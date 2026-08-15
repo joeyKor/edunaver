@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUNAVER - 대한민국 대표 교육 포털</title>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Top Utility Bar -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-left">
+                <button class="menu-btn" id="menu-toggle" aria-label="메뉴 열기">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="pay-logo">
+                    <span class="pay-badge">edu</span>
+                    <span class="pay-text">pay</span>
+                </div>
+            </div>
+
+            <!-- Central Search Area -->
+            <div class="header-center">
+                <div class="logo-container">
+                    <a href="#" class="logo-link">
+                        <span class="logo-text">
+                            EDU<span class="logo-highlight">N<span class="cap-icon"><i class="fa-solid fa-graduation-cap"></i></span>V</span>ER
+                        </span>
+                    </a>
+                </div>
+                <div class="search-area">
+                    <div class="search-box-container">
+                        <form action="#" class="search-form" id="search-form">
+                            <input type="text" autocomplete="off" placeholder="배우고 싶은 지식을 검색해보세요! (예: 화성 탐사선, AI 코딩)" class="search-input" id="search-input">
+                            <div class="search-buttons">
+                                <button type="button" class="keyboard-btn" aria-label="가상 키보드">
+                                    <i class="fa-solid fa-keyboard"></i>
+                                </button>
+                                <button type="button" class="ai-btn" id="ai-search-btn">
+                                    <span class="ai-text">AI</span>
+                                </button>
+                                <button type="submit" class="search-submit-btn" aria-label="검색">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <!-- Search Suggestions Dropdown -->
+                        <div class="search-dropdown" id="search-dropdown">
+                            <div class="dropdown-header">
+                                <span>최근 검색어</span>
+                                <button class="clear-all-btn" id="clear-search-btn">전체 삭제</button>
+                            </div>
+                            <ul class="dropdown-list" id="search-history-list">
+                                <li class="empty-message">최근 검색 내역이 없습니다.</li>
+                            </ul>
+                            <div class="dropdown-footer">
+                                <span class="help-text">추천 검색어</span>
+                                <div class="recommend-tags">
+                                    <span class="tag">#코딩기초</span>
+                                    <span class="tag">#우주과학</span>
+                                    <span class="tag">#초등수학</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <button class="nav-icon-btn" aria-label="알림">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                <button class="nav-icon-btn" aria-label="학습 바구니">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation / Service Links -->
+    <nav class="services-nav">
+        <div class="services-container">
+            <a href="#" class="service-item" id="nav-mail-btn">
+                <div class="icon-circle mail"><i class="fa-solid fa-envelope"></i></div>
+                <span>메일</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle cafe"><i class="fa-solid fa-users"></i></div>
+                <span>학습 카페</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle blog"><i class="fa-solid fa-pen-nib"></i></div>
+                <span>지식 블로그</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle library"><i class="fa-solid fa-book-open"></i></div>
+                <span>디지털도서관</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle science"><i class="fa-solid fa-flask"></i></div>
+                <span>가상과학실험</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle coding"><i class="fa-solid fa-code"></i></div>
+                <span>코딩교실</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle history"><i class="fa-solid fa-landmark"></i></div>
+                <span>역사체험관</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle encyclopedia"><i class="fa-solid fa-globe"></i></div>
+                <span>백과사전</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle dictionary"><i class="fa-solid fa-language"></i></div>
+                <span>어학사전</span>
+            </a>
+            <a href="#" class="service-item">
+                <div class="icon-circle ebook"><i class="fa-solid fa-tablet-screen-button"></i></div>
+                <span>전자교과서</span>
+            </a>
+            <button class="service-more-btn" aria-label="더보기">
+                <i class="fa-solid fa-ellipsis"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+        <div class="content-wrapper">
+            
+            <!-- Left Column: Content, Articles, Publisher Stand -->
+            <div class="column-left">
+                <!-- Large Promotional Banner (Matches Naver Ad Banner position) -->
+                <section class="banner-section">
+                    <div class="edu-banner">
+                        <div class="banner-content">
+                            <span class="banner-tag">국립과천과학관</span>
+                            <h2 class="banner-title">창의 융합 과학 캠프 <span>(방학특별과정)</span></h2>
+                            <p class="banner-desc">스마트 코딩과 가상 우주 탐사 프로젝트, 선착순 마감 임박!</p>
+                            <span class="banner-sub-desc">과정 안내 및 온라인 심의 필 제176625호(2026.06.01~2027.05.31)</span>
+                        </div>
+                        <div class="banner-action">
+                            <a href="#" class="banner-btn">캠프 신청하기 <i class="fa-solid fa-chevron-right"></i></a>
+                        </div>
+                        <!-- Decorative graphical objects to simulate a premium banner -->
+                        <div class="banner-decoration">
+                            <div class="decor-circle"></div>
+                            <i class="fa-solid fa-rocket decor-icon"></i>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Newspaper / Educational Stand -->
+                <section class="journal-section">
+                    <!-- Tab Headers -->
+                    <div class="journal-header">
+                        <div class="journal-tabs">
+                            <button class="journal-tab active" data-category="all">종합 학술지</button>
+                            <button class="journal-tab" data-category="science">과학/기술</button>
+                            <button class="journal-tab" data-category="humanities">인문/사회</button>
+                            <button class="journal-tab" data-category="primary">초등/기초</button>
+                            <button class="journal-tab" data-category="secondary">중고등/입시</button>
+                            <button class="journal-tab" data-category="global">어학/글로벌</button>
+                        </div>
+                        <a href="#" class="cup-icon-link">
+                            <span class="cup-text"><i class="fa-solid fa-trophy"></i> 2026 전국 코딩 올림피아드</span>
+                        </a>
+                    </div>
+
+                    <!-- Breaking/Rolling News Ticker -->
+                    <div class="news-ticker-container">
+                        <div class="ticker-label">교육 뉴스</div>
+                        <div class="ticker-content">
+                            <ul class="ticker-list" id="ticker-list">
+                                <li><a href="#">[인기] 전국 초중고 가상 과학 실험 플랫폼, 이용률 200% 돌파</a></li>
+                                <li><a href="#">[속보] AI 튜터 기반의 개인 맞춤형 교육 커리큘럼 도입 발표</a></li>
+                                <li><a href="#">[과학] 한국 천문연구소, 새로운 외계 행성 탐색 프로젝트 공개</a></li>
+                                <li><a href="#">[독서] 청소년 추천 도서 100선 선정, 전자책 무료 대여 시작</a></li>
+                            </ul>
+                        </div>
+                        <div class="ticker-nav">
+                            <a href="#" class="ticker-home">뉴스홈</a>
+                        </div>
+                    </div>
+
+                    <!-- Publisher Grid (24 slots, 4x6 layout) -->
+                    <div class="publisher-grid-wrapper">
+                        <div class="publisher-grid" id="publisher-grid">
+                            <!-- Logos will be rendered dynamically via JS or hardcoded with styles to look like real logos -->
+                            <!-- We will write mock structures for now which will be easy to render and control -->
+                        </div>
+
+                        <!-- Pagination Controls -->
+                        <div class="grid-pagination">
+                            <button class="page-btn prev" id="grid-prev-btn" aria-label="이전 페이지"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span class="page-indicator" id="grid-page-indicator">학술사 더보기 1 / 4</span>
+                            <button class="page-btn next" id="grid-next-btn" aria-label="다음 페이지"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Right Column: Login Card, Widgets, Mini Banners -->
+            <div class="column-right">
+                <!-- Premium Naver-style Login Container -->
+                <section class="login-card-container" id="login-card-container">
+                    <div class="login-card-logged-out" id="login-logged-out">
+                        <p class="login-prompt">에듀네이버를 더 안전하고 유익하게 이용하세요</p>
+                        <button class="login-btn-green" id="show-login-form-btn">
+                            <span class="edu-logo-inline">EDU</span><b>NAVER</b> 로그인
+                        </button>
+                        <div class="login-links">
+                            <a href="#">아이디 찾기</a>
+                            <span class="divider"></span>
+                            <a href="#">비밀번호 찾기</a>
+                            <span class="divider"></span>
+                            <a href="signup.html">회원가입</a>
+                        </div>
+                    </div>
+
+                    <!-- Toggleable Form (Hidden initially, slides down on click) -->
+                    <div class="login-form-container" id="login-form-container" style="display: none;">
+                        <div class="form-header">
+                            <h3>EDUNAVER 로그인</h3>
+                            <button class="form-close-btn" id="close-login-btn"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <form id="auth-form" class="auth-form">
+                            <div class="input-group">
+                                <label for="user-id" class="sr-only">아이디</label>
+                                <div class="input-wrapper">
+                                    <i class="fa-regular fa-user"></i>
+                                    <input type="text" id="user-id" placeholder="아이디" required>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label for="user-pw" class="sr-only">비밀번호</label>
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-lock"></i>
+                                    <input type="password" id="user-pw" placeholder="비밀번호" required>
+                                </div>
+                            </div>
+                            <div class="form-options">
+                                <label class="keep-logged-in">
+                                    <input type="checkbox" id="keep-login">
+                                    <span>로그인 상태 유지</span>
+                                </label>
+                            </div>
+                            <button type="submit" class="submit-login-btn">로그인</button>
+                        </form>
+                        <div class="login-links form-bottom-links">
+                            <a href="#">아이디 찾기</a>
+                            <span class="divider"></span>
+                            <a href="#">비밀번호 찾기</a>
+                            <span class="divider"></span>
+                            <a href="signup.html">회원가입</a>
+                        </div>
+                    </div>
+
+                    <!-- Logged-in Mock State (Naver Style) -->
+                    <div class="login-card-logged-in" id="login-logged-in" style="display: none;">
+                        <div class="profile-main">
+                            <div class="profile-avatar-wrapper">
+                                <div class="profile-avatar">
+                                    <i class="fa-solid fa-user-graduate"></i>
+                                </div>
+                                <button class="profile-settings-btn" title="설정"><i class="fa-solid fa-gear"></i></button>
+                            </div>
+                            <div class="profile-details">
+                                <div class="profile-username-row">
+                                    <span class="profile-name" id="user-display-name">홍길동</span>님
+                                    <span class="profile-id-badge">EDU ID <i class="fa-solid fa-lock"></i></span>
+                                </div>
+                                <div class="profile-email">gildong@edunaver.com</div>
+                                <div class="profile-tokens">
+                                    <span class="token-item"><i class="fa-solid fa-envelope-open-text token-n"></i>멤버십</span>
+                                    <span class="token-item">쪽지 <strong class="highlight-green" id="profile-note-count">0</strong></span>
+                                    <span class="token-item"><span class="happy-bean-dot"></span>해피빈</span>
+                                </div>
+                            </div>
+                            <div class="profile-actions">
+                                <button class="logout-btn-naver" id="logout-btn">로그아웃 <i class="fa-solid fa-right-from-bracket"></i></button>
+                            </div>
+                        </div>
+                        <div class="profile-bottom-nav">
+                            <button class="nav-menu-item open-mail-btn" id="card-mail-btn">
+                                <span class="nav-menu-label">메일</span>
+                                <span class="nav-menu-count" id="profile-mail-count">0</span>
+                            </button>
+                            <button class="nav-menu-item">
+                                <span class="nav-menu-label">카페</span>
+                                <span class="nav-menu-count" id="profile-cafe-count">0</span>
+                            </button>
+                            <button class="nav-menu-item">
+                                <span class="nav-menu-label">블로그</span>
+                            </button>
+                            <button class="nav-menu-item">
+                                <span class="nav-menu-label">페이</span>
+                            </button>
+                            <button class="nav-menu-slider-btn" aria-label="다음 메뉴"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Course Recommendation Slider (Matches the Naver Ad Slider widget) -->
+                <section class="slider-widget-container">
+                    <div class="slider-header">
+                        <h4>배움을 채우는 추천 클래스</h4>
+                        <span class="widget-ad-tag">AD</span>
+                    </div>
+                    <div class="slider-viewport">
+                        <div class="slider-track" id="slider-track">
+                            <!-- Slide 1 -->
+                            <div class="slide">
+                                <div class="slide-image-placeholder gradient-1">
+                                    <i class="fa-solid fa-code"></i>
+                                    <span class="slide-subject">Coding</span>
+                                </div>
+                                <div class="slide-info">
+                                    <div class="slide-tags">
+                                        <span class="slide-tag tag-green">초급</span>
+                                        <span class="slide-tag tag-purple">인기</span>
+                                    </div>
+                                    <h5 class="slide-title">스크래치로 배우는 초등 첫 코딩 게임 만들기</h5>
+                                    <div class="slide-author">EBS 소프트웨어 전문 강사진</div>
+                                    <div class="slide-footer">
+                                        <span class="rating"><i class="fa-solid fa-star"></i> 4.9 (292)</span>
+                                        <span class="price">무료</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Slide 2 -->
+                            <div class="slide">
+                                <div class="slide-image-placeholder gradient-2">
+                                    <i class="fa-solid fa-microscope"></i>
+                                    <span class="slide-subject">Science</span>
+                                </div>
+                                <div class="slide-info">
+                                    <div class="slide-tags">
+                                        <span class="slide-tag tag-green">중급</span>
+                                        <span class="slide-tag tag-blue">NEW</span>
+                                    </div>
+                                    <h5 class="slide-title">집에서 하는 흥미진진한 주말 과학 홈스쿨링</h5>
+                                    <div class="slide-author">사이언스동아 연구원팀</div>
+                                    <div class="slide-footer">
+                                        <span class="rating"><i class="fa-solid fa-star"></i> 4.8 (179)</span>
+                                        <span class="price">교재 포함</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Slide 3 -->
+                            <div class="slide">
+                                <div class="slide-image-placeholder gradient-3">
+                                    <i class="fa-solid fa-compass-drafting"></i>
+                                    <span class="slide-subject">Math</span>
+                                </div>
+                                <div class="slide-info">
+                                    <div class="slide-tags">
+                                        <span class="slide-tag tag-green">전연령</span>
+                                        <span class="slide-tag tag-orange">BEST</span>
+                                    </div>
+                                    <h5 class="slide-title">도형으로 직관적으로 파악하는 중학 기하학 기초</h5>
+                                    <div class="slide-author">수학동아 편집부</div>
+                                    <div class="slide-footer">
+                                        <span class="rating"><i class="fa-solid fa-star"></i> 5.0 (800)</span>
+                                        <span class="price">무료</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="slider-controls">
+                        <button class="slider-control prev" id="slider-prev-btn" aria-label="이전 슬라이드"><i class="fa-solid fa-chevron-left"></i></button>
+                        <span class="slider-indicator" id="slider-indicator">1 / 3</span>
+                        <button class="slider-control next" id="slider-next-btn" aria-label="다음 슬라이드"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                </section>
+
+                <!-- Bottom Promotion Banner (Purple block in Naver screenshot) -->
+                <section class="bottom-promo-section">
+                    <a href="#" class="promo-link-card">
+                        <div class="promo-badge">HOT EVENT</div>
+                        <div class="promo-main-text">
+                            초중등 코딩 경진대회<br>
+                            <strong>역대급 상금 및 혜택 장학금!</strong>
+                        </div>
+                        <div class="promo-discount-badge">선착순 7% 추가 혜택</div>
+                        <div class="promo-graphics">
+                            <i class="fa-solid fa-laptop-code"></i>
+                        </div>
+                    </a>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer-bottom">
+        <div class="footer-links">
+            <a href="#">회사소개</a>
+            <a href="#">이용약관</a>
+            <a href="#"><strong>개인정보처리방침</strong></a>
+            <a href="#">청소년보호정책</a>
+            <a href="#">고객센터</a>
+        </div>
+        <p class="copyright">Copyright © EDUNAVER Corp. All Rights Reserved.</p>
+    </footer>
+
+
+
+    <script src="main.js"></script>
+</body>
+</html>

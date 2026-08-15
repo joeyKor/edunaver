@@ -1,0 +1,308 @@
+/* EDUNAVER Signup Page Styles */
+
+:root {
+    --primary-color: #2db400; /* NAVER Green */
+    --primary-hover: #279e00;
+    --primary-light: #e8f7e5;
+    
+    --bg-main: #f5f6f7;
+    --bg-card: #ffffff;
+    --border-light: #ebebeb;
+    --border-medium: #dadadc;
+    --border-focus: #2db400;
+    
+    --text-primary: #1e1e23;
+    --text-secondary: #505058;
+    --text-muted: #8e8e97;
+    
+    --accent-red: #f43142;
+    --accent-blue: #0066ff;
+    
+    --font-korean: 'Noto Sans KR', sans-serif;
+    --font-english: 'Inter', sans-serif;
+    
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-korean);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.signup-wrapper {
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header & Logo */
+.signup-header {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.logo-link {
+    text-decoration: none;
+    display: inline-block;
+}
+
+.logo-text {
+    font-family: var(--font-english);
+    font-size: 32px;
+    font-weight: 900;
+    color: #1e1e23;
+    letter-spacing: -1.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-highlight {
+    color: var(--primary-color);
+    position: relative;
+    padding-right: 5px;
+}
+
+.cap-icon {
+    position: absolute;
+    top: -12px;
+    right: -8px;
+    font-size: 14px;
+    transform: rotate(-15deg);
+    color: var(--primary-color);
+}
+
+/* Signup Container */
+.signup-container {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border-medium);
+    border-radius: 12px;
+    padding: 40px 30px;
+    box-shadow: var(--shadow-md);
+}
+
+.input-row {
+    margin-bottom: 22px;
+    position: relative;
+}
+
+.input-label {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--border-medium);
+    border-radius: 6px;
+    background: #fff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-wrapper:focus-within {
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(45, 180, 0, 0.12);
+}
+
+.input-icon {
+    position: absolute;
+    left: 15px;
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+.input-wrapper input {
+    width: 100%;
+    height: 46px;
+    border: none;
+    outline: none;
+    padding: 0 15px 0 45px;
+    font-size: 15px;
+    color: var(--text-primary);
+    background: transparent;
+    border-radius: 6px;
+}
+
+.input-wrapper input::placeholder {
+    color: var(--text-muted);
+    font-size: 14px;
+}
+
+/* Date input specific formatting */
+.input-wrapper input[type="date"] {
+    padding-right: 15px;
+    font-family: var(--font-english), var(--font-korean);
+}
+
+/* Password eye button */
+.pw-toggle-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0 15px;
+    font-size: 16px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.pw-toggle-btn:hover {
+    color: var(--text-primary);
+}
+
+/* Error/Success Feedbacks */
+.field-error {
+    color: var(--accent-red);
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+    align-items: center;
+}
+
+.field-error::before {
+    content: "\f071";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+.field-success {
+    color: var(--primary-color);
+    font-size: 12px;
+    margin-top: 6px;
+    display: none;
+    align-items: center;
+}
+
+.field-success::before {
+    content: "\f058";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    margin-right: 5px;
+}
+
+/* Submit Button */
+.submit-btn {
+    width: 100%;
+    height: 52px;
+    background-color: var(--primary-color);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.submit-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.submit-btn:disabled {
+    background-color: var(--border-medium);
+    cursor: not-allowed;
+}
+
+/* Footer Section */
+.signup-footer {
+    margin-top: 40px;
+    text-align: center;
+}
+
+.footer-links {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-decoration: none;
+}
+
+.footer-links a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+.footer-links .divider {
+    width: 1px;
+    height: 12px;
+    background-color: var(--border-medium);
+}
+
+.copyright {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-english);
+}
+
+/* Toast Message */
+.toast {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translate(-50%, 50px);
+    background: rgba(30, 30, 35, 0.95);
+    color: #fff;
+    padding: 14px 28px;
+    border-radius: 30px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+    z-index: 1000;
+}
+
+.toast.show {
+    transform: translate(-50%, 0);
+    opacity: 1;
+}
+
+.toast-icon {
+    color: var(--primary-color);
+    font-size: 18px;
+}
+
+.toast-icon.error {
+    color: var(--accent-red);
+}

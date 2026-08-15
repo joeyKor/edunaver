@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  pocketbase:
+    image: pocketbase/pocketbase:latest
+    container_name: edunaver-pocketbase
+    ports:
+      - "8090:8090"
+    volumes:
+      # Mount the data folder locally to ensure mail data is persisted
+      - ./pb_data:/pb/pb_data
+    restart: unless-stopped
+    command:
+      - serve
+      - --http=0.0.0.0:8090
+
+  web:
+    image: nginx:alpine
+    container_name: edunaver-web
+    ports:
+      - "8080:80"
+    volumes:
+      # Mount this project directory to Nginx's public folder
+      - .:/usr/share/nginx/html
+    restart: unless-stopped

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>받은메일함 : EDUNAVER 메일</title>
+    <!-- Google Fonts for modern typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="mail.css">
+</head>
+<body>
+    <!-- Full-Screen Mail Container -->
+    <div class="mail-app-container">
+        
+        <!-- Header Section (Matches Naver Mail Screenshot Top bar) -->
+        <header class="mail-header">
+            <div class="header-left">
+                <a href="index.html" class="logo-link" title="EDUNAVER 메인으로 이동">
+                    <span class="logo-edu">EDU</span><span class="logo-mail">메일</span>
+                </a>
+                <!-- Mini Quick Actions -->
+                <div class="quick-icons">
+                    <button class="q-btn active" title="메일"><i class="fa-solid fa-envelope"></i></button>
+                    <button class="q-btn" title="캘린더"><i class="fa-regular fa-calendar-days"></i></button>
+                    <button class="q-btn" title="할일"><i class="fa-regular fa-clipboard"></i></button>
+                    <button class="q-btn" title="주소록"><i class="fa-regular fa-address-book"></i></button>
+                    <button class="q-btn" title="메모"><i class="fa-regular fa-sticky-note"></i></button>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <!-- Search Box -->
+                <div class="mail-search-box">
+                    <input type="text" placeholder="메일 검색" class="search-input">
+                    <button class="search-btn" aria-label="검색"><i class="fa-solid fa-magnifying-glass"></i></button>
+                    <button class="search-arrow-btn" aria-label="상세검색"><span class="arrow-text">상세 <i class="fa-solid fa-caret-down"></i></span></button>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-profile">
+                    <div class="profile-avatar"><i class="fa-solid fa-user-graduate"></i></div>
+                    <span class="profile-name" id="header-user-name">홍길동</span>
+                    <i class="fa-solid fa-caret-down dropdown-arrow"></i>
+                </div>
+                <button class="header-icon-btn" aria-label="메모장"><i class="fa-regular fa-comment-dots"></i></button>
+                <button class="header-icon-btn" aria-label="알림"><i class="fa-regular fa-bell"></i></button>
+            </div>
+        </header>
+        
+        <!-- Main Layout (Sidebar + Main Pane) -->
+        <div class="mail-layout-body">
+            
+            <!-- Left Sidebar Section -->
+            <aside class="mail-sidebar">
+                <!-- Primary Compose Buttons -->
+                <div class="compose-btn-row">
+                    <button class="compose-btn write" id="sidebar-write-btn">
+                        메일 쓰기
+                    </button>
+                    <button class="compose-btn write-self">
+                        내게 쓰기
+                    </button>
+                </div>
+                
+                    <!-- Quick Icon Filters -->
+                <div class="quick-filters">
+                    <button class="filter-item" title="안읽음"><span class="f-count" id="unread-sidebar-count">0</span><span class="f-label">안읽음</span></button>
+                    <button class="filter-item" title="중요"><i class="fa-regular fa-star icon-star"></i><span class="f-label">중요</span></button>
+                    <button class="filter-item" title="첨부"><i class="fa-solid fa-paperclip icon-clip"></i><span class="f-label">첨부</span></button>
+                    <button class="filter-item" title="TO"><span class="icon-to">TO</span><span class="f-label">TO</span></button>
+                </div>
+                
+                <!-- Mailbox Folders List -->
+                <div class="folders-area">
+                    <ul class="folder-list">
+                        <li class="folder-item" id="folder-all-btn">
+                            <span class="folder-title"><i class="fa-solid fa-inbox"></i> 전체메일</span>
+                            <button class="cleanup-btn">정리하기</button>
+                        </li>
+                        <li class="folder-item active" id="folder-inbox-btn">
+                            <span class="folder-title"><i class="fa-regular fa-envelope"></i> 받은메일함 <strong class="badge-count">0</strong></span>
+                        </li>
+                        <li class="folder-item" id="folder-sent-btn">
+                            <span class="folder-title"><i class="fa-regular fa-paper-plane"></i> 보낸메일함 <span class="badge-count-gray" id="sent-mail-count">0</span></span>
+                        </li>
+                        <li class="folder-item" id="folder-receipt-btn">
+                            <span class="folder-title"><i class="fa-solid fa-user-check"></i> 수신확인</span>
+                        </li>
+                        <li class="folder-item">
+                            <span class="folder-title"><i class="fa-regular fa-file-lines"></i> 임시보관함</span>
+                        </li>
+                        <li class="folder-item">
+                            <span class="folder-title"><i class="fa-regular fa-envelope-open"></i> 내게쓴메일함 <span class="badge-count-gray">0</span></span>
+                        </li>
+                    </ul>
+                    
+                    <!-- Smart Mailboxes Dropdown Section -->
+                    <div class="smart-mailbox-section">
+                        <div class="section-title">
+                            <span><i class="fa-solid fa-cube"></i> 스마트메일함</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <ul class="folder-list sub-list">
+                            <li class="folder-item sub">
+                                <span class="folder-title">프로모션 <strong class="badge-count">0</strong></span>
+                            </li>
+                            <li class="folder-item sub">
+                                <span class="folder-title">청구·결제 <strong class="badge-count">0</strong></span>
+                            </li>
+                            <li class="folder-item sub">
+                                <span class="folder-title">SNS <strong class="badge-count-blue">0</strong></span>
+                            </li>
+                            <li class="folder-item sub">
+                                <span class="folder-title">카페</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Personal Mailboxes -->
+                    <div class="personal-mailbox-section">
+                        <div class="section-title">
+                            <span><i class="fa-solid fa-folder"></i> 내 메일함</span>
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </div>
+                        <ul class="folder-list sub-list">
+                            <li class="folder-item sub"><span class="folder-title">보낼 편지함</span></li>
+                        </ul>
+                    </div>
+
+                    <!-- Trash Folder List -->
+                    <ul class="folder-list footer-folders">
+                        <li class="folder-item">
+                            <span class="folder-title"><i class="fa-solid fa-ban"></i> 스팸메일함 <strong class="badge-count-orange">0</strong></span>
+                        </li>
+                        <li class="folder-item">
+                            <span class="folder-title"><i class="fa-regular fa-trash-can"></i> 휴지통 <strong class="badge-count-gray">0</strong></span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Sidebar Footer Widgets -->
+                <div class="sidebar-footer">
+                    <div class="footer-links">
+                        <a href="#">환경설정</a>
+                        <span class="div-bar">|</span>
+                        <a href="#">고객센터</a>
+                    </div>
+                    <div class="capacity-gauge">
+                        <div class="capacity-labels">
+                            <span>메일용량</span>
+                            <strong>2.87GB / 5GB</strong>
+                        </div>
+                        <div class="gauge-bar-bg">
+                            <div class="gauge-bar-fill" style="width: 57.4%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+            
+            <!-- Right Content Area -->
+            <main class="mail-main-content">
+                
+                <!-- 1. INBOX MAIL LIST VIEW -->
+                <div class="mail-view-panel" id="inbox-panel">
+                    
+                    <!-- Inner Sub-Tabs (받은메일함, 프로모션, 청구결제, SNS, 카페) -->
+                    <div class="mail-sub-tabs">
+                        <button class="sub-tab active">받은메일함</button>
+                        <button class="sub-tab">프로모션</button>
+                        <button class="sub-tab">청구·결제</button>
+                        <button class="sub-tab">SNS</button>
+                        <button class="sub-tab">카페</button>
+                        <button class="sub-tab add-btn" title="탭 추가"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+
+                    <!-- Toolbar Actions bar -->
+                    <div class="mail-toolbar">
+                        <div class="toolbar-left">
+                            <div class="toolbar-checkbox" id="toolbar-select-all" title="전체선택">
+                                <i class="fa-regular fa-square"></i>
+                            </div>
+                            <i class="fa-solid fa-caret-down dropdown-caret"></i>
+                            
+                            <span class="divider"></span>
+                            
+                            <button class="tb-action-btn">읽음</button>
+                            <button class="tb-action-btn">삭제</button>
+                            <button class="tb-action-btn">스팸신고</button>
+                            <button class="tb-action-btn text-muted">답장</button>
+                            <button class="tb-action-btn text-muted">전체답장</button>
+                            <button class="tb-action-btn text-muted">전달</button>
+                            <button class="tb-action-btn">이동 <i class="fa-solid fa-caret-down"></i></button>
+                            <button class="tb-action-btn">더보기 <i class="fa-solid fa-caret-down"></i></button>
+                            
+                            <span class="divider"></span>
+                            
+                            <button class="tb-action-btn filter">필터 <i class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="unread-cleanup">
+                                <strong id="inbox-unread-count">0</strong> 안읽음
+                                <button class="delete-unread-btn">삭제</button>
+                            </span>
+                            <span class="divider"></span>
+                            <button class="view-settings-btn" title="정렬 및 뷰 설정"><i class="fa-solid fa-clock-rotate-left"></i> <i class="fa-solid fa-bars"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Mail List Container -->
+                    <div class="mail-list-container">
+                        <ul class="mail-list-table" id="inbox-list">
+                            <!-- Populated dynamically via PocketBase -->
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 2. SENT MAILBOX VIEW -->
+                <div class="mail-view-panel" id="sent-panel" style="display: none;">
+                    <!-- Toolbar Actions bar -->
+                    <div class="mail-toolbar">
+                        <div class="toolbar-left">
+                            <div class="toolbar-checkbox" title="전체선택">
+                                <i class="fa-regular fa-square"></i>
+                            </div>
+                            <span class="divider"></span>
+                            <button class="tb-action-btn">삭제</button>
+                            <button class="tb-action-btn">이동 <i class="fa-solid fa-caret-down"></i></button>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="page-count">보낸 메일 <strong id="sent-mailbox-count">0</strong>개</span>
+                        </div>
+                    </div>
+
+                    <!-- Sent Mail List -->
+                    <div class="mail-list-container">
+                        <ul class="mail-list-table" id="sent-list">
+                            <li class="empty-mailbox-li">
+                                <div class="empty-mailbox-msg">
+                                    <i class="fa-regular fa-folder-open"></i>
+                                    <p>보낸 메일이 없습니다. '메일 쓰기' 버튼을 눌러 첫 메일을 작성해 보세요!</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 2.2. RECEIPT CONFIRMATION VIEW (수신확인함) -->
+                <div class="mail-view-panel" id="receipt-panel" style="display: none;">
+                    <!-- Toolbar Actions bar -->
+                    <div class="mail-toolbar">
+                        <div class="toolbar-left">
+                            <div class="toolbar-checkbox" title="전체선택">
+                                <i class="fa-regular fa-square"></i>
+                            </div>
+                            <span class="divider"></span>
+                            <button class="tb-action-btn">삭제</button>
+                            <button class="tb-action-btn">발송취소</button>
+                        </div>
+                        <div class="toolbar-right">
+                            <span class="page-count">수신확인 <strong id="receipt-mailbox-count">0</strong>건</span>
+                        </div>
+                    </div>
+
+                    <!-- Receipt List -->
+                    <div class="mail-list-container">
+                        <ul class="mail-list-table" id="receipt-list">
+                            <li class="empty-mailbox-li">
+                                <div class="empty-mailbox-msg">
+                                    <i class="fa-regular fa-folder-open"></i>
+                                    <p>보낸 메일이 없습니다.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+
+                <!-- 2.5. MAIL DETAIL VIEW -->
+                <div class="mail-view-panel" id="detail-panel" style="display: none;">
+                    <div class="mail-toolbar">
+                        <div class="toolbar-left">
+                            <button class="tb-action-btn" id="detail-back-btn"><i class="fa-solid fa-arrow-left"></i> 목록</button>
+                            <span class="divider"></span>
+                            <button class="tb-action-btn" id="detail-delete-btn">삭제</button>
+                        </div>
+                    </div>
+                    <div class="mail-detail-container" style="padding: 24px; background: #fff; flex: 1; overflow-y: auto;">
+                        <div class="detail-header" style="border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 20px;">
+                            <h2 id="detail-subject" style="font-size: 20px; font-weight: bold; margin-bottom: 12px; color: #222;">제목</h2>
+                            <div class="detail-meta" style="font-size: 13px; color: #666; display: flex; flex-direction: column; gap: 6px;">
+                                <div><strong>보낸사람:</strong> <span id="detail-sender">sender@edunaver.com</span></div>
+                                <div><strong>받는사람:</strong> <span id="detail-recipient">recipient@edunaver.com</span></div>
+                                <div><strong>보낸시간:</strong> <span id="detail-time">2026-08-14 06:45</span></div>
+                            </div>
+                        </div>
+                        <div id="detail-body" style="font-size: 14px; line-height: 1.6; color: #333; min-height: 200px; white-space: pre-wrap; word-break: break-all;">
+                            본문 내용
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MAIL COMPOSE (WRITE MAIL) VIEW WITH INTEGRATED CHECKLISTS -->
+                <div class="mail-view-panel" id="compose-panel" style="display: none;">
+                    
+                    <!-- Composer Header Title row -->
+                    <div class="composer-header-title">
+                        <h3>메일쓰기</h3>
+                        <span class="drafts-count">임시보관 메일 <strong>23</strong></span>
+                    </div>
+
+                    <!-- Composer Header bar -->
+                    <div class="composer-toolbar">
+                        <div class="toolbar-actions-left">
+                            <button class="send-mail-action-btn" id="composer-send-btn">
+                                보내기
+                            </button>
+                            <button class="compose-sub-btn">예약</button>
+                            <button class="compose-sub-btn">임시저장</button>
+                            <button class="compose-sub-btn">미리보기</button>
+                            <button class="compose-sub-btn">템플릿</button>
+                            <button class="compose-sub-btn">내게쓰기</button>
+                        </div>
+                        <div class="toolbar-actions-right">
+                            <button class="tb-icon-btn" title="보내기 창 확대"><i class="fa-solid fa-arrow-up"></i></button>
+                            <button class="tb-icon-btn" title="새창에서 쓰기"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                            <button class="tb-icon-btn" title="설정"><i class="fa-solid fa-gear"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Split composer screen: Form on left, Learning widget on right -->
+                    <div class="compose-split-container">
+                        
+                        <!-- Form Editor -->
+                        <div class="compose-form-area">
+                            <!-- Recipient row -->
+                            <div class="form-row">
+                                <label for="input-to">받는사람</label>
+                                <div class="input-container inline-elements">
+                                    <label class="inline-checkbox">
+                                        <input type="checkbox" id="check-individual"> <span>개인별</span>
+                                        <i class="fa-regular fa-circle-question info-icon" title="받는 사람이 여러 명일 때 각각 한 명씩 전송받도록 메일을 발송합니다."></i>
+                                    </label>
+                                    <input type="email" id="input-to" class="composer-input-field" placeholder="">
+                                    <button class="contacts-btn">주소록</button>
+                                </div>
+                            </div>
+                            
+                            <!-- CC row -->
+                            <div class="form-row cc-row">
+                                <label for="input-cc">참조</label>
+                                <div class="input-container inline-elements">
+                                    <input type="text" id="input-cc" class="composer-input-field" placeholder="">
+                                    <i class="fa-solid fa-chevron-down cc-expand-icon"></i>
+                                </div>
+                            </div>
+                            
+                            <!-- Subject row -->
+                            <div class="form-row">
+                                <label for="input-subject">제목</label>
+                                <div class="input-container inline-elements">
+                                    <label class="inline-checkbox">
+                                        <input type="checkbox" id="check-important"> <span class="text-important">중요 <strong class="exclam-mark">!</strong></span>
+                                    </label>
+                                    <input type="text" id="input-subject" class="composer-input-field" placeholder="">
+                                </div>
+                            </div>
+                            
+                            <!-- File Attachments Area (Styled after Naver filebox) -->
+                            <div class="form-row file-attach-row">
+                                <label>파일첨부</label>
+                                <div class="file-attach-container">
+                                    <div class="file-attach-header">
+                                        <div class="attach-tabs">
+                                            <button class="attach-tab active">내 PC</button>
+                                            <button class="attach-tab">MYBOX</button>
+                                        </div>
+                                        <div class="attach-info">
+                                            <span>일반 0KB/10MB | 대용량 0KB/2.00GBx10개</span>
+                                        </div>
+                                    </div>
+                                    <div class="file-drop-zone">
+                                        <i class="fa-solid fa-plus drop-icon"></i>
+                                        <span>파일을 마우스로 끌어 오세요</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Rich Text Editor Formatting Bar (Naver style) -->
+                            <div class="text-editor-container">
+                                <div class="editor-format-bar">
+                                    <!-- Font selection -->
+                                    <select id="ed-font-family" class="format-select" title="글꼴">
+                                        <option value="'Noto Sans KR', sans-serif">기본글꼴</option>
+                                        <option value="'굴림', Gulim, sans-serif">굴림</option>
+                                        <option value="'돋움', Dotum, sans-serif">돋움</option>
+                                        <option value="'맑은 고딕', 'Malgun Gothic', sans-serif">맑은 고딕</option>
+                                        <option value="'나눔고딕', 'NanumGothic', sans-serif">나눔고딕</option>
+                                        <option value="Arial, sans-serif">Arial</option>
+                                    </select>
+                                    <!-- Size selection -->
+                                    <select id="ed-font-size" class="format-select font-size-select" title="글자 크기">
+                                        <option value="12px">12px</option>
+                                        <option value="14px" selected>14px</option>
+                                        <option value="16px">16px</option>
+                                        <option value="18px">18px</option>
+                                        <option value="20px">20px</option>
+                                    </select>
+                                    <span class="editor-divider"></span>
+                                    <!-- Style buttons -->
+                                    <button type="button" class="ed-btn text-bold" id="ed-btn-bold" title="굵게">B</button>
+                                    <button type="button" class="ed-btn text-italic" id="ed-btn-italic" title="기울임">I</button>
+                                    <button type="button" class="ed-btn text-underline" id="ed-btn-underline" title="밑줄">U</button>
+                                    <button type="button" class="ed-btn text-strike" id="ed-btn-strike" title="취소선">S</button>
+                                    <label class="ed-btn text-color-label" title="글자색">
+                                        <span class="text-color-char">T</span>
+                                        <input type="color" id="ed-color-text" value="#333333" class="color-picker-hidden">
+                                    </label>
+                                    <label class="ed-btn bg-color-label" title="형광펜">
+                                        <i class="fa-solid fa-marker"></i>
+                                        <input type="color" id="ed-color-bg" value="#ffffff" class="color-picker-hidden">
+                                    </label>
+                                    <span class="editor-divider"></span>
+                                    <!-- Align buttons -->
+                                    <button type="button" class="ed-btn align-btn active" data-align="left" title="좌측정렬"><i class="fa-solid fa-align-left"></i></button>
+                                    <button type="button" class="ed-btn align-btn" data-align="center" title="가운데정렬"><i class="fa-solid fa-align-center"></i></button>
+                                    <button type="button" class="ed-btn align-btn" data-align="right" title="우측정렬"><i class="fa-solid fa-align-right"></i></button>
+                                </div>
+                                <div class="editor-textarea-wrapper">
+                                    <div id="input-body" class="editor-textarea" contenteditable="true" data-placeholder="내용을 입력하세요."></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Sent Confirmation Modal (Replaces old celebration popup) -->
+    <div class="celebration-overlay" id="celebration-screen" style="display: none;">
+        <div class="celebration-card">
+            <div class="popper-icon green-icon"><i class="fa-regular fa-circle-check"></i></div>
+            <h3>메일을 성공적으로 보냈습니다.</h3>
+            <p>보내신 메일은 '보낸메일함'에서 확인하실 수 있습니다.</p>
+            <div class="sent-actions-row">
+                <button class="ok-btn inbox-goto-btn" id="celebration-inbox-btn">받은메일함 가기</button>
+                <button class="ok-btn" id="celebration-confirm-btn">보낸메일함 가기</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="mail.js"></script>
+</body>
+</html>
