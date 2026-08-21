@@ -288,6 +288,221 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // ----------------------------------------------------
+    // Main In-Place Search Results Engine
+    // ----------------------------------------------------
+    const searchResultsSection = document.getElementById("main-search-results-section");
+    const defaultMainContent = document.getElementById("default-main-content");
+    const searchKeywordDisplay = document.getElementById("search-keyword-display");
+    const searchTotalCount = document.getElementById("search-total-count");
+    const searchItemsFeed = document.getElementById("search-items-feed");
+    const btnCloseSearchResults = document.getElementById("btn-close-search-results");
+    const searchTabBtns = document.querySelectorAll(".search-tab-btn");
+
+    let currentSearchTab = "all";
+    let activeQuery = "";
+
+    function highlightKeyword(text, keyword) {
+        if (!text || !keyword) return text || "";
+        const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`(${escaped})`, 'gi');
+        return text.replace(regex, '<mark>$1</mark>');
+    }
+
+    function performMainSearch(query) {
+        if (!query) return;
+        activeQuery = query;
+        
+        // Hide default main content & show search results section
+        if (defaultMainContent) defaultMainContent.style.display = "none";
+        if (searchResultsSection) searchResultsSection.style.display = "block";
+
+        if (searchKeywordDisplay) searchKeywordDisplay.textContent = query;
+        if (searchInput) searchInput.value = query;
+        if (searchDropdown) searchDropdown.style.display = "none";
+
+        // Scroll to top of search results smoothly
+        window.scrollTo({ top: 110, behavior: 'smooth' });
+
+        renderSearchResultsFeed();
+    }
+
+    function closeSearchResults() {
+        if (searchResultsSection) searchResultsSection.style.display = "none";
+        if (defaultMainContent) defaultMainContent.style.display = "block";
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    if (btnCloseSearchResults) {
+        btnCloseSearchResults.addEventListener("click", closeSearchResults);
+    }
+
+    searchTabBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            searchTabBtns.forEach(b => b.classList.remove("active"));
+            btn.classList.add("active");
+            currentSearchTab = btn.getAttribute("data-tab") || "all";
+            renderSearchResultsFeed();
+        });
+    });
+
+    const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
+
+    async function renderSearchResultsFeed() {
+        if (!searchItemsFeed) return;
+
+        // Try syncing latest posts from PocketBase
+        try {
+            const pbRes = await fetch(`${POCKETBASE_URL}/api/collections/posts/records?sort=-created`);
+            if (pbRes.ok) {
+                const pbData = await pbRes.json();
+                if (pbData.items && pbData.items.length > 0) {
+                    const pbPosts = pbData.items.map(item => ({
+                        id: item.id,
+                        author: item.author || "블로거",
+                        authorAvatar: item.authorAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80",
+                        time: item.created ? new Date(item.created).toLocaleDateString() : "방금 전",
+                        category: item.category || "일상·생각",
+                        title: item.title || "",
+                        summary: item.summary || "",
+                        fullContent: item.fullContent || "",
+                        thumbnail: item.thumbnail || "",
+                        likes: item.likes || 0,
+                        comments: item.comments || 0
+                    }));
+
+                    const localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+                    const merged = [...pbPosts];
+                    localPosts.forEach(lp => {
+                        if (!merged.find(mp => mp.id === lp.id)) {
+                            merged.push(lp);
+                        }
+                    });
+                    localStorage.setItem("naverBlogPosts", JSON.stringify(merged));
+                }
+            }
+        } catch(e) {
+            console.warn("PocketBase search sync skipped, using cache");
+        }
+
+        // Fetch stored blog posts
+        let allPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+        
+        // If empty, supply default seed posts so user always gets rich results
+        if (allPosts.length === 0) {
+            allPosts = [
+                {
+                    id: "post_fold",
+                    author: "삼성스마트폰 공식 카페",
+                    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80",
+                    time: "1주 전",
+                    category: "IT·컴퓨터",
+                    title: "역대급 완성도! 갤럭시 Z 폴드8 실사용 리뷰 (성능·카메라·AI 신기능 총정리)",
+                    summary: "구분 스펙 사양 실사용 체감 특징 후면 메인 5,000만 화소 카메라와 스냅드래곤 8 탑재! 야간이나 어두운 실내에서도 빛 번짐 없이 깔끔하고 선명한 사진 촬영이 가능했습니다. 폴드8 배터리 효율과 무게 혁신을 집중 분석해 드립니다.",
+                    thumbnail: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&auto=format&fit=crop&q=80"
+                },
+                {
+                    id: "post_tech",
+                    author: "테크인사이드",
+                    authorAvatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&auto=format&fit=crop&q=80",
+                    time: "3일 전",
+                    category: "비즈니스·경제",
+                    title: "2026 차세대 AI 스마트폰과 폴더블 디스플레이 시장 전망",
+                    summary: "온디바이스 AI 시대가 본격화되면서 폴드형 폼팩터의 생산성과 멀티태스킹 가치가 재조명받고 있습니다. 새로운 힌지 구조와 방열 설계로 완성도를 높인 최신 디바이스 트렌드.",
+                    thumbnail: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&auto=format&fit=crop&q=80"
+                }
+            ];
+        }
+
+        const q = activeQuery.toLowerCase();
+
+        // Filter by search query
+        let matchedPosts = allPosts.filter(p => {
+            const titleMatch = p.title && p.title.toLowerCase().includes(q);
+            const summaryMatch = p.summary && p.summary.toLowerCase().includes(q);
+            const contentMatch = p.fullContent && p.fullContent.toLowerCase().includes(q);
+            const authorMatch = p.author && p.author.toLowerCase().includes(q);
+            const catMatch = p.category && p.category.toLowerCase().includes(q);
+            return titleMatch || summaryMatch || contentMatch || authorMatch || catMatch;
+        });
+
+        // Tab filtering simulation
+        if (currentSearchTab === "image") {
+            matchedPosts = matchedPosts.filter(p => p.thumbnail);
+        }
+
+        if (searchTotalCount) {
+            searchTotalCount.textContent = `총 ${matchedPosts.length}건`;
+        }
+
+        if (matchedPosts.length === 0) {
+            searchItemsFeed.innerHTML = `
+                <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 60px 20px; text-align: center; color: #888;">
+                    <i class="fa-solid fa-circle-exclamation" style="font-size: 38px; color: #ced4da; margin-bottom: 14px;"></i>
+                    <h4 style="font-size: 16px; color: #333; margin-bottom: 6px;">'${activeQuery}'에 대한 검색 결과가 없습니다.</h4>
+                    <p style="font-size: 13px;">단어의 철자가 정확한지 확인해 보거나, 다른 검색어로 검색해 보세요.</p>
+                </div>
+            `;
+            return;
+        }
+
+        const loggedInUser = localStorage.getItem("naverLoggedInUser");
+        const currentAvatar = localStorage.getItem("naverBlogAvatar");
+
+        searchItemsFeed.innerHTML = "";
+        matchedPosts.forEach(post => {
+            const card = document.createElement("article");
+            card.className = "search-result-card";
+
+            const highlightedTitle = highlightKeyword(post.title, activeQuery);
+            // Plain text summary
+            let snippetText = post.summary || "";
+            if (!snippetText && post.fullContent) {
+                const tmp = document.createElement("div");
+                tmp.innerHTML = post.fullContent;
+                snippetText = tmp.innerText || tmp.textContent;
+            }
+            const highlightedSnippet = highlightKeyword(snippetText, activeQuery);
+
+            let authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`) || post.authorAvatar;
+            if (!authorAvatar) {
+                authorAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80';
+            }
+
+            card.innerHTML = `
+                <div class="result-source-row">
+                    <div class="result-source-info">
+                        <img src="${authorAvatar}" class="result-author-avatar" alt="${post.author}">
+                        <span class="result-source-name">${post.author}</span>
+                        <span class="result-source-time">· ${post.time || '방금 전'}</span>
+                    </div>
+                    <span class="result-type-badge">${post.category || '블로그'}</span>
+                </div>
+                <div class="result-main-group">
+                    <div class="result-text-content">
+                        <h4 class="result-title" onclick="location.href='my-blog.html?post=${post.id}'">${highlightedTitle}</h4>
+                        <p class="result-snippet">${highlightedSnippet}</p>
+                    </div>
+                    ${post.thumbnail ? `
+                        <div class="result-thumb-wrapper" onclick="location.href='my-blog.html?post=${post.id}'">
+                            <img src="${post.thumbnail}" alt="Thumbnail" class="result-thumb-img">
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="result-sub-replies">
+                    <div class="sub-reply-item">
+                        <span class="sub-reply-tag">RE</span>
+                        <span>${post.category || '지식공유'} 추천 글 및 상세 스펙 가이드</span>
+                    </div>
+                    <div class="sub-reply-item" style="color:#03c75a; font-weight:600; cursor:pointer;" onclick="location.href='my-blog.html?post=${post.id}'">
+                        <span>원문 보기 <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
+                    </div>
+                </div>
+            `;
+            searchItemsFeed.appendChild(card);
+        });
+    }
+
     if (searchForm) {
         searchForm.addEventListener("submit", (e) => {
             e.preventDefault();
@@ -299,9 +514,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (recentSearches.length > 5) recentSearches.pop();
                 
                 localStorage.setItem("recentSearches", JSON.stringify(recentSearches));
-                searchInput.value = query;
-                searchDropdown.style.display = "none";
-                alert(`"${query}" 검색결과 페이지로 연결됩니다. (데모 페이지에서는 검색어 등록 완료)`);
+                renderRecentSearches();
+
+                // Perform in-place search on index.html
+                performMainSearch(query);
             }
         });
     }
@@ -310,7 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
         aiSearchBtn.addEventListener("click", () => {
             const query = searchInput.value.trim();
             if (query) {
-                alert(`CUE:가 "${query}"에 대한 검색 결과를 생성하고 있습니다...`);
+                performMainSearch(query);
             } else {
                 alert("검색어를 입력한 뒤 AI 버튼을 눌러주세요!");
             }
@@ -320,8 +536,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Recommend tag click events
     document.querySelectorAll(".recommend-tags .tag").forEach(tag => {
         tag.addEventListener("click", () => {
-            searchInput.value = tag.textContent.replace("#", "");
-            searchForm.submit();
+            const keyword = tag.textContent.replace("#", "").trim();
+            searchInput.value = keyword;
+            performMainSearch(keyword);
         });
     });
 
@@ -447,6 +664,17 @@ document.addEventListener("DOMContentLoaded", () => {
             if (profileEmailEl) {
                 profileEmailEl.textContent = savedEmail;
             }
+
+            const savedAvatar = localStorage.getItem(`naverBlogAvatar_${savedName}`);
+            const avatarBox = document.querySelector(".profile-avatar");
+            if (avatarBox) {
+                if (savedAvatar) {
+                    avatarBox.innerHTML = `<img src="${savedAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    avatarBox.innerHTML = `<img src="default-avatar.svg" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                }
+            }
+
             updateUnreadCounts();
         }
     }
@@ -496,6 +724,21 @@ document.addEventListener("DOMContentLoaded", () => {
                         finalName = data.record.name || data.record.username;
                         emailAddr = data.record.email || `${data.record.username}@edunaver.com`;
                         loggedIn = true;
+
+                        // Save PocketBase user profile info
+                        if (data.record.id) localStorage.setItem("naverLoggedInUserId", data.record.id);
+                        if (data.record.avatarUrl) {
+                            localStorage.setItem(`naverBlogAvatar_${finalName}`, data.record.avatarUrl);
+                            if (data.record.username) localStorage.setItem(`naverBlogAvatar_${data.record.username}`, data.record.avatarUrl);
+                        }
+                        if (data.record.blogTitle) {
+                            localStorage.setItem(`naverMyBlogTitle_${finalName}`, data.record.blogTitle);
+                            if (data.record.username) localStorage.setItem(`naverMyBlogTitle_${data.record.username}`, data.record.blogTitle);
+                        }
+                        if (data.record.blogDesc) {
+                            localStorage.setItem(`naverMyBlogDesc_${finalName}`, data.record.blogDesc);
+                            if (data.record.username) localStorage.setItem(`naverMyBlogDesc_${data.record.username}`, data.record.blogDesc);
+                        }
                     }
                 } catch (err) {
                     console.error("PocketBase auth connection failed:", err);
@@ -515,6 +758,16 @@ document.addEventListener("DOMContentLoaded", () => {
             if (profileEmailEl) {
                 profileEmailEl.textContent = emailAddr;
             }
+
+            const currentAvatar = localStorage.getItem(`naverBlogAvatar_${finalName}`);
+            const avatarBox = document.querySelector(".profile-avatar");
+            if (avatarBox) {
+                if (currentAvatar) {
+                    avatarBox.innerHTML = `<img src="${currentAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    avatarBox.innerHTML = `<img src="default-avatar.svg" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                }
+            }
             
             // Set persistence
             localStorage.setItem("naverIsLoggedIn", "true");
@@ -532,6 +785,7 @@ document.addEventListener("DOMContentLoaded", () => {
             authForm.reset();
             localStorage.removeItem("naverIsLoggedIn");
             localStorage.removeItem("naverLoggedInUser");
+            localStorage.removeItem("naverLoggedInUserId");
             localStorage.removeItem("naverLoggedInEmail");
         });
     }

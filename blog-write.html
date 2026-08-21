@@ -1,0 +1,1107 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트에디터 ONE - NAVER Blog</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="blog.css">
+    <style>
+        :root {
+            --editor-bg: #f5f6f8;
+            --editor-card: #ffffff;
+            --naver-green: #03c75a;
+            --naver-dark-green: #029b46;
+        }
+
+        body {
+            background-color: var(--editor-bg);
+            margin: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+            color: #333;
+        }
+
+        /* Top Header Bar */
+        .editor-top-bar {
+            background: #fff;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 10px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .editor-top-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .btn-editor-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #f1f3f5;
+            transition: 0.15s;
+        }
+        .btn-editor-back:hover {
+            background: #e9ecef;
+            color: #111;
+        }
+
+        .editor-brand-tag {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .editor-brand-tag .logo-n {
+            background: var(--naver-green);
+            color: #fff;
+            padding: 1px 5px;
+            border-radius: 2px;
+            font-size: 11px;
+            font-weight: 900;
+            text-decoration: none;
+            cursor: pointer;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        .editor-brand-tag .logo-n:hover {
+            background: var(--naver-dark-green);
+            transform: scale(1.08);
+        }
+
+        .editor-top-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-save-draft {
+            font-size: 13px;
+            color: #495057;
+            background: #fff;
+            border: 1px solid #ced4da;
+            padding: 7px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: 0.15s;
+        }
+        .btn-save-draft:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+        }
+
+        .btn-submit-publish {
+            background: var(--naver-green);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 7px 22px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(3,199,90,0.25);
+            transition: background 0.15s, transform 0.1s;
+        }
+        .btn-submit-publish:hover {
+            background: var(--naver-dark-green);
+        }
+        .btn-submit-publish:active {
+            transform: scale(0.98);
+        }
+
+        /* Editor Workspace Layout */
+        .editor-workspace {
+            max-width: 920px;
+            margin: 24px auto 60px;
+            background: #fff;
+            border-radius: 8px;
+            border: 1px solid #e1e4e8;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+            overflow: hidden;
+        }
+
+        .editor-meta-header {
+            padding: 16px 32px;
+            border-bottom: 1px solid #f1f3f5;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            background: #fafbfc;
+        }
+
+        .category-select-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-select-wrapper label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .select-category {
+            padding: 7px 12px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: #fff;
+            outline: none;
+            cursor: pointer;
+        }
+        .select-category:focus {
+            border-color: var(--naver-green);
+        }
+
+        /* Rich Text Formatting Toolbar */
+        .smart-toolbar {
+            background: #fff;
+            border-bottom: 1px solid #edf0f2;
+            padding: 8px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            position: sticky;
+            top: 53px;
+            z-index: 90;
+            user-select: none;
+        }
+
+        .tool-group {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            border-right: 1px solid #eee;
+            padding-right: 6px;
+            margin-right: 4px;
+        }
+        .tool-group:last-child {
+            border-right: none;
+        }
+
+        .btn-tool {
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: #495057;
+            font-size: 14px;
+            min-width: 32px;
+            height: 32px;
+            padding: 0 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: 0.15s;
+        }
+        .btn-tool:hover {
+            background: #f1f3f5;
+            color: #111;
+        }
+        .btn-tool:active, .btn-tool.active {
+            background: #e9ecef;
+            color: var(--naver-green);
+        }
+
+        .btn-tool-photo {
+            background: #ebfbee;
+            color: #029b46;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1px solid #b2f2bb;
+        }
+        .btn-tool-photo:hover {
+            background: #d3f9d8;
+            color: #028038;
+        }
+
+        /* Modern Naver Toast & Modal */
+        .naver-toast-msg {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #1e2024;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 12px 24px;
+            border-radius: 30px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 9999;
+        }
+
+        .naver-toast-msg.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .naver-toast-msg i {
+            color: var(--naver-green);
+            font-size: 16px;
+        }
+
+        .naver-toast-msg.error i {
+            color: #ff6b6b;
+        }
+
+        .select-tool {
+            height: 30px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 12px;
+            padding: 0 6px;
+            color: #495057;
+            outline: none;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .color-picker-tool {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border: none;
+            cursor: pointer;
+            background: transparent;
+        }
+
+        /* Main Content Fields */
+        .editor-inner-body {
+            padding: 32px;
+        }
+
+        .title-input-box {
+            margin-bottom: 24px;
+        }
+
+        .input-title {
+            width: 100%;
+            border: none;
+            outline: none;
+            font-size: 26px;
+            font-weight: 700;
+            color: #212529;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #edf0f2;
+            box-sizing: border-box;
+        }
+        .input-title:focus {
+            border-bottom-color: var(--naver-green);
+        }
+        .input-title::placeholder {
+            color: #adb5bd;
+            font-weight: 400;
+        }
+
+        /* WYSIWYG Editable Area */
+        .wysiwyg-editor {
+            min-height: 460px;
+            outline: none;
+            font-size: 16px;
+            line-height: 1.8;
+            color: #2b2f33;
+            word-break: break-word;
+            padding: 10px 4px;
+        }
+        
+        .wysiwyg-editor[contenteditable]:empty::before {
+            content: "이웃들과 나누고 싶은 이야기, 소소한 일상, 유익한 지식을 자유롭게 작성해보세요.\A\A상단의 [사진] 버튼을 누르면 내 컴퓨터의 이미지 파일을 바로 첨부할 수 있습니다.";
+            white-space: pre-wrap;
+            color: #adb5bd;
+        }
+
+        /* Rich Content Styles inside editor */
+        .wysiwyg-editor blockquote {
+            border-left: 4px solid var(--naver-green);
+            background: #f8f9fa;
+            margin: 16px 0;
+            padding: 12px 18px;
+            color: #495057;
+            font-style: italic;
+            border-radius: 0 6px 6px 0;
+        }
+        .wysiwyg-editor hr {
+            border: none;
+            border-top: 1px dashed #ced4da;
+            margin: 24px 0;
+        }
+        /* Interactive Resizable Images */
+        .wysiwyg-editor img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 16px auto;
+            display: block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            cursor: pointer;
+            transition: outline 0.15s, transform 0.15s;
+        }
+
+        .wysiwyg-editor img.selected-editor-img {
+            outline: 3px solid var(--naver-green);
+            outline-offset: 2px;
+            box-shadow: 0 4px 16px rgba(3, 199, 90, 0.25);
+        }
+
+        /* Floating Image Quick Resize Toolbar */
+        #img-quick-toolbar {
+            position: absolute;
+            background: #2b2f33;
+            border-radius: 24px;
+            padding: 4px 10px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            z-index: 1000;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+            user-select: none;
+        }
+
+        #img-quick-toolbar button {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: 0.15s;
+        }
+
+        #img-quick-toolbar button:hover {
+            background: rgba(255,255,255,0.2);
+            color: #55efc4;
+        }
+
+        #img-quick-toolbar button.btn-del-img:hover {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .wysiwyg-editor a {
+            color: #03c75a;
+            text-decoration: underline;
+        }
+        .wysiwyg-editor h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 20px 0 10px;
+            color: #111;
+        }
+        .wysiwyg-editor h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 16px 0 8px;
+            color: #222;
+        }
+
+        /* Footer Status */
+        .editor-footer-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 32px;
+            background: #fafbfc;
+            border-top: 1px solid #edf0f2;
+            font-size: 12px;
+            color: #868e96;
+        }
+
+        .draft-notice {
+            color: var(--naver-green);
+            font-weight: 500;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden Local File Input -->
+    <input type="file" id="local-image-input" accept="image/*" style="display: none;" onchange="handleLocalImageUpload(event)">
+
+    <!-- 1. Top Navigation Bar -->
+    <header class="editor-top-bar">
+        <div class="editor-top-left">
+            <a href="blog.html" class="btn-editor-back">
+                <i class="fa-solid fa-arrow-left"></i> 블로그 홈
+            </a>
+            <div class="editor-brand-tag">
+                <a href="index.html" class="logo-n" title="통합 메인(EDUNAVER)으로 이동">N</a>
+                <a href="blog.html" style="text-decoration: none; color: inherit;" title="블로그 홈으로 이동">SmartEditor ONE</a>
+            </div>
+        </div>
+        <div class="editor-top-right">
+            <button type="button" class="btn-save-draft" id="btn-save-draft" onclick="saveDraft()">
+                <i class="fa-regular fa-floppy-disk"></i> 임시저장 <span id="draft-count" style="color:var(--naver-green); font-weight:bold; margin-left:2px;">(0)</span>
+            </button>
+            <button type="button" class="btn-submit-publish" id="btn-submit-post" onclick="publishPost()">
+                <i class="fa-solid fa-paper-plane"></i> 발행하기
+            </button>
+        </div>
+    </header>
+
+    <!-- 2. Editor Main Body -->
+    <main class="editor-workspace">
+
+        <!-- Top Category Bar -->
+        <div class="editor-meta-header">
+            <div class="category-select-wrapper">
+                <label for="post-category"><i class="fa-solid fa-folder-open" style="color: #666;"></i> 카테고리:</label>
+                <select class="select-category" id="post-category">
+                    <option value="요리·레시피">요리·레시피</option>
+                    <option value="비즈니스·경제">비즈니스·경제</option>
+                    <option value="IT·컴퓨터">IT·컴퓨터</option>
+                    <option value="패션·미용">패션·미용</option>
+                    <option value="원예·재배">원예·재배</option>
+                    <option value="어학·외국어">어학·외국어</option>
+                    <option value="스포츠·건강">스포츠·건강</option>
+                    <option value="일상·생각">일상·생각</option>
+                </select>
+            </div>
+            <div id="draft-saved-msg" class="draft-notice">
+                <i class="fa-solid fa-check"></i> 자동 저장되었습니다.
+            </div>
+        </div>
+
+        <!-- Real WYSIWYG Formatting Ribbon -->
+        <div class="smart-toolbar">
+            <!-- Image Insert Button (Local PC) -->
+            <div class="tool-group">
+                <button type="button" class="btn-tool btn-tool-photo" onclick="triggerLocalImageUpload()" title="내 컴퓨터에서 이미지 첨부">
+                    <i class="fa-solid fa-camera"></i> 사진
+                </button>
+            </div>
+
+            <!-- Font Style Group -->
+            <div class="tool-group">
+                <select class="select-tool" onchange="formatHeading(this.value)">
+                    <option value="p">본문 기본</option>
+                    <option value="h2">제목 1 (큰 제목)</option>
+                    <option value="h3">제목 2 (중간 제목)</option>
+                </select>
+            </div>
+
+            <div class="tool-group">
+                <select class="select-tool" onchange="formatFontSize(this.value)">
+                    <option value="3">보통 크기</option>
+                    <option value="1">매우 작게</option>
+                    <option value="2">작게</option>
+                    <option value="4">크게</option>
+                    <option value="5">매우 크게</option>
+                </select>
+            </div>
+
+            <div class="tool-group">
+                <button type="button" class="btn-tool" onclick="execCmd('bold')" title="굵게 (Ctrl+B)"><i class="fa-solid fa-bold"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('italic')" title="기울임 (Ctrl+I)"><i class="fa-solid fa-italic"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('underline')" title="밑줄 (Ctrl+U)"><i class="fa-solid fa-underline"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('strikeThrough')" title="취소선"><i class="fa-solid fa-strikethrough"></i></button>
+            </div>
+
+            <!-- Color Group -->
+            <div class="tool-group" title="글자 색상">
+                <i class="fa-solid fa-palette" style="font-size:12px; color:#666; margin-right:4px;"></i>
+                <input type="color" class="color-picker-tool" value="#333333" onchange="execCmdWithArg('foreColor', this.value)" title="글자색 변경">
+            </div>
+
+            <!-- Align Group -->
+            <div class="tool-group">
+                <button type="button" class="btn-tool" onclick="execCmd('justifyLeft')" title="왼쪽 정렬"><i class="fa-solid fa-align-left"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('justifyCenter')" title="가운데 정렬"><i class="fa-solid fa-align-center"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('justifyRight')" title="오른쪽 정렬"><i class="fa-solid fa-align-right"></i></button>
+            </div>
+
+            <!-- List & Extras Group -->
+            <div class="tool-group">
+                <button type="button" class="btn-tool" onclick="execCmd('insertUnorderedList')" title="글머리 기호 목록"><i class="fa-solid fa-list-ul"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('insertOrderedList')" title="번호 매기기 목록"><i class="fa-solid fa-list-ol"></i></button>
+                <button type="button" class="btn-tool" onclick="insertQuoteBlock()" title="인용구 박스"><i class="fa-solid fa-quote-left"></i></button>
+                <button type="button" class="btn-tool" onclick="execCmd('insertHorizontalRule')" title="구분선"><i class="fa-solid fa-minus"></i></button>
+            </div>
+
+            <!-- Link & Reset -->
+            <div class="tool-group">
+                <button type="button" class="btn-tool" onclick="insertHyperlink()" title="링크 삽입"><i class="fa-solid fa-link"></i></button>
+                <button type="button" class="btn-tool" onclick="resetEditorContent()" title="초기화"><i class="fa-solid fa-rotate-right"></i></button>
+            </div>
+        </div>
+
+        <!-- Main Writing Body -->
+        <div class="editor-inner-body">
+            
+            <!-- Title -->
+            <div class="title-input-box">
+                <input type="text" class="input-title" id="post-title" placeholder="제목을 입력하세요" autofocus>
+            </div>
+
+            <!-- WYSIWYG Content Editable Area -->
+            <div id="post-editor" class="wysiwyg-editor" contenteditable="true" spellcheck="false"></div>
+
+            <!-- Floating Image Quick Controller Toolbar -->
+            <div id="img-quick-toolbar">
+                <button type="button" onclick="setCurrentImageSize('30%')" title="작게 (30%)">작게 (30%)</button>
+                <button type="button" onclick="setCurrentImageSize('50%')" title="보통 (50%)">보통 (50%)</button>
+                <button type="button" onclick="setCurrentImageSize('75%')" title="크게 (75%)">크게 (75%)</button>
+                <button type="button" onclick="setCurrentImageSize('100%')" title="전체 너비 (100%)">100%</button>
+                <span style="color: #666; font-size: 10px;">|</span>
+                <button type="button" onclick="setCurrentImageAlign('left')" title="왼쪽 정렬"><i class="fa-solid fa-align-left"></i></button>
+                <button type="button" onclick="setCurrentImageAlign('center')" title="가운데 정렬"><i class="fa-solid fa-align-center"></i></button>
+                <button type="button" onclick="setCurrentImageAlign('right')" title="오른쪽 정렬"><i class="fa-solid fa-align-right"></i></button>
+                <span style="color: #666; font-size: 10px;">|</span>
+                <button type="button" class="btn-del-img" onclick="deleteSelectedImage()" title="사진 삭제"><i class="fa-solid fa-trash"></i></button>
+            </div>
+
+        </div>
+
+        <!-- Footer Stats -->
+        <div class="editor-footer-status">
+            <div>
+                <span>작성자: <strong id="editor-author-name" style="color: #333;">조이네</strong></span>
+            </div>
+            <div>
+                <span>공백 포함 <strong id="char-count" style="color: var(--naver-green);">0</strong>자</span>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        let firstInsertedImage = null; // Auto-detect thumbnail from content
+
+        let selectedImageElement = null;
+        let currentEditPostId = null;
+
+        // Initialize editor state
+        document.addEventListener("DOMContentLoaded", () => {
+            const userName = localStorage.getItem("naverLoggedInUser") || "조이네";
+            document.getElementById("editor-author-name").textContent = userName;
+
+            // Check if editing existing post
+            checkEditMode();
+
+            // Load last draft if not editing
+            if (!currentEditPostId) {
+                loadDraftIfExists();
+            }
+
+            const editor = document.getElementById("post-editor");
+            // Word counter listener
+            editor.addEventListener("input", updateWordCount);
+            editor.addEventListener("keyup", updateWordCount);
+
+            // Handle image selection & quick toolbar positioning
+            editor.addEventListener("click", (e) => {
+                if (e.target.tagName === "IMG") {
+                    selectEditorImage(e.target);
+                } else {
+                    deselectEditorImage();
+                }
+            });
+
+            // Hide toolbar when clicking outside editor
+            document.addEventListener("click", (e) => {
+                const toolbar = document.getElementById("img-quick-toolbar");
+                if (!e.target.closest("#post-editor") && !e.target.closest("#img-quick-toolbar")) {
+                    deselectEditorImage();
+                }
+            });
+
+            // Reposition toolbar on scroll
+            window.addEventListener("scroll", () => {
+                if (selectedImageElement) {
+                    positionQuickToolbar(selectedImageElement);
+                }
+            });
+        });
+
+        function selectEditorImage(img) {
+            deselectEditorImage();
+            selectedImageElement = img;
+            img.classList.add("selected-editor-img");
+            positionQuickToolbar(img);
+        }
+
+        function deselectEditorImage() {
+            if (selectedImageElement) {
+                selectedImageElement.classList.remove("selected-editor-img");
+                selectedImageElement = null;
+            }
+            const toolbar = document.getElementById("img-quick-toolbar");
+            if (toolbar) toolbar.style.display = "none";
+        }
+
+        function positionQuickToolbar(img) {
+            const toolbar = document.getElementById("img-quick-toolbar");
+            if (!toolbar) return;
+
+            const rect = img.getBoundingClientRect();
+            toolbar.style.display = "flex";
+            toolbar.style.top = `${window.scrollY + rect.top - 44}px`;
+            toolbar.style.left = `${window.scrollX + rect.left + (rect.width / 2) - (toolbar.offsetWidth / 2)}px`;
+        }
+
+        function setCurrentImageSize(widthPercent) {
+            if (!selectedImageElement) return;
+            selectedImageElement.style.width = widthPercent;
+            selectedImageElement.style.maxWidth = "100%";
+            selectedImageElement.style.height = "auto";
+            positionQuickToolbar(selectedImageElement);
+            updateWordCount();
+        }
+
+        function setCurrentImageAlign(align) {
+            if (!selectedImageElement) return;
+            selectedImageElement.style.display = "block";
+            if (align === "left") {
+                selectedImageElement.style.margin = "16px auto 16px 0";
+            } else if (align === "center") {
+                selectedImageElement.style.margin = "16px auto";
+            } else if (align === "right") {
+                selectedImageElement.style.margin = "16px 0 16px auto";
+            }
+            positionQuickToolbar(selectedImageElement);
+        }
+
+        function deleteSelectedImage() {
+            if (!selectedImageElement) return;
+            if (confirm("선택한 사진을 본문에서 삭제할까요?")) {
+                selectedImageElement.remove();
+                deselectEditorImage();
+                updateWordCount();
+            }
+        }
+
+        function updateWordCount() {
+            const editor = document.getElementById("post-editor");
+            const text = editor.innerText || editor.textContent || "";
+            document.getElementById("char-count").textContent = text.replace(/\n/g, "").length;
+        }
+
+        // Trigger Local Image Picker
+        function triggerLocalImageUpload() {
+            document.getElementById("local-image-input").click();
+        }
+
+        // Resize & Compress Image using HTML5 Canvas
+        function resizeAndCompressImage(file, maxWidth = 900, maxHeight = 900, quality = 0.75) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Maintain aspect ratio while bounding max dimensions
+                        if (width > height) {
+                            if (width > maxWidth) {
+                                height = Math.round((height * maxWidth) / width);
+                                width = maxWidth;
+                            }
+                        } else {
+                            if (height > maxHeight) {
+                                width = Math.round((width * maxHeight) / height);
+                                height = maxHeight;
+                            }
+                        }
+
+                        const canvas = document.createElement("canvas");
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext("2d");
+                        // Smooth rendering
+                        ctx.imageSmoothingEnabled = true;
+                        ctx.imageSmoothingQuality = "high";
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Export as lightweight WebP or standard JPEG (drastically reduces base64 size by ~90%)
+                        let compressedDataUrl = canvas.toDataURL("image/webp", quality);
+                        if (!compressedDataUrl.startsWith("data:image/webp")) {
+                            compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
+                        }
+
+                        console.log(`Original: ${(file.size / 1024).toFixed(1)} KB ➡️ Compressed: ${(compressedDataUrl.length * 0.75 / 1024).toFixed(1)} KB`);
+                        resolve(compressedDataUrl);
+                    };
+                    img.onerror = reject;
+                    img.src = e.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Handle Image File Selection and insert resized/compressed image
+        async function handleLocalImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                alert("이미지 파일만 선택할 수 있습니다.");
+                return;
+            }
+
+            try {
+                // Resize & Compress image down to web-optimized dimensions & weight
+                const compressedUrl = await resizeAndCompressImage(file, 900, 900, 0.75);
+
+                const editor = document.getElementById("post-editor");
+                editor.focus();
+                
+                // Insert Image element into WYSIWYG
+                document.execCommand("insertImage", false, compressedUrl);
+                
+                if (!firstInsertedImage) {
+                    firstInsertedImage = compressedUrl;
+                }
+                
+                updateWordCount();
+            } catch (err) {
+                console.error("Image compression error:", err);
+                alert("이미지를 처리하는 중 오류가 발생했습니다.");
+            } finally {
+                // Reset file input for future selection
+                event.target.value = "";
+            }
+        }
+
+        // WYSIWYG Command Execution
+        function execCmd(command) {
+            document.getElementById("post-editor").focus();
+            document.execCommand(command, false, null);
+            updateWordCount();
+        }
+
+        function execCmdWithArg(command, arg) {
+            document.getElementById("post-editor").focus();
+            document.execCommand(command, false, arg);
+            updateWordCount();
+        }
+
+        function formatHeading(tag) {
+            document.getElementById("post-editor").focus();
+            if (tag === 'p') {
+                document.execCommand('formatBlock', false, '<p>');
+            } else {
+                document.execCommand('formatBlock', false, `<${tag}>`);
+            }
+        }
+
+        function formatFontSize(size) {
+            document.getElementById("post-editor").focus();
+            document.execCommand('fontSize', false, size);
+        }
+
+        function insertQuoteBlock() {
+            document.getElementById("post-editor").focus();
+            document.execCommand('formatBlock', false, '<blockquote>');
+        }
+
+        function insertHyperlink() {
+            const url = prompt("연결할 웹사이트 링크 주소를 입력하세요:", "https://");
+            if (url) {
+                document.getElementById("post-editor").focus();
+                document.execCommand('createLink', false, url);
+            }
+        }
+
+        function resetEditorContent() {
+            if (confirm("작성 중인 내용을 모두 지우고 초기화할까요?")) {
+                document.getElementById("post-title").value = "";
+                document.getElementById("post-editor").innerHTML = "";
+                firstInsertedImage = null;
+                updateWordCount();
+            }
+        }
+
+        // Show modern Naver Toast
+        function showNaverToast(message, isError = false, duration = 2500) {
+            let toast = document.getElementById("naver-global-toast");
+            if (!toast) {
+                toast = document.createElement("div");
+                toast.id = "naver-global-toast";
+                toast.className = "naver-toast-msg";
+                document.body.appendChild(toast);
+            }
+            toast.className = isError ? "naver-toast-msg error" : "naver-toast-msg";
+            toast.innerHTML = isError 
+                ? `<i class="fa-solid fa-circle-exclamation"></i> <span>${message}</span>`
+                : `<i class="fa-solid fa-circle-check"></i> <span>${message}</span>`;
+            
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, duration);
+        }
+
+        // Draft Management
+        function saveDraft() {
+            const title = document.getElementById("post-title").value.trim();
+            const contentHtml = document.getElementById("post-editor").innerHTML.trim();
+            const category = document.getElementById("post-category").value;
+
+            if (!title && !contentHtml) {
+                showNaverToast("저장할 내용이 없습니다.", true);
+                return;
+            }
+
+            const draft = {
+                title: title,
+                content: contentHtml,
+                category: category,
+                savedAt: new Date().toLocaleTimeString()
+            };
+
+            try {
+                localStorage.setItem("naverBlogDraft", JSON.stringify(draft));
+                const notice = document.getElementById("draft-saved-msg");
+                notice.textContent = `임시저장 완료 (${draft.savedAt})`;
+                notice.style.display = "inline-block";
+                document.getElementById("draft-count").textContent = "(1)";
+                showNaverToast("작성 중인 글이 안전하게 임시저장되었습니다.");
+                
+                setTimeout(() => {
+                    notice.style.display = "none";
+                }, 3000);
+            } catch (e) {
+                showNaverToast("임시저장 용량이 초과되었습니다.", true);
+            }
+        }
+
+        function loadDraftIfExists() {
+            const draftRaw = localStorage.getItem("naverBlogDraft");
+            if (draftRaw) {
+                try {
+                    const draft = JSON.parse(draftRaw);
+                    document.getElementById("draft-count").textContent = "(1)";
+                    if (draft.title || draft.content) {
+                        if (confirm(`이전에 작성 중이던 임시저장 글(${draft.savedAt})이 있습니다. 이어서 작성하시겠습니까?`)) {
+                            document.getElementById("post-title").value = draft.title || "";
+                            document.getElementById("post-editor").innerHTML = draft.content || "";
+                            if (draft.category) document.getElementById("post-category").value = draft.category;
+                            updateWordCount();
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+
+        const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
+
+        // Check and load post for edit mode
+        function checkEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get("editId");
+            if (!editId) return;
+
+            currentEditPostId = editId;
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const post = posts.find(p => p.id === editId);
+            if (post) {
+                document.getElementById("post-category").value = post.category || "일상·생각";
+                document.getElementById("post-title").value = post.title || "";
+                const editor = document.getElementById("post-editor");
+                editor.innerHTML = post.fullContent || post.summary || "";
+                updateWordCount();
+
+                const btnSubmit = document.getElementById("btn-submit-post");
+                if (btnSubmit) {
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-check"></i> 수정 완료';
+                }
+                const backBtn = document.querySelector(".btn-editor-back");
+                if (backBtn) {
+                    backBtn.href = `my-blog.html?postId=${encodeURIComponent(editId)}`;
+                    backBtn.innerHTML = '<i class="fa-solid fa-arrow-left"></i> 포스트로 돌아가기';
+                }
+            }
+        }
+
+        // Publish or Update Post
+        async function publishPost() {
+            const title = document.getElementById("post-title").value.trim();
+            const editor = document.getElementById("post-editor");
+            const contentHtml = editor.innerHTML.trim();
+            const plainText = editor.innerText.trim();
+            const category = document.getElementById("post-category").value;
+
+            if (!title) {
+                showNaverToast("제목을 입력해주세요.", true);
+                document.getElementById("post-title").focus();
+                return;
+            }
+
+            if (!plainText && !contentHtml) {
+                showNaverToast("본문 내용을 입력해주세요.", true);
+                editor.focus();
+                return;
+            }
+
+            // Extract first image from content for thumbnail if available
+            const tempDiv = document.createElement("div");
+            tempDiv.innerHTML = contentHtml;
+            const imgTag = tempDiv.querySelector("img");
+            const autoThumbnail = imgTag ? imgTag.src : "";
+
+            const userName = localStorage.getItem("naverLoggedInUser") || "조이네";
+            const userAvatar = localStorage.getItem(`naverBlogAvatar_${userName}`) || localStorage.getItem("naverBlogAvatar") || "default-avatar.svg";
+            const summaryText = plainText.length > 140 ? plainText.substring(0, 140) + "..." : plainText;
+
+            const btnSubmit = document.getElementById("btn-submit-post");
+            if (btnSubmit) {
+                btnSubmit.disabled = true;
+                btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 저장 중...';
+            }
+
+            // If in Edit Mode: Update existing post
+            if (currentEditPostId) {
+                const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+                const idx = posts.findIndex(p => p.id === currentEditPostId);
+                if (idx !== -1) {
+                    posts[idx].title = title;
+                    posts[idx].category = category;
+                    posts[idx].summary = summaryText;
+                    posts[idx].fullContent = contentHtml;
+                    if (autoThumbnail) posts[idx].thumbnail = autoThumbnail;
+                    localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+                }
+
+                try {
+                    await fetch(`${POCKETBASE_URL}/api/collections/posts/records/${currentEditPostId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            title: title,
+                            category: category,
+                            summary: summaryText,
+                            fullContent: contentHtml,
+                            thumbnail: autoThumbnail
+                        })
+                    });
+                } catch (e) {}
+
+                showNaverToast("포스트가 성공적으로 수정되었습니다!");
+                setTimeout(() => {
+                    window.location.href = `my-blog.html?postId=${encodeURIComponent(currentEditPostId)}`;
+                }, 600);
+                return;
+            }
+
+            // New Post Mode
+            const newPostId = "post_" + Date.now();
+            const newPost = {
+                id: newPostId,
+                author: userName,
+                authorAvatar: userAvatar,
+                time: "방금 전",
+                category: category,
+                title: title,
+                summary: summaryText,
+                fullContent: contentHtml,
+                thumbnail: autoThumbnail,
+                likes: 0,
+                comments: 0,
+                isNeighbor: false
+            };
+
+            // Always update local storage
+            const localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            localPosts.unshift(newPost);
+            localStorage.setItem("naverBlogPosts", JSON.stringify(localPosts));
+
+            try {
+                const pbPayload = {
+                    title: title,
+                    category: category,
+                    author: userName,
+                    authorAvatar: userAvatar,
+                    summary: summaryText,
+                    fullContent: contentHtml,
+                    thumbnail: autoThumbnail,
+                    likes: 0,
+                    comments: 0
+                };
+
+                const response = await fetch(`${POCKETBASE_URL}/api/collections/posts/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(pbPayload)
+                });
+
+                if (response.ok) {
+                    const record = await response.json();
+                    if (record && record.id) {
+                        newPost.id = record.id;
+                        localPosts[0] = newPost;
+                        localStorage.setItem("naverBlogPosts", JSON.stringify(localPosts));
+                    }
+                }
+            } catch (pbErr) {
+                console.log("PocketBase write error, using local fallback", pbErr);
+            }
+
+            // Clear local draft upon successful publish
+            localStorage.removeItem("naverBlogDraft");
+
+            // Record user activity
+            const actKey = `naverBlogActivities_${userName}`;
+            const activities = JSON.parse(localStorage.getItem(actKey) || "[]");
+            activities.unshift({
+                id: Date.now(),
+                text: `'${title}' 글을 새로 발행했습니다.`,
+                time: "방금 전"
+            });
+            localStorage.setItem(actKey, JSON.stringify(activities));
+
+            showNaverToast("새 글이 성공적으로 등록되었습니다!");
+            setTimeout(() => {
+                window.location.href = `my-blog.html?postId=${encodeURIComponent(newPost.id)}`;
+            }, 600);
+        }
+    </script>
+</body>
+</html>

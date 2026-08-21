@@ -10,7 +10,310 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=20260820_search">
+    <style>
+        /* Embedded In-Place Search Results Styles */
+        .search-results-section {
+            background-color: #f5f6f8 !important;
+            min-height: calc(100vh - 180px);
+            padding-bottom: 60px;
+            width: 100%;
+        }
+
+        .search-tabs-bar {
+            background: #ffffff !important;
+            border-bottom: 1px solid #e5e8eb !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            padding: 0 40px !important;
+            position: sticky !important;
+            top: 0 !important;
+            z-index: 50 !important;
+        }
+
+        .search-tabs-list {
+            display: flex !important;
+            gap: 4px !important;
+        }
+
+        .search-tab-btn {
+            padding: 14px 16px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            color: #555 !important;
+            background: none !important;
+            border: none !important;
+            border-bottom: 3px solid transparent !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            transition: 0.15s !important;
+        }
+
+        .search-tab-btn:hover {
+            color: #03c75a !important;
+        }
+
+        .search-tab-btn.active {
+            color: #03c75a !important;
+            border-bottom-color: #03c75a !important;
+        }
+
+        .tab-ai-badge {
+            background: #e14e32 !important;
+            color: #fff !important;
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            padding: 1px 4px !important;
+            border-radius: 3px !important;
+        }
+
+        .btn-close-search-results {
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            color: #666 !important;
+            background: #f1f3f5 !important;
+            border: 1px solid #e1e4e8 !important;
+            padding: 6px 14px !important;
+            border-radius: 4px !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+        }
+
+        .btn-close-search-results:hover {
+            background: #e9ecef !important;
+            color: #111 !important;
+        }
+
+        .search-results-container {
+            max-width: 1130px !important;
+            margin: 0 auto !important;
+            padding: 0 16px !important;
+        }
+
+        .search-results-body {
+            display: grid !important;
+            grid-template-columns: 1fr 320px !important;
+            gap: 24px !important;
+            padding: 24px 0 !important;
+        }
+
+        .search-query-summary {
+            display: flex !important;
+            align-items: baseline !important;
+            gap: 10px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .search-query-summary h3 {
+            font-size: 18px !important;
+            font-weight: 700 !important;
+            color: #111 !important;
+            margin: 0 !important;
+        }
+
+        .search-query-summary span {
+            font-size: 13px !important;
+            color: #888 !important;
+        }
+
+        .search-items-feed {
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 16px !important;
+        }
+
+        .search-result-card {
+            background: #fff !important;
+            border-radius: 8px !important;
+            border: 1px solid #e3e7ed !important;
+            padding: 20px 24px !important;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+        }
+
+        .result-source-row {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-bottom: 10px !important;
+        }
+
+        .result-source-info {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+        }
+
+        .result-author-avatar {
+            width: 26px !important;
+            height: 26px !important;
+            border-radius: 50% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
+        .result-source-name {
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            color: #333 !important;
+        }
+
+        .result-source-time {
+            font-size: 12px !important;
+            color: #888 !important;
+        }
+
+        .result-type-badge {
+            font-size: 11px !important;
+            font-weight: 700 !important;
+            color: #03c75a !important;
+            background: #ebfbee !important;
+            padding: 2px 6px !important;
+            border-radius: 3px !important;
+        }
+
+        .result-main-group {
+            display: flex !important;
+            gap: 18px !important;
+        }
+
+        .result-text-content {
+            flex: 1 !important;
+        }
+
+        .result-title {
+            font-size: 17px !important;
+            font-weight: 700 !important;
+            color: #1f3bb3 !important;
+            line-height: 1.4 !important;
+            margin: 0 0 8px 0 !important;
+            cursor: pointer !important;
+        }
+
+        .result-title:hover {
+            text-decoration: underline !important;
+        }
+
+        .result-title mark, .result-snippet mark {
+            background: transparent !important;
+            color: #111 !important;
+            font-weight: 900 !important;
+            text-decoration: underline !important;
+            text-decoration-color: #03c75a !important;
+        }
+
+        .result-snippet {
+            font-size: 13.5px !important;
+            color: #4b525d !important;
+            line-height: 1.6 !important;
+            margin: 0 0 12px 0 !important;
+        }
+
+        .result-thumb-wrapper {
+            width: 120px !important;
+            height: 90px !important;
+            border-radius: 6px !important;
+            overflow: hidden !important;
+            flex-shrink: 0 !important;
+            cursor: pointer !important;
+        }
+
+        .result-thumb-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+        }
+
+        .result-sub-replies {
+            background: #f8f9fa !important;
+            border-radius: 6px !important;
+            padding: 10px 14px !important;
+            display: flex !important;
+            gap: 12px !important;
+            font-size: 12px !important;
+            color: #555 !important;
+            margin-top: 10px !important;
+        }
+
+        .sub-reply-item {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            white-space: nowrap !important;
+        }
+
+        .sub-reply-tag {
+            background: #e9ecef !important;
+            color: #495057 !important;
+            font-size: 10px !important;
+            font-weight: bold !important;
+            padding: 1px 4px !important;
+            border-radius: 3px !important;
+        }
+
+        .search-side-card {
+            background: #fff !important;
+            border: 1px solid #e3e7ed !important;
+            border-radius: 8px !important;
+            padding: 18px !important;
+        }
+
+        .search-side-card h4 {
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            color: #222 !important;
+            margin: 0 0 12px 0 !important;
+        }
+
+        .search-related-tags {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+        }
+
+        .rel-tag {
+            background: #f1f3f5 !important;
+            color: #495057 !important;
+            font-size: 12px !important;
+            font-weight: 500 !important;
+            padding: 5px 10px !important;
+            border-radius: 16px !important;
+            cursor: pointer !important;
+        }
+
+        .btn-side-blog-link {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 6px !important;
+            width: 100% !important;
+            background: #03c75a !important;
+            color: #fff !important;
+            font-size: 13px !important;
+            font-weight: 700 !important;
+            padding: 9px !important;
+            border-radius: 6px !important;
+            text-align: center !important;
+            text-decoration: none !important;
+        }
+
+        @media (max-width: 860px) {
+            .search-results-body {
+                grid-template-columns: 1fr !important;
+            }
+            .search-results-right {
+                display: none !important;
+            }
+            .search-tabs-bar {
+                padding: 0 16px !important;
+            }
+        }
+    </style>
 </head>
 <body>
     <!-- Top Utility Bar -->
@@ -96,7 +399,7 @@
                 <div class="icon-circle cafe"><i class="fa-solid fa-users"></i></div>
                 <span>학습 카페</span>
             </a>
-            <a href="#" class="service-item">
+            <a href="blog.html" class="service-item" id="nav-blog-btn">
                 <div class="icon-circle blog"><i class="fa-solid fa-pen-nib"></i></div>
                 <span>지식 블로그</span>
             </a>
@@ -134,8 +437,61 @@
         </div>
     </nav>
 
+    <!-- Search Results View (Displays in-place on search) -->
+    <section class="search-results-section" id="main-search-results-section" style="display: none;">
+        <div class="search-results-container">
+            <!-- Search Results Sub-header with Tabs -->
+            <div class="search-tabs-bar">
+                <div class="search-tabs-list">
+                    <button class="search-tab-btn active" data-tab="all"><span class="tab-ai-badge">AI</span> 통합검색</button>
+                    <button class="search-tab-btn" data-tab="blog"><i class="fa-solid fa-pen-nib"></i> 블로그</button>
+                    <button class="search-tab-btn" data-tab="cafe"><i class="fa-solid fa-users"></i> 카페</button>
+                    <button class="search-tab-btn" data-tab="news"><i class="fa-regular fa-newspaper"></i> 뉴스</button>
+                    <button class="search-tab-btn" data-tab="image"><i class="fa-regular fa-image"></i> 이미지</button>
+                </div>
+                <button class="btn-close-search-results" id="btn-close-search-results">
+                    <i class="fa-solid fa-xmark"></i> 메인으로 돌아가기
+                </button>
+            </div>
+
+            <div class="search-results-body">
+                <!-- Left Search Feed -->
+                <div class="search-results-left">
+                    <div class="search-query-summary">
+                        <h3>'<span id="search-keyword-display"></span>' 검색결과</h3>
+                        <span id="search-total-count">총 0건</span>
+                    </div>
+
+                    <!-- Dynamic Results List -->
+                    <div class="search-items-feed" id="search-items-feed">
+                        <!-- Populated via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Right Sidebar inside Search Results -->
+                <div class="search-results-right">
+                    <div class="search-side-card">
+                        <h4>연관 검색어</h4>
+                        <div class="search-related-tags" id="search-related-tags">
+                            <span class="rel-tag">사양</span>
+                            <span class="rel-tag">출시일</span>
+                            <span class="rel-tag">후기</span>
+                            <span class="rel-tag">가격</span>
+                            <span class="rel-tag">카메라</span>
+                        </div>
+                    </div>
+                    <div class="search-side-card" style="margin-top: 16px;">
+                        <h4>블로그 바로가기</h4>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">지식과 일상이 가득한 에듀네이버 블로그</p>
+                        <a href="blog.html" class="btn-side-blog-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> 블로그 홈</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Main Content Container -->
-    <main class="main-container">
+    <main class="main-container" id="default-main-content">
         <div class="content-wrapper">
             
             <!-- Left Column: Content, Articles, Publisher Stand -->
@@ -220,9 +576,9 @@
                             <span class="edu-logo-inline">EDU</span><b>NAVER</b> 로그인
                         </button>
                         <div class="login-links">
-                            <a href="#">아이디 찾기</a>
+                            <a href="find-id.html">아이디 찾기</a>
                             <span class="divider"></span>
-                            <a href="#">비밀번호 찾기</a>
+                            <a href="find-password.html">비밀번호 찾기</a>
                             <span class="divider"></span>
                             <a href="signup.html">회원가입</a>
                         </div>
@@ -258,9 +614,9 @@
                             <button type="submit" class="submit-login-btn">로그인</button>
                         </form>
                         <div class="login-links form-bottom-links">
-                            <a href="#">아이디 찾기</a>
+                            <a href="find-id.html">아이디 찾기</a>
                             <span class="divider"></span>
-                            <a href="#">비밀번호 찾기</a>
+                            <a href="find-password.html">비밀번호 찾기</a>
                             <span class="divider"></span>
                             <a href="signup.html">회원가입</a>
                         </div>
@@ -271,7 +627,7 @@
                         <div class="profile-main">
                             <div class="profile-avatar-wrapper">
                                 <div class="profile-avatar">
-                                    <i class="fa-solid fa-user-graduate"></i>
+                                    <img src="default-avatar.svg" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                                 </div>
                                 <button class="profile-settings-btn" title="설정"><i class="fa-solid fa-gear"></i></button>
                             </div>
@@ -300,7 +656,7 @@
                                 <span class="nav-menu-label">카페</span>
                                 <span class="nav-menu-count" id="profile-cafe-count">0</span>
                             </button>
-                            <button class="nav-menu-item">
+                            <button class="nav-menu-item" onclick="location.href='blog.html'" id="card-blog-btn">
                                 <span class="nav-menu-label">블로그</span>
                             </button>
                             <button class="nav-menu-item">

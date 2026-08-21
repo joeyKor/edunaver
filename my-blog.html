@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>개인 블로그 - NAVER Blog</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="blog.css">
+    <style>
+        .myblog-container {
+            max-width: 960px;
+            margin: 0 auto 60px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            border-radius: 0 0 12px 12px;
+            overflow: hidden;
+        }
+        .myblog-nav-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 28px;
+            border-bottom: 1px solid #edf0f2;
+            background: #fafbfc;
+        }
+        .myblog-content-area {
+            padding: 30px;
+        }
+        .myblog-stats-row {
+            display: flex;
+            gap: 20px;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #edf0f2;
+        }
+        .stat-badge {
+            color: #00c73c;
+            font-weight: 700;
+        }
+        .post-detail-view {
+            padding: 20px 0;
+        }
+        .post-detail-header {
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #edf0f2;
+        }
+        .post-detail-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #111;
+            margin-bottom: 12px;
+        }
+        .post-detail-meta-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #888;
+            margin-top: 8px;
+        }
+        .post-author-meta-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .post-author-mini-avatar {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .post-author-meta-name {
+            font-weight: 700;
+            color: #333;
+        }
+        .post-meta-actions-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+        }
+        .btn-post-action-text {
+            background: none;
+            border: 1px solid #e1e4e8;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            padding: 3px 8px;
+            border-radius: 4px;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-post-action-text:hover {
+            color: #111;
+            background: #f1f3f5;
+            border-color: #ced4da;
+        }
+        .btn-post-more-dots {
+            background: none;
+            border: none;
+            color: #666;
+            font-size: 16px;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .btn-post-more-dots:hover {
+            background: #f1f3f5;
+            color: #111;
+        }
+        .post-action-dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 6px;
+            background: #ffffff;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+            min-width: 125px;
+            z-index: 100;
+            padding: 4px 0;
+            display: none;
+            animation: dropdownFadeIn 0.15s ease-out;
+        }
+        @keyframes dropdownFadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .post-dropdown-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 9px 14px;
+            font-size: 13px;
+            color: #333;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            text-align: left;
+            transition: 0.12s;
+        }
+        .post-dropdown-item:hover {
+            background: #f8f9fa;
+            color: #00c73c;
+        }
+        .post-dropdown-item.item-delete {
+            color: #e03131;
+            border-top: 1px solid #f1f3f5;
+        }
+        .post-dropdown-item.item-delete:hover {
+            background: #fff5f5;
+            color: #c92a2a;
+        }
+        .post-detail-body {
+            font-size: 16px;
+            line-height: 1.85;
+            color: #333;
+            margin-bottom: 30px;
+            word-break: break-word;
+        }
+        .post-detail-body img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px auto;
+            display: block;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+        }
+        .post-detail-body blockquote {
+            border-left: 4px solid #00c73c;
+            background: #f8f9fa;
+            margin: 16px 0;
+            padding: 14px 20px;
+            color: #495057;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+        .post-detail-body hr {
+            border: none;
+            border-top: 1px dashed #ced4da;
+            margin: 24px 0;
+        }
+        .post-detail-body a {
+            color: #00c73c;
+            text-decoration: underline;
+        }
+        .comments-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+        .comment-input-box {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+        .comment-input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid #d5d9de;
+            border-radius: 6px;
+            font-size: 13px;
+            outline: none;
+        }
+        .btn-comment-submit {
+            background: #00c73c;
+            color: #fff;
+            padding: 10px 18px;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- GNB Header -->
+    <header class="blog-header">
+        <div class="blog-gnb">
+            <div class="blog-gnb-left">
+                <div class="blog-logo">
+                    <a href="index.html" class="blog-logo-n" title="통합 메인(EDUNAVER)으로 이동">N</a>
+                    <a href="blog.html" class="blog-logo-text" title="블로그 홈으로 이동">blog</a>
+                </div>
+                <button type="button" class="btn-integrated-search" onclick="location.href='blog.html'">
+                    <i class="fa-solid fa-house"></i> 블로그 홈
+                </button>
+            </div>
+            <div class="blog-gnb-right">
+                <button class="subnav-btn-pill" onclick="openProfileModal()">
+                    <i class="fa-solid fa-gear"></i> 블로그 관리
+                </button>
+                <a href="blog-write.html" class="btn-write-post" style="padding: 6px 14px; border-radius: 16px; font-size: 12px; font-weight: bold;">
+                    <i class="fa-solid fa-pen-nib"></i> 글쓰기
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- My Blog Main Area -->
+    <div class="myblog-container">
+
+        <!-- Blog Cover -->
+        <div class="myblog-cover">
+            <div style="position: relative; display: inline-block; cursor: pointer;" onclick="openProfileModal()" title="프로필 사진 및 정보 변경">
+                <img src="default-avatar.svg" alt="Avatar" class="myblog-profile-img" id="myblog-avatar">
+                <div style="position: absolute; bottom: 4px; right: 4px; background: #00c73c; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
+                    <i class="fa-solid fa-camera"></i>
+                </div>
+            </div>
+            <h1 class="myblog-title" id="myblog-title">조이의 일상 &amp; 지식 서재</h1>
+            <p class="myblog-intro" id="myblog-desc">배움과 소소한 일상을 기록하는 공간입니다.</p>
+        </div>
+
+        <!-- Sub Navbar -->
+        <div class="myblog-nav-bar">
+            <div style="font-weight: 700; font-size: 14px; color: #333;">
+                <span id="view-mode-title">전체 포스트 목록</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="tool-btn" id="btn-back-to-list" style="display: none;" onclick="showPostList()">
+                    <i class="fa-solid fa-list"></i> 목록으로
+                </button>
+                <a href="blog-write.html" class="tool-btn"><i class="fa-solid fa-plus"></i> 새 글 쓰기</a>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="myblog-content-area">
+
+            <!-- Stats Bar -->
+            <div class="myblog-stats-row">
+                <span>전체 포스트 <strong class="stat-badge" id="total-post-count">0</strong></span>
+                <span>오늘 방문자 <strong class="stat-badge">12</strong>명</span>
+                <span>전체 방문자 <strong class="stat-badge">3,450</strong>명</span>
+                <span>이웃 <strong class="stat-badge">24</strong>명</span>
+            </div>
+
+            <!-- List View Mode -->
+            <div id="myblog-list-view">
+                <div class="post-list-container" id="myblog-post-list">
+                    <!-- Dynamic rendering -->
+                </div>
+            </div>
+
+            <!-- Single Post Detail View Mode -->
+            <div id="myblog-detail-view" style="display: none;" class="post-detail-view">
+                <div class="post-detail-header">
+                    <span id="detail-category" style="font-size: 12px; color: #00c73c; font-weight: 700;">카테고리</span>
+                    <h2 class="post-detail-title" id="detail-title">포스트 제목</h2>
+                    <div class="post-detail-meta-row">
+                        <div class="post-author-meta-left">
+                            <img src="default-avatar.svg" id="detail-author-avatar" class="post-author-mini-avatar" alt="작성자 아바타">
+                            <span class="post-author-meta-name" id="detail-author">작성자</span>
+                            <span>·</span>
+                            <span id="detail-time">시간</span>
+                        </div>
+                        <div class="post-meta-actions-right">
+                            <button type="button" class="btn-post-action-text" onclick="copyCurrentPostUrl()"><i class="fa-regular fa-copy"></i> URL 복사</button>
+                            <button type="button" class="btn-post-action-text"><i class="fa-solid fa-chart-simple"></i> 통계</button>
+                            
+                            <div style="position: relative;" id="post-more-action-container">
+                                <button type="button" class="btn-post-more-dots" id="btn-post-more-dots" onclick="togglePostActionMenu(event)" title="더보기">
+                                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                                </button>
+                                <div class="post-action-dropdown-menu" id="post-action-dropdown">
+                                    <button type="button" class="post-dropdown-item" onclick="editCurrentPost()">
+                                        <span>수정하기</span>
+                                        <i class="fa-solid fa-pencil" style="font-size: 12px; color: #666;"></i>
+                                    </button>
+                                    <button type="button" class="post-dropdown-item item-delete" onclick="deleteCurrentPost()">
+                                        <span>삭제하기</span>
+                                        <i class="fa-regular fa-trash-can" style="font-size: 13px; color: #e03131;"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post-detail-body" id="detail-body">
+                    포스트 본문 내용이 표시됩니다.
+                </div>
+
+                <!-- Comments -->
+                <div class="comments-section">
+                    <h4 style="font-size: 14px; font-weight: 700; color: #222;">
+                        <i class="fa-regular fa-comments"></i> 댓글 <span id="comment-count">0</span>
+                    </h4>
+                    <div id="comments-list" style="margin-top: 12px;"></div>
+                    <div class="comment-input-box">
+                        <input type="text" id="new-comment-input" class="comment-input" placeholder="따뜻한 댓글을 남겨주세요..." onkeypress="if(event.key==='Enter') addComment()">
+                        <button class="btn-comment-submit" onclick="addComment()">등록</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Edit Profile / Blog Info Modal -->
+    <div class="blog-modal" id="profile-modal">
+        <div class="modal-content-box">
+            <h3 class="modal-title">내 블로그 & 프로필 설정</h3>
+            
+            <!-- Avatar Upload & Presets -->
+            <div class="modal-form-group" style="text-align: center; margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px;">프로필 아바타 사진</label>
+                <div style="position: relative; display: inline-block; cursor: pointer;" onclick="document.getElementById('modal-avatar-input').click()">
+                    <img id="modal-avatar-preview" src="default-avatar.svg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #00c73c;">
+                    <div style="position: absolute; bottom: 0; right: 0; background: #00c73c; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #fff;">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="modal-avatar-input" accept="image/*" style="display: none;" onchange="handleModalAvatarChange(event)">
+                <div style="font-size: 11px; color: #888; margin-top: 6px;">사진을 클릭하여 내 컴퓨터에서 이미지를 변경하세요</div>
+                
+                <!-- Quick Preset Avatars -->
+                <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+                    <img src="default-avatar.svg" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 1px solid #ddd;" onclick="setPresetAvatar(this.src)" title="기본 아바타">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPresetAvatar(this.src)" title="프로필 1">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPresetAvatar(this.src)" title="프로필 2">
+                    <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPresetAvatar(this.src)" title="프로필 3">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPresetAvatar(this.src)" title="프로필 4">
+                </div>
+            </div>
+
+            <div class="modal-form-group">
+                <label>블로그 이름</label>
+                <input type="text" id="modal-blog-title" class="modal-input" placeholder="블로그 제목을 입력하세요">
+            </div>
+            <div class="modal-form-group">
+                <label>블로그 소개글</label>
+                <input type="text" id="modal-blog-desc" class="modal-input" placeholder="소개글을 입력하세요">
+            </div>
+            <div class="modal-actions">
+                <button class="tool-btn" onclick="closeProfileModal()">취소</button>
+                <button class="btn-write-post" style="padding: 8px 16px; border-radius: 6px;" onclick="saveBlogProfile()">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentViewingPostId = null;
+        let blogOwner = null; // Target blog owner being viewed
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const postId = urlParams.get('post') || urlParams.get('postId');
+            const authorParam = urlParams.get('author');
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+
+            // 1. Determine blog owner
+            if (postId) {
+                const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+                const post = posts.find(p => p.id === postId);
+                if (post && post.author) {
+                    blogOwner = post.author;
+                }
+            } else if (authorParam) {
+                blogOwner = authorParam;
+            }
+
+            if (!blogOwner) {
+                blogOwner = currentUser || "조이";
+            }
+
+            // 2. Load Blog Cover & Info for the Blog Owner
+            loadBlogProfile(blogOwner);
+            
+            // 3. Render Post Detail or List
+            if (postId) {
+                viewPostDetail(postId);
+            } else {
+                showPostList();
+            }
+        });
+
+        // Default avatar
+        function getDefaultAvatar(username) {
+            return "default-avatar.svg";
+        }
+
+        async function loadBlogProfile(owner) {
+            const targetOwner = owner || blogOwner || localStorage.getItem("naverLoggedInUser") || "조이";
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            const isMyBlog = (currentUser && currentUser === targetOwner);
+
+            let blogTitle = localStorage.getItem(`naverMyBlogTitle_${targetOwner}`) || `${targetOwner}의 일상 & 지식 서재`;
+            let blogDesc = localStorage.getItem(`naverMyBlogDesc_${targetOwner}`) || "배움과 소소한 일상을 기록하는 공간입니다.";
+            let avatarUrl = localStorage.getItem(`naverBlogAvatar_${targetOwner}`) || getDefaultAvatar(targetOwner);
+
+            currentAvatarUrl = avatarUrl;
+            document.getElementById("myblog-title").textContent = blogTitle;
+            document.getElementById("myblog-desc").textContent = blogDesc;
+            document.getElementById("myblog-avatar").src = avatarUrl;
+
+            // Background fetch from PocketBase users collection to keep up-to-date across computers
+            try {
+                const response = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(targetOwner)}'||username='${encodeURIComponent(targetOwner)}')`);
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items && data.items.length > 0) {
+                        const userRecord = data.items[0];
+                        if (userRecord.avatarUrl) {
+                            avatarUrl = userRecord.avatarUrl;
+                            localStorage.setItem(`naverBlogAvatar_${targetOwner}`, avatarUrl);
+                            document.getElementById("myblog-avatar").src = avatarUrl;
+                            currentAvatarUrl = avatarUrl;
+                        }
+                        if (userRecord.blogTitle) {
+                            blogTitle = userRecord.blogTitle;
+                            localStorage.setItem(`naverMyBlogTitle_${targetOwner}`, blogTitle);
+                            document.getElementById("myblog-title").textContent = blogTitle;
+                        }
+                        if (userRecord.blogDesc) {
+                            blogDesc = userRecord.blogDesc;
+                            localStorage.setItem(`naverMyBlogDesc_${targetOwner}`, blogDesc);
+                            document.getElementById("myblog-desc").textContent = blogDesc;
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn("PocketBase profile sync skipped:", err);
+            }
+
+            // Show/Hide camera badge and blog manage button based on ownership
+            const cameraBadge = document.querySelector(".myblog-cover .fa-camera")?.parentElement;
+            if (cameraBadge) {
+                cameraBadge.style.display = isMyBlog ? "flex" : "none";
+            }
+            const coverAvatarWrapper = document.querySelector(".myblog-cover div[onclick='openProfileModal()']");
+            if (coverAvatarWrapper) {
+                if (!isMyBlog) {
+                    coverAvatarWrapper.style.cursor = "default";
+                    coverAvatarWrapper.title = `${targetOwner}의 프로필`;
+                } else {
+                    coverAvatarWrapper.style.cursor = "pointer";
+                    coverAvatarWrapper.title = "프로필 사진 및 정보 변경";
+                }
+            }
+
+            const gnbManageBtn = document.querySelector(".blog-gnb-right .subnav-btn-pill");
+            if (gnbManageBtn) {
+                gnbManageBtn.style.display = isMyBlog ? "inline-flex" : "none";
+            }
+        }
+
+        function showPostList() {
+            document.getElementById("myblog-list-view").style.display = "block";
+            document.getElementById("myblog-detail-view").style.display = "none";
+            document.getElementById("btn-back-to-list").style.display = "none";
+            
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            const isMyBlog = (currentUser && currentUser === blogOwner);
+            document.getElementById("view-mode-title").textContent = isMyBlog ? "내 포스트 목록" : `${blogOwner}님의 포스트 목록`;
+
+            const listContainer = document.getElementById("myblog-post-list");
+            const allPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            
+            // Filter posts written by the blog owner
+            const ownerPosts = allPosts.filter(p => p.author === blogOwner);
+            document.getElementById("total-post-count").textContent = ownerPosts.length;
+
+            if (ownerPosts.length === 0) {
+                listContainer.innerHTML = `<div style="text-align:center; padding: 40px; color:#888;">등록된 포스트가 없습니다.</div>`;
+                return;
+            }
+
+            listContainer.innerHTML = "";
+            ownerPosts.forEach(post => {
+                const card = document.createElement("article");
+                card.className = "blog-post-card";
+                card.innerHTML = `
+                    <div class="post-content-area">
+                        <div class="post-author-row">
+                            <span style="font-size: 12px; color: #00c73c; font-weight: 700;">${post.category}</span>
+                            <span class="post-time">${post.time || '방금 전'}</span>
+                        </div>
+                        <h3 class="post-main-title" onclick="viewPostDetail('${post.id}')">${post.title}</h3>
+                        <p class="post-summary-text" onclick="viewPostDetail('${post.id}')">${post.summary}</p>
+                        <div class="post-meta-bottom">
+                            <span><i class="fa-regular fa-heart"></i> 공감 ${post.likes || 0}</span>
+                            <span>댓글 ${post.comments || 0}</span>
+                        </div>
+                    </div>
+                    ${post.thumbnail ? `
+                        <div class="post-thumbnail-wrapper" onclick="viewPostDetail('${post.id}')">
+                            <img src="${post.thumbnail}" alt="Thumbnail" class="post-thumbnail-img">
+                        </div>
+                    ` : ''}
+                `;
+                listContainer.appendChild(card);
+            });
+        }
+
+        function viewPostDetail(postId) {
+            currentViewingPostId = postId;
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const post = posts.find(p => p.id === postId);
+
+            if (!post) {
+                showPostList();
+                return;
+            }
+
+            // Sync blog owner with the post's author and reload cover
+            if (post.author && post.author !== blogOwner) {
+                blogOwner = post.author;
+                loadBlogProfile(blogOwner);
+            }
+
+            document.getElementById("myblog-list-view").style.display = "none";
+            document.getElementById("myblog-detail-view").style.display = "block";
+            document.getElementById("btn-back-to-list").style.display = "inline-flex";
+            document.getElementById("view-mode-title").textContent = post.title;
+
+            document.getElementById("detail-category").textContent = post.category || "일상·생각";
+            document.getElementById("detail-title").textContent = post.title;
+            document.getElementById("detail-author").textContent = post.author;
+            document.getElementById("detail-time").textContent = post.time || "방금 전";
+            document.getElementById("detail-body").innerHTML = post.fullContent || post.summary;
+
+            // Set author avatar in metadata header
+            const authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`) || getDefaultAvatar(post.author);
+            const detailAvatarEl = document.getElementById("detail-author-avatar");
+            if (detailAvatarEl) {
+                detailAvatarEl.src = authorAvatar;
+            }
+
+            // Check if current user is owner/author to show 3 dots menu
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            const isMyPost = (currentUser && (post.author === currentUser || blogOwner === currentUser));
+            const moreContainer = document.getElementById("post-more-action-container");
+            if (moreContainer) {
+                moreContainer.style.display = isMyPost ? "block" : "none";
+            }
+            closePostActionMenu();
+
+            renderComments(post);
+        }
+
+        // Toggle 3-dots post action menu
+        function togglePostActionMenu(event) {
+            if (event) event.stopPropagation();
+            const dropdown = document.getElementById("post-action-dropdown");
+            if (dropdown) {
+                dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+            }
+        }
+
+        function closePostActionMenu() {
+            const dropdown = document.getElementById("post-action-dropdown");
+            if (dropdown) {
+                dropdown.style.display = "none";
+            }
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest("#post-more-action-container")) {
+                closePostActionMenu();
+            }
+        });
+
+        // Edit current post
+        function editCurrentPost() {
+            closePostActionMenu();
+            if (!currentViewingPostId) return;
+            window.location.href = `blog-write.html?editId=${encodeURIComponent(currentViewingPostId)}`;
+        }
+
+        // Delete current post
+        async function deleteCurrentPost() {
+            closePostActionMenu();
+            if (!currentViewingPostId) return;
+
+            if (!confirm("이 블로그 글을 정말로 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")) {
+                return;
+            }
+
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const targetPost = posts.find(p => p.id === currentViewingPostId);
+            const updatedPosts = posts.filter(p => p.id !== currentViewingPostId);
+            localStorage.setItem("naverBlogPosts", JSON.stringify(updatedPosts));
+
+            // Try PocketBase deletion
+            try {
+                await fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${currentViewingPostId}`, {
+                    method: 'DELETE'
+                });
+            } catch (e) {}
+
+            // Record user activity
+            const currentUser = localStorage.getItem("naverLoggedInUser") || "조이네";
+            const actKey = `naverBlogActivities_${currentUser}`;
+            const activities = JSON.parse(localStorage.getItem(actKey) || "[]");
+            activities.unshift({
+                id: Date.now(),
+                text: `'${targetPost ? targetPost.title : '포스트'}' 글을 삭제했습니다.`,
+                time: "방금 전"
+            });
+            localStorage.setItem(actKey, JSON.stringify(activities));
+
+            alert("블로그 글이 성공적으로 삭제되었습니다.");
+            showPostList();
+        }
+
+        // Copy current post URL
+        function copyCurrentPostUrl() {
+            const currentUrl = window.location.origin + window.location.pathname + "?postId=" + encodeURIComponent(currentViewingPostId);
+            navigator.clipboard.writeText(currentUrl).then(() => {
+                alert("글 주소가 복사되었습니다.\n" + currentUrl);
+            }).catch(() => {
+                alert("글 주소: " + currentUrl);
+            });
+        }
+
+        function renderComments(post) {
+            const commentsContainer = document.getElementById("comments-list");
+            const comments = post.commentList || [];
+            document.getElementById("comment-count").textContent = comments.length;
+
+            if (comments.length === 0) {
+                commentsContainer.innerHTML = `
+                    <div style="font-size: 13px; color: #999; text-align: center; padding: 16px 0;">
+                        첫 번째 댓글을 남겨보세요.
+                    </div>
+                `;
+                return;
+            }
+
+            commentsContainer.innerHTML = comments.map(c => {
+                const commentAvatar = localStorage.getItem(`naverBlogAvatar_${c.user}`) || getDefaultAvatar(c.user);
+                return `
+                    <div style="font-size: 13px; padding: 10px 0; border-bottom: 1px solid #edf0f2; display: flex; gap: 10px; align-items: flex-start;">
+                        <img src="${commentAvatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; margin-top: 2px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <strong style="color: #222; font-size: 13px;">${c.user}</strong>
+                                <span style="font-size: 11px; color: #999;">${c.time || '방금 전'}</span>
+                            </div>
+                            <div style="margin-top: 4px; color: #444; line-height: 1.4; word-break: break-all;">${c.text}</div>
+                        </div>
+                    </div>
+                `;
+            }).join("");
+        }
+
+        async function addComment() {
+            const input = document.getElementById("new-comment-input");
+            const text = input.value.trim();
+            if (!text || !currentViewingPostId) return;
+
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const post = posts.find(p => p.id === currentViewingPostId);
+            if (post) {
+                if (!post.commentList) post.commentList = [];
+                const userName = localStorage.getItem("naverLoggedInUser") || "방문자";
+                
+                const newComment = {
+                    id: Date.now(),
+                    user: userName,
+                    text: text,
+                    time: new Date().toLocaleDateString()
+                };
+
+                post.commentList.push(newComment);
+                post.comments = post.commentList.length;
+                localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+                input.value = "";
+                renderComments(post);
+
+                // If post has PocketBase id, send full comments array (JSON)
+                if (post.id && !post.id.startsWith("post_")) {
+                    try {
+                        await fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                comments: post.commentList
+                            })
+                        });
+                    } catch (e) {
+                        console.warn("PocketBase comments JSON sync skipped:", e);
+                    }
+                }
+            }
+        }
+
+        let currentAvatarUrl = null;
+
+        // Modal
+        function openProfileModal() {
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            if (!currentUser || currentUser !== blogOwner) {
+                alert("블로그 주인만 설정을 변경할 수 있습니다.");
+                return;
+            }
+            
+            const userName = currentUser;
+            document.getElementById("modal-blog-title").value = localStorage.getItem(`naverMyBlogTitle_${userName}`) || `${userName}의 일상 & 지식 서재`;
+            document.getElementById("modal-blog-desc").value = localStorage.getItem(`naverMyBlogDesc_${userName}`) || "배움과 소소한 일상을 기록하는 공간입니다.";
+            
+            const avatarUrl = localStorage.getItem(`naverBlogAvatar_${userName}`) || getDefaultAvatar(userName);
+            currentAvatarUrl = avatarUrl;
+            document.getElementById("modal-avatar-preview").src = avatarUrl;
+
+            document.getElementById("profile-modal").classList.add("active");
+        }
+
+        function setPresetAvatar(src) {
+            currentAvatarUrl = src;
+            document.getElementById("modal-avatar-preview").src = src;
+        }
+
+        function handleModalAvatarChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith("image/")) {
+                alert("이미지 파일만 선택할 수 있습니다.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    const size = 200;
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
+                    currentAvatarUrl = compressedUrl;
+                    document.getElementById("modal-avatar-preview").src = compressedUrl;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function closeProfileModal() {
+            document.getElementById("profile-modal").classList.remove("active");
+        }
+
+        async function saveBlogProfile() {
+            const userName = localStorage.getItem("naverLoggedInUser") || "조이";
+            const newTitle = document.getElementById("modal-blog-title").value.trim();
+            const newDesc = document.getElementById("modal-blog-desc").value.trim();
+            
+            if (newTitle) {
+                localStorage.setItem(`naverMyBlogTitle_${userName}`, newTitle);
+            }
+            if (newDesc) {
+                localStorage.setItem(`naverMyBlogDesc_${userName}`, newDesc);
+            }
+            if (currentAvatarUrl) {
+                localStorage.setItem(`naverBlogAvatar_${userName}`, currentAvatarUrl);
+            }
+
+            closeProfileModal();
+            loadBlogProfile(userName);
+
+            // Sync update to PocketBase users collection
+            try {
+                let userId = localStorage.getItem("naverLoggedInUserId");
+                if (!userId) {
+                    // Find user id by name/username
+                    const searchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(userName)}'||username='${encodeURIComponent(userName)}')`);
+                    if (searchRes.ok) {
+                        const sData = await searchRes.json();
+                        if (sData.items && sData.items.length > 0) {
+                            userId = sData.items[0].id;
+                            localStorage.setItem("naverLoggedInUserId", userId);
+                        }
+                    }
+                }
+
+                if (userId) {
+                    const updatePayload = {};
+                    if (currentAvatarUrl) updatePayload.avatarUrl = currentAvatarUrl;
+                    if (newTitle) updatePayload.blogTitle = newTitle;
+                    if (newDesc) updatePayload.blogDesc = newDesc;
+
+                    await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatePayload)
+                    });
+                }
+            } catch (err) {
+                console.warn("PocketBase profile update failed:", err);
+            }
+        }
+    </script>
+</body>
+</html>

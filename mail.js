@@ -12,6 +12,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (headerUserName) {
         headerUserName.textContent = userName;
     }
+    const mailHeaderAvatar = document.getElementById("mail-header-avatar");
+    if (mailHeaderAvatar) {
+        const savedAvatar = localStorage.getItem(`naverBlogAvatar_${userName}`) || "default-avatar.svg";
+        mailHeaderAvatar.src = savedAvatar;
+    }
 
     const currentUserEmail = userEmail;
 
@@ -53,12 +58,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // (Pocketbase integration replaces sentEmails local array)
 
+    // Sub-tab elements
+    const tabInboxUnread = document.getElementById("tab-inbox-unread");
+    const tabInboxAll = document.getElementById("tab-inbox-all");
+    const allMailCount = document.getElementById("all-mail-count");
+
     // ----------------------------------------------------
     // 1. View Switcher Helper
     // ----------------------------------------------------
     let currentPanel = "inbox";
+    let inboxFilterMode = "unread"; // 'unread' (받은메일함: 읽지 않은 메일만) or 'all' (전체메일: 읽은 메일 포함 모두)
 
-    const showPanel = (panelName) => {
+    const updateSubTabStyles = () => {
+        if (tabInboxUnread && tabInboxAll) {
+            if (inboxFilterMode === "unread") {
+                tabInboxUnread.classList.add("active");
+                tabInboxAll.classList.remove("active");
+            } else {
+                tabInboxAll.classList.add("active");
+                tabInboxUnread.classList.remove("active");
+            }
+        }
+    };
+
+    const showPanel = (panelName, filterMode = null) => {
         // Hide all
         inboxPanel.style.display = "none";
         sentPanel.style.display = "none";
@@ -74,8 +97,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (panelName === "inbox") {
             currentPanel = "inbox";
+            inboxFilterMode = filterMode || "unread";
             inboxPanel.style.display = "flex";
             if (folderInboxBtn) folderInboxBtn.classList.add("active");
+            updateSubTabStyles();
+            renderInboxEmailsList();
+        } else if (panelName === "all") {
+            currentPanel = "all";
+            inboxFilterMode = "all";
+            inboxPanel.style.display = "flex";
+            if (folderAllBtn) folderAllBtn.classList.add("active");
+            updateSubTabStyles();
             renderInboxEmailsList();
         } else if (panelName === "sent") {
             currentPanel = "sent";
@@ -103,16 +135,32 @@ document.addEventListener("DOMContentLoaded", () => {
         sidebarWriteBtn.addEventListener("click", () => showPanel("compose"));
     }
     if (folderInboxBtn) {
-        folderInboxBtn.addEventListener("click", () => showPanel("inbox"));
+        folderInboxBtn.addEventListener("click", () => showPanel("inbox", "unread"));
     }
     if (folderAllBtn) {
-        folderAllBtn.addEventListener("click", () => showPanel("inbox"));
+        folderAllBtn.addEventListener("click", () => showPanel("all", "all"));
     }
     if (folderSentBtn) {
         folderSentBtn.addEventListener("click", () => showPanel("sent"));
     }
     if (folderReceiptBtn) {
         folderReceiptBtn.addEventListener("click", () => showPanel("receipt"));
+    }
+
+    // Inbox Sub-Tab Clicks
+    if (tabInboxUnread) {
+        tabInboxUnread.addEventListener("click", () => {
+            folderItems.forEach(item => item.classList.remove("active"));
+            if (folderInboxBtn) folderInboxBtn.classList.add("active");
+            showPanel("inbox", "unread");
+        });
+    }
+    if (tabInboxAll) {
+        tabInboxAll.addEventListener("click", () => {
+            folderItems.forEach(item => item.classList.remove("active"));
+            if (folderAllBtn) folderAllBtn.classList.add("active");
+            showPanel("all", "all");
+        });
     }
 
     // (Educational Checklist logic removed)
@@ -219,11 +267,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------------------------------
     // 4. Render Inbox & Sent Mail Box from Pocketbase
     // ----------------------------------------------------
-    const renderInboxRows = (emails) => {
+    const renderInboxRows = (allEmails) => {
         const inboxList = document.getElementById("inbox-list");
         if (!inboxList) return;
 
-        const unreadCount = emails.filter(m => !m.is_read).length;
+        const unreadCount = allEmails.filter(m => !m.is_read).length;
         
         const unreadCountBadge = document.querySelector("#folder-inbox-btn .badge-count");
         if (unreadCountBadge) unreadCountBadge.textContent = unreadCount;
@@ -234,12 +282,24 @@ document.addEventListener("DOMContentLoaded", () => {
         const inboxUnreadCount = document.getElementById("inbox-unread-count");
         if (inboxUnreadCount) inboxUnreadCount.textContent = unreadCount;
 
-        if (emails.length === 0) {
+        if (allMailCount) {
+            allMailCount.textContent = allEmails.length;
+        }
+
+        // Apply filter: inboxFilterMode === "unread" shows only unread mails; "all" shows all mails
+        const displayEmails = (inboxFilterMode === "unread")
+            ? allEmails.filter(m => !m.is_read)
+            : allEmails;
+
+        if (displayEmails.length === 0) {
+            const emptyText = (inboxFilterMode === "unread")
+                ? "읽지 않은 메일이 없습니다."
+                : "받은 메일이 없습니다.";
             inboxList.innerHTML = `
                 <li class="empty-mailbox-li">
                     <div class="empty-mailbox-msg">
                         <i class="fa-regular fa-folder-open"></i>
-                        <p>받은 메일이 없습니다.</p>
+                        <p>${emptyText}</p>
                     </div>
                 </li>
             `;
@@ -247,7 +307,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         inboxList.innerHTML = "";
-        emails.forEach((email) => {
+        displayEmails.forEach((email) => {
             const isRead = email.is_read;
             const li = document.createElement("li");
             li.className = `mail-row${isRead ? "" : " unread"}`;
@@ -615,11 +675,28 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Helper to open mail detail view
+    let currentDetailEmail = null;
+
     const openMailDetail = async (mailId) => {
         try {
             const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${mailId}`);
             if (!response.ok) throw new Error("Failed to load mail details");
             const email = await response.json();
+            currentDetailEmail = email;
+
+            // Set folder title dynamically (< 받은메일함, < 전체메일, < 보낸메일함 등)
+            const detailFolderTitle = document.getElementById("detail-folder-title");
+            if (detailFolderTitle) {
+                if (currentPanel === "sent") {
+                    detailFolderTitle.textContent = "보낸메일함";
+                } else if (currentPanel === "receipt") {
+                    detailFolderTitle.textContent = "수신확인";
+                } else if (currentPanel === "all") {
+                    detailFolderTitle.textContent = "전체메일";
+                } else {
+                    detailFolderTitle.textContent = "받은메일함";
+                }
+            }
 
             // Populate detail view fields
             document.getElementById("detail-subject").textContent = email.subject;
@@ -737,10 +814,113 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Detail panel action buttons
     const detailBackBtn = document.getElementById("detail-back-btn");
-    if (detailBackBtn) {
-        detailBackBtn.addEventListener("click", () => {
-            // Return back to the previous active panel
-            showPanel(currentPanel);
+    const detailBackTopBtn = document.getElementById("detail-back-top-btn");
+    const handleDetailBack = () => {
+        showPanel(currentPanel);
+    };
+    if (detailBackBtn) detailBackBtn.addEventListener("click", handleDetailBack);
+    if (detailBackTopBtn) detailBackTopBtn.addEventListener("click", handleDetailBack);
+
+    // Reply function
+    const handleReply = (isReplyAll = false) => {
+        if (!currentDetailEmail) return;
+
+        resetComposerForm();
+        
+        // If reply: To = original sender; If replyAll: To = sender + recipient
+        if (inputTo) {
+            inputTo.value = currentDetailEmail.sender;
+        }
+
+        // Subject: Re: [Original Subject]
+        if (inputSubject) {
+            const origSubj = currentDetailEmail.subject || "";
+            inputSubject.value = origSubj.startsWith("Re:") ? origSubj : `Re: ${origSubj}`;
+        }
+
+        // Quoted Body
+        if (inputBody) {
+            let formattedTime = currentDetailEmail.created;
+            try {
+                const d = new Date(currentDetailEmail.created.replace(" ", "T"));
+                if (!isNaN(d.getTime())) formattedTime = d.toLocaleString('ko-KR');
+            } catch (e) {}
+
+            inputBody.innerHTML = `<br><br><div style="border-left: 2px solid #ccc; padding-left: 10px; margin-top: 20px; color: #666; font-size: 13px;">
+                <p style="margin: 0 0 6px 0;"><strong>----- 원본 메일 -----</strong></p>
+                <p style="margin: 0 0 4px 0;"><strong>보낸사람:</strong> ${currentDetailEmail.sender}</p>
+                <p style="margin: 0 0 4px 0;"><strong>받는사람:</strong> ${currentDetailEmail.recipient}</p>
+                <p style="margin: 0 0 4px 0;"><strong>날짜:</strong> ${formattedTime}</p>
+                <p style="margin: 0 0 10px 0;"><strong>제목:</strong> ${currentDetailEmail.subject}</p>
+                <div>${currentDetailEmail.body || ""}</div>
+            </div>`;
+        }
+
+        showPanel("compose");
+        setTimeout(() => {
+            if (inputBody) {
+                inputBody.focus();
+            }
+        }, 100);
+    };
+
+    const detailReplyBtn = document.getElementById("detail-reply-btn");
+    if (detailReplyBtn) {
+        detailReplyBtn.addEventListener("click", () => handleReply(false));
+    }
+
+    const detailReplyAllBtn = document.getElementById("detail-reply-all-btn");
+    if (detailReplyAllBtn) {
+        detailReplyAllBtn.addEventListener("click", () => handleReply(true));
+    }
+
+    const detailForwardBtn = document.getElementById("detail-forward-btn");
+    if (detailForwardBtn) {
+        detailForwardBtn.addEventListener("click", () => {
+            if (!currentDetailEmail) return;
+            resetComposerForm();
+            if (inputSubject) {
+                const origSubj = currentDetailEmail.subject || "";
+                inputSubject.value = origSubj.startsWith("Fwd:") ? origSubj : `Fwd: ${origSubj}`;
+            }
+            if (inputBody) {
+                let formattedTime = currentDetailEmail.created;
+                try {
+                    const d = new Date(currentDetailEmail.created.replace(" ", "T"));
+                    if (!isNaN(d.getTime())) formattedTime = d.toLocaleString('ko-KR');
+                } catch (e) {}
+
+                inputBody.innerHTML = `<br><br><div style="border-left: 2px solid #ccc; padding-left: 10px; margin-top: 20px; color: #666; font-size: 13px;">
+                    <p style="margin: 0 0 6px 0;"><strong>----- 전달된 메일 -----</strong></p>
+                    <p style="margin: 0 0 4px 0;"><strong>보낸사람:</strong> ${currentDetailEmail.sender}</p>
+                    <p style="margin: 0 0 4px 0;"><strong>받는사람:</strong> ${currentDetailEmail.recipient}</p>
+                    <p style="margin: 0 0 4px 0;"><strong>날짜:</strong> ${formattedTime}</p>
+                    <p style="margin: 0 0 10px 0;"><strong>제목:</strong> ${currentDetailEmail.subject}</p>
+                    <div>${currentDetailEmail.body || ""}</div>
+                </div>`;
+            }
+            showPanel("compose");
+            if (inputTo) inputTo.focus();
+        });
+    }
+
+    const detailMarkUnreadBtn = document.getElementById("detail-mark-unread-btn");
+    if (detailMarkUnreadBtn) {
+        detailMarkUnreadBtn.addEventListener("click", async () => {
+            if (!currentDetailEmail) return;
+            try {
+                const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${currentDetailEmail.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ is_read: false })
+                });
+                if (!response.ok) throw new Error("PATCH failed");
+                alert("안 읽은 메일로 변경되었습니다.");
+                showPanel(currentPanel);
+            } catch (err) {
+                console.error("Error setting unread:", err);
+                alert("상태 변경에 실패했습니다.");
+            }
         });
     }
 

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이디 찾기 : EDUNAVER</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="signup.css">
+    <style>
+        .find-id-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.5;
+            text-align: center;
+        }
+
+        .result-box {
+            display: none;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 24px;
+            margin-top: 20px;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-icon {
+            font-size: 38px;
+            color: var(--primary-color);
+            margin-bottom: 12px;
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .result-id-card {
+            background: #ffffff;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .found-id-text {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+        }
+
+        .found-created-text {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 14px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: #ffffff;
+            border: 1px solid var(--border-medium);
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: #f1f3f5;
+        }
+
+        .btn-primary-link {
+            flex: 1;
+            padding: 14px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #ffffff;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .btn-primary-link:hover {
+            background: var(--primary-hover);
+        }
+    </style>
+</head>
+<body>
+    <div class="signup-wrapper">
+        <!-- Logo Header -->
+        <header class="signup-header">
+            <a href="index.html" class="logo-link">
+                <span class="logo-text">
+                    EDU<span class="logo-highlight">N<span class="cap-icon"><i class="fa-solid fa-graduation-cap"></i></span></span>VER
+                </span>
+            </a>
+        </header>
+
+        <!-- Main Form Box -->
+        <main class="signup-container">
+            <h2 style="font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 8px;">아이디 찾기</h2>
+            <p class="find-id-desc">회원가입 시 등록하신 <strong>이름</strong>과 <strong>생년월일</strong>을 입력해주세요.</p>
+
+            <form id="find-id-form" novalidate>
+                <!-- Name Field -->
+                <div class="input-row">
+                    <label for="find-name" class="input-label">이름</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-user input-icon"></i>
+                        <input type="text" id="find-name" placeholder="가입한 이름을 입력하세요" required>
+                    </div>
+                    <div class="field-error" id="error-find-name">이름을 입력해주세요.</div>
+                </div>
+
+                <!-- Date of Birth Field -->
+                <div class="input-row">
+                    <label for="find-birthdate" class="input-label">생년월일</label>
+                    <div class="input-wrapper">
+                        <i class="fa-regular fa-calendar input-icon"></i>
+                        <input type="date" id="find-birthdate" required>
+                    </div>
+                    <div class="field-error" id="error-find-birthdate">생년월일을 선택해주세요.</div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn" id="find-submit-btn">
+                    아이디 찾기
+                </button>
+            </form>
+
+            <!-- Result Box -->
+            <div class="result-box" id="result-box">
+                <div class="result-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="result-title">등록된 회원 정보를 찾았습니다!</div>
+                <div id="found-id-container">
+                    <!-- Dynamic ID items inserted here -->
+                </div>
+                <div class="result-actions">
+                    <a href="index.html" class="btn-primary-link">로그인하러 가기</a>
+                    <a href="signup.html" class="btn-secondary">회원가입</a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="signup-footer" style="margin-top: 30px; text-align: center; font-size: 12px; color: var(--text-muted);">
+            <div class="footer-links" style="margin-bottom: 8px;">
+                <a href="#" style="color: var(--text-muted); text-decoration: none; margin: 0 6px;">이용약관</a> |
+                <a href="#" style="color: var(--text-muted); text-decoration: none; margin: 0 6px; font-weight: 700;">개인정보처리방침</a> |
+                <a href="#" style="color: var(--text-muted); text-decoration: none; margin: 0 6px;">책임의 한계와 법적고지</a> |
+                <a href="#" style="color: var(--text-muted); text-decoration: none; margin: 0 6px;">회원정보 고객센터</a>
+            </div>
+            <p class="copyright">Copyright &copy; <strong>EDUNAVER Corp.</strong> All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fa-solid fa-circle-check toast-icon" id="toast-icon"></i>
+        <span id="toast-message">알림 메시지</span>
+    </div>
+
+    <script src="find-id.js"></script>
+</body>
+</html>

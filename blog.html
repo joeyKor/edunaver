@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NAVER 블로그 - 지식과 일상을 나누는 공간</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="blog.css">
+</head>
+<body>
+
+    <!-- 1. GNB Header -->
+    <header class="blog-header">
+        <div class="blog-gnb">
+            <div class="blog-gnb-left">
+                <div class="blog-logo">
+                    <a href="index.html" class="blog-logo-n" title="통합 메인(EDUNAVER)으로 이동">N</a>
+                    <a href="blog.html" class="blog-logo-text" title="블로그 홈으로 이동">blog</a>
+                </div>
+                
+                <!-- Search Box -->
+                <form class="blog-search-box" id="blog-search-form">
+                    <select class="blog-search-select">
+                        <option>글</option>
+                        <option>블로거</option>
+                    </select>
+                    <div class="blog-search-divider"></div>
+                    <input type="text" placeholder="검색어를 입력하세요." class="blog-search-input" id="blog-search-input">
+                    <button type="submit" class="blog-search-btn" aria-label="검색">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </form>
+
+                <button type="button" class="btn-integrated-search" onclick="location.href='index.html'">통합검색</button>
+            </div>
+
+            <div class="blog-gnb-right">
+                <div class="user-profile-badge" onclick="location.href='my-blog.html'">
+                    <div class="user-avatar-circle"><img src="default-avatar.svg" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" id="header-avatar-img"></div>
+                    <span id="header-user-name">조이네</span>
+                    <i class="fa-solid fa-caret-down" style="font-size: 10px; color: #888;"></i>
+                </div>
+
+                <div class="gnb-icons">
+                    <a href="#" class="gnb-icon-btn" title="말풍선"><i class="fa-regular fa-comment-dots"></i></a>
+                    <a href="#" class="gnb-icon-btn" title="알림">
+                        <i class="fa-regular fa-bell"></i>
+                    </a>
+                    <a href="mail.html" class="gnb-icon-btn" title="메일">
+                        <i class="fa-regular fa-envelope"></i>
+                        <span class="badge">99+</span>
+                    </a>
+                    <a href="index.html" class="gnb-icon-btn" title="메뉴 바로가기"><i class="fa-solid fa-table-cells"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Sub Navigation Menu -->
+        <nav class="blog-subnav">
+            <div class="blog-subnav-inner">
+                <div class="subnav-tabs">
+                    <span class="subnav-tab active">블로그 홈</span>
+                    <span class="subnav-tab">주제별 보기</span>
+                    <span class="subnav-tab">이달의 블로그</span>
+                    <span class="subnav-tab">공식블로그</span>
+                    <span class="subnav-tab">챌린지 프로그램</span>
+                </div>
+                <div class="subnav-actions">
+                    <button class="subnav-btn-pill">블로그 마켓 가입</button>
+                    <button class="subnav-btn-pill">블로그팀 공식블로그</button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 3. Main Body Container -->
+    <main class="blog-container">
+
+        <!-- Left Content Area -->
+        <section class="blog-main-content">
+
+            <!-- A. Hot Topic & Promotion Section -->
+            <div class="hottopic-section">
+                <div class="hottopic-header">
+                    <div class="hottopic-title">
+                        <span class="hottopic-badge">핫토픽</span>
+                        <i class="fa-solid fa-chevron-right" style="font-size: 11px; color: #888;"></i>
+                        <span class="hottopic-sub">디저트</span>
+                    </div>
+                    <div class="hottopic-pagination">
+                        <button class="page-num-btn active">1</button>
+                        <button class="page-num-btn">2</button>
+                        <button class="page-num-btn">3</button>
+                        <button class="page-num-btn">4</button>
+                        <button class="page-num-btn">5</button>
+                    </div>
+                </div>
+
+                <div class="hottopic-cards-wrapper">
+                    <!-- Carousel 3 Cards -->
+                    <div class="hottopic-carousel">
+                        <!-- Card 1 -->
+                        <div class="topic-card" style="background-image: url('https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&auto=format&fit=crop&q=80');">
+                            <div class="topic-card-overlay"></div>
+                            <i class="fa-solid fa-circle-play topic-card-play"></i>
+                            <div class="topic-card-desc">누구나 좋아하는 디저트 레시피~</div>
+                        </div>
+
+                        <!-- Card 2 -->
+                        <div class="topic-card" style="background-image: url('https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&auto=format&fit=crop&q=80');">
+                            <div class="topic-card-overlay"></div>
+                            <i class="fa-solid fa-circle-play topic-card-play"></i>
+                            <div class="topic-card-author">
+                                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&auto=format&fit=crop&q=80" alt="써니데이즈" class="author-avatar-sm">
+                                <span class="author-name-tag">써니데이즈</span>
+                            </div>
+                            <div class="topic-card-desc">무화과를 좋아하시나요? 저는 무화과를 좋아하는데 저희 가족은...</div>
+                        </div>
+
+                        <!-- Card 3 -->
+                        <div class="topic-card" style="background-image: url('https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=400&auto=format&fit=crop&q=80');">
+                            <div class="topic-card-overlay"></div>
+                            <i class="fa-solid fa-circle-play topic-card-play"></i>
+                            <div class="topic-card-desc">바나나 브레드로 입맛 저격!</div>
+                        </div>
+                    </div>
+
+                    <!-- Promo Banner -->
+                    <div class="hottopic-banner">
+                        <div class="banner-tooltip" id="banner-seller-tooltip">
+                            <span>여기서 블로그 마켓 셀러로 가입하고, 상품을 등록해보세요.</span>
+                            <button class="banner-tooltip-close" id="banner-tooltip-close"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="banner-content">
+                            <div class="banner-eyebrow">블로그 있어요</div>
+                            <div class="banner-title">메로의 시선</div>
+                            <div class="banner-brand">
+                                <span style="font-weight:900;">N</span> blog
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- B. Central Feed Section -->
+            <div class="feed-section">
+
+                <!-- Neighbor Notice Top Banner -->
+                <div class="neighbor-notice-card">
+                    <span class="notice-tag-badge">매일 10분 마음챙김 키트</span>
+                    <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?w=150&auto=format&fit=crop&q=80" alt="Mindfulness" class="notice-img">
+                    <div class="notice-text-group">
+                        <h4>아직 이웃이 없습니다.</h4>
+                        <p>아래 주제별 블로거 추천을 통해 관심 주제의 블로그 이웃을 만들어보세요.</p>
+                    </div>
+                    <button class="notice-close-btn"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <!-- Feed Category Filter Bar -->
+                <div class="feed-category-bar">
+                    <span class="category-filter-item active" data-category="전체">전체</span>
+                    <span class="category-filter-item" data-category="요리·레시피">요리·레시피</span>
+                    <span class="category-filter-item" data-category="비즈니스·경제">비즈니스·경제</span>
+                    <span class="category-filter-item" data-category="IT·컴퓨터">IT·컴퓨터</span>
+                    <span class="category-filter-item" data-category="패션·미용">패션·미용</span>
+                    <span class="category-filter-item" data-category="원예·재배">원예·재배</span>
+                    <span class="category-filter-item" data-category="어학·외국어">어학·외국어</span>
+                    <span class="category-filter-item" data-category="스포츠·건강">스포츠·건강</span>
+                    <span class="category-filter-item" data-category="일상·생각">일상·생각</span>
+                </div>
+
+                <!-- Post Cards Container -->
+                <div class="post-list-container" id="post-list-container">
+                    <!-- Loaded dynamically via blog.js -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Right Sidebar Area -->
+        <aside class="blog-sidebar">
+
+            <!-- 1. User Login & My Blog Widget -->
+            <div class="sidebar-widget">
+
+                <!-- If Logged Out -->
+                <div class="login-box-logged-out" id="sidebar-logged-out" style="display: none;">
+                    <p>네이버 로그인 후 나만의 개인 블로그를 시작해보세요!</p>
+                    <a href="index.html" class="btn-naver-login">네이버 로그인</a>
+                    <div class="login-find-links">
+                        <a href="find-id.html">아이디 찾기</a>
+                        <span>|</span>
+                        <a href="find-password.html">비밀번호 찾기</a>
+                        <span>|</span>
+                        <a href="signup.html">회원가입</a>
+                    </div>
+                </div>
+
+                <!-- If Logged In -->
+                <div class="login-box-logged-in" id="sidebar-logged-in">
+                    <div class="user-info-row">
+                        <div class="user-profile-meta">
+                            <div class="user-main-avatar"><i class="fa-regular fa-user"></i></div>
+                            <div class="user-name-box">
+                                <h3 id="sidebar-user-name">조이네</h3>
+                                <a href="my-blog.html" class="visitor-stat-link">
+                                    오늘 <strong>0</strong>명 방문 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <button class="btn-logout-subtle" id="blog-logout-btn">로그아웃</button>
+                    </div>
+
+                    <div class="user-blog-actions">
+                        <button class="btn-action-blog btn-my-blog" id="btn-go-my-blog">
+                            내 블로그
+                        </button>
+                        <button class="btn-action-blog btn-write-post" id="btn-go-write">
+                            <i class="fa-solid fa-pen-nib"></i> 글쓰기
+                        </button>
+                    </div>
+
+                    <!-- Sidebar Subtabs -->
+                    <div class="sidebar-subtabs">
+                        <button class="sidebar-tab-btn active" data-tab="news">내 소식</button>
+                        <button class="sidebar-tab-btn" data-tab="activity">내 활동</button>
+                        <button class="sidebar-tab-btn" data-tab="neighbors">이웃 목록</button>
+                    </div>
+
+                    <!-- Activity Items List -->
+                    <ul class="sidebar-activity-list" id="sidebar-activity-list">
+                        <!-- Loaded dynamically via blog.js -->
+                    </ul>
+
+                    <div class="sidebar-bottom-bar">
+                        <span class="btn-clear-all" id="sidebar-clear-all">모두 삭제</span>
+                        <div class="sidebar-nav-arrows">
+                            <i class="fa-solid fa-chevron-left" style="cursor: pointer;"></i>
+                            <i class="fa-solid fa-chevron-right" style="cursor: pointer;"></i>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 2. Helpful Guide Widget -->
+            <div class="sidebar-widget" style="background: #fbfbfc;">
+                <h4 style="font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #333;">
+                    <i class="fa-solid fa-lightbulb" style="color: #ffb703; margin-right: 4px;"></i> 블로그 활용 팁
+                </h4>
+                <p style="font-size: 12px; color: #666; line-height: 1.5;">
+                    [글쓰기] 버튼을 눌러 관심 있는 주제의 이야기를 작성해보세요. 작성된 글은 실시간으로 메인 피드와 내 블로그에 노출됩니다.
+                </p>
+            </div>
+
+        </aside>
+
+    </main>
+
+    <script src="blog.js"></script>
+</body>
+</html>
