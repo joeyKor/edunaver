@@ -7,7 +7,7 @@ const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
 document.addEventListener("DOMContentLoaded", () => {
     // Read logged-in username and email from localStorage or default
     const userName = localStorage.getItem("naverLoggedInUser") || "홍길동";
-    const userEmail = localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com";
+    const userEmail = (localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com").replace(/@(edunaver|edunver|naver)\.com$/i, "@eduver.com");
     const headerUserName = document.getElementById("header-user-name");
     if (headerUserName) {
         headerUserName.textContent = userName;

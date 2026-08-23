@@ -117,11 +117,39 @@
         }
         window.handleJoinSubmitDirect = handleJoinSubmitDirect;
 
+        function isCurrentCafeMemberDirect() {
+            var curUser = (localStorage.getItem("naverLoggedInUser") || "").trim();
+            var curId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
+            var curUsername = (localStorage.getItem("naverLoggedInUsername") || "").trim();
+            var cafe = window.currentCafeRecord || {};
+            var mgr = (cafe.manager || "").trim();
+            var joinedMembers = Array.isArray(cafe.joinedMembers) ? cafe.joinedMembers : [];
+
+            if (mgr && (curUser === mgr || curId === mgr || curUsername === mgr || (curUser && mgr.includes(curUser)) || (curId && mgr.includes(curId)))) {
+                return true;
+            }
+            if (joinedMembers.some(function(m) {
+                var mStr = typeof m === 'object' ? (m.nickname || m.name || m.username || "") : String(m);
+                return (curUser && mStr.includes(curUser)) || (curId && mStr.includes(curId)) || (curUsername && mStr.includes(curUsername));
+            })) {
+                return true;
+            }
+            return false;
+        }
+        window.isCurrentCafeMemberDirect = isCurrentCafeMemberDirect;
+
         function openCafeWriteViewDirect() {
             var isAuth = localStorage.getItem("naverIsLoggedIn") === "true";
             if (!isAuth) {
                 alert("로그인이 필요한 서비스입니다.");
                 location.href = "index.html?redirect=" + encodeURIComponent(location.href);
+                return;
+            }
+
+            if (!isCurrentCafeMemberDirect()) {
+                if (confirm("카페 멤버만 글을 작성할 수 있습니다.\n지금 카페에 가입하시겠습니까?")) {
+                    openCafeJoinViewDirect();
+                }
                 return;
             }
 
@@ -168,6 +196,7 @@
 
             var posts = typeof cafe.posts === 'string' ? JSON.parse(cafe.posts) : (Array.isArray(cafe.posts) ? cafe.posts : []);
             var post = posts.find(function(p) { return p.id === postId; }) || posts[0];
+            window.currentViewingPostId = post ? post.id : postId;
 
             if (post) {
                 var titleEl = document.getElementById('detail-post-title');
@@ -179,6 +208,7 @@
                 var badgeEl = document.getElementById('detail-notice-badge');
                 var boardEl = document.getElementById('detail-board-name');
                 var commentWrap = document.getElementById('comment-section-wrap');
+                var commentWriteUserEl = document.getElementById('comment-write-user-name');
 
                 if (titleEl) titleEl.textContent = post.title || '';
                 if (authorEl) authorEl.textContent = post.author || cafe.manager || '익명';
@@ -188,9 +218,16 @@
                 if (badgeEl) badgeEl.style.display = post.isNotice ? 'inline-block' : 'none';
                 if (boardEl) boardEl.textContent = (post.board || '자유게시판') + ' >';
 
+                // Set active comment user nickname to the logged-in user
+                var activeCommentNick = (curUser || cafe.manager || '새회원').trim();
+                if (commentWriteUserEl) {
+                    commentWriteUserEl.textContent = activeCommentNick;
+                }
+
                 if (isMember) {
                     if (bodyEl) bodyEl.innerHTML = post.content || `${cafe.name} 카페를 시작합니다.`;
                     if (commentWrap) commentWrap.style.display = 'block';
+                    renderCommentsDirect(post);
                 } else {
                     // Render Member-Only Blur + 10초 만에 가입하기 CTA (Matching Screenshot)
                     if (bodyEl) {
@@ -243,6 +280,129 @@
             if (pDetail) pDetail.style.display = "flex";
             window.scrollTo({ top: 120, behavior: 'smooth' });
         };
+
+        function renderCommentsDirect(post) {
+            if (!post) return;
+            var listContainer = document.getElementById("comment-list-container");
+            var comments = Array.isArray(post.comments) ? post.comments : [];
+            var commentCountEl = document.getElementById("detail-comment-count");
+            var topCommentCountEl = document.getElementById("detail-top-comment-count");
+
+            if (commentCountEl) commentCountEl.textContent = comments.length;
+            if (topCommentCountEl) topCommentCountEl.textContent = comments.length;
+
+            if (!listContainer) return;
+            listContainer.innerHTML = "";
+
+            if (comments.length === 0) {
+                listContainer.innerHTML = "";
+                return;
+            }
+
+            comments.forEach(function(c) {
+                var item = document.createElement("div");
+                item.className = "comment-item";
+                var authorNick = c.author || "익명";
+                var avatarUrl = localStorage.getItem("naverBlogAvatar_" + authorNick) || "default-avatar.svg";
+                var authorIdMask = "";
+                if (typeof parseEduverMemberDirect === "function") {
+                    var parsed = parseEduverMemberDirect(authorNick, authorNick === (window.currentCafeRecord && window.currentCafeRecord.manager), window.currentCafeRecord && window.currentCafeRecord.manager);
+                    if (parsed && parsed.idMask) {
+                        authorIdMask = ' <span style="font-weight: 400; color: #888; font-size: 11px;">(' + parsed.idMask + ')</span>';
+                    }
+                }
+
+                item.innerHTML = 
+                    '<div class="comment-avatar"><img src="' + avatarUrl + '" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"></div>' +
+                    '<div class="comment-body">' +
+                        '<div class="comment-header-line">' +
+                            '<span class="comment-author">' + authorNick + authorIdMask + '</span>' +
+                            '<span class="comment-date">' + (c.time || "방금 전") + '</span>' +
+                        '</div>' +
+                        '<div class="comment-text">' + (c.text || "") + '</div>' +
+                    '</div>';
+                listContainer.appendChild(item);
+            });
+        }
+        window.renderComments = renderCommentsDirect;
+
+        function submitCommentDirect() {
+            var isAuth = localStorage.getItem("naverIsLoggedIn") === "true";
+            if (!isAuth) {
+                alert("댓글을 작성하려면 먼저 로그인이 필요합니다.");
+                return;
+            }
+
+            var input = document.getElementById("comment-input-text");
+            var text = input ? input.value.trim() : "";
+            if (!text) {
+                alert("댓글 내용을 입력해주세요.");
+                if (input) input.focus();
+                return;
+            }
+
+            var postId = window.currentViewingPostId;
+            var cafe = window.currentCafeRecord || {};
+            var rawPosts = cafe.posts || [];
+            var posts = typeof rawPosts === 'string' ? JSON.parse(rawPosts) : (Array.isArray(rawPosts) ? rawPosts : []);
+            var post = posts.find(function(p) { return p.id === postId; });
+            if (!post) return;
+
+            if (!Array.isArray(post.comments)) post.comments = [];
+
+            var now = new Date();
+            var year = now.getFullYear();
+            var month = String(now.getMonth() + 1).padStart(2, "0");
+            var day = String(now.getDate()).padStart(2, "0");
+            var hours = String(now.getHours()).padStart(2, "0");
+            var mins = String(now.getMinutes()).padStart(2, "0");
+            var timeStr = year + "." + month + "." + day + ". " + hours + ":" + mins;
+
+            var activeNick = (localStorage.getItem("naverLoggedInUser") || "새회원").trim();
+
+            post.comments.push({
+                id: "c_" + Date.now(),
+                author: activeNick,
+                time: timeStr,
+                text: text
+            });
+
+            // Update posts in currentCafeRecord
+            cafe.posts = posts;
+            window.currentCafeRecord = cafe;
+
+            // Sync localStorage
+            try {
+                var cafesData = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+                var cIdx = cafesData.findIndex(function(c) { return String(c.id) === String(cafe.id); });
+                if (cIdx !== -1) {
+                    cafesData[cIdx].posts = posts;
+                    localStorage.setItem("naverCafesData", JSON.stringify(cafesData));
+                }
+            } catch(e) {}
+
+            // Async sync to PocketBase
+            if (cafe.id && !cafe.id.startsWith("cafe_")) {
+                try {
+                    fetch("https://pb.joyfamkr.synology.me/api/collections/cafes/records/" + cafe.id, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            posts: JSON.stringify(posts)
+                        })
+                    }).catch(function(err) { console.log("PB comment sync err:", err); });
+                } catch(e) {}
+            }
+
+            // Clear input & reset button
+            if (input) input.value = "";
+            var submitBtn = document.getElementById("btn-comment-submit");
+            if (submitBtn) submitBtn.classList.remove("active");
+
+            // Re-render comments list immediately
+            renderCommentsDirect(post);
+        }
+        window.submitComment = submitCommentDirect;
 
         function handleFullSubmitDirect() {
             var boardEl = document.getElementById("full-write-board");
@@ -306,11 +466,13 @@
                     if (post.isNotice) tr.className = 'notice-tr';
                     var numOrBadge = post.isNotice ? '<span class="badge-table-notice">공지</span>' : (posts.length - index);
                     var pTime = (post.time && typeof post.time === 'string') ? (post.time.indexOf(' ') > -1 ? post.time.split(' ')[0] : post.time) : '2026.08.23';
+                    var commCount = Array.isArray(post.comments) ? post.comments.length : (parseInt(post.commentsCount, 10) || 0);
+                    var commBadge = commCount > 0 ? '<span class="badge-post-comment-count">[' + commCount + ']</span>' : '';
 
                     tr.innerHTML = 
                         '<td class="td-check"><input type="checkbox" class="post-check-item" data-id="' + (post.id || '') + '"></td>' +
                         '<td>' + numOrBadge + '</td>' +
-                        '<td class="td-board-title" style="cursor:pointer;" onclick="openPostDetailDirect(\'' + (post.id || '') + '\')"><span class="post-link-text" style="' + (post.isNotice ? 'color:#eb5757; font-weight:700;' : '') + '">' + (post.title || '(제목 없음)') + '</span><span class="badge-n-dot">N</span></td>' +
+                        '<td class="td-board-title" style="cursor:pointer;" onclick="openPostDetailDirect(\'' + (post.id || '') + '\')"><span class="post-link-text" style="' + (post.isNotice ? 'color:#eb5757; font-weight:700;' : '') + '">' + (post.title || '(제목 없음)') + '</span>' + commBadge + '<span class="badge-n-dot">N</span></td>' +
                         '<td>' + (post.author || '익명') + '</td>' +
                         '<td>' + pTime + '</td>' +
                         '<td>' + (post.views || 0) + '</td>' +
@@ -407,11 +569,13 @@
                         if (post.isNotice) tr.className = 'notice-tr';
                         var numOrBadge = post.isNotice ? '<span class="badge-table-notice">공지</span>' : (posts.length - index);
                         var pTime = (post.time && typeof post.time === 'string') ? (post.time.indexOf(' ') > -1 ? post.time.split(' ')[0] : post.time) : '2026.08.23';
+                        var commCount = Array.isArray(post.comments) ? post.comments.length : (parseInt(post.commentsCount, 10) || 0);
+                        var commBadge = commCount > 0 ? '<span class="badge-post-comment-count">[' + commCount + ']</span>' : '';
 
                         tr.innerHTML = 
                             '<td class="td-check"><input type="checkbox" class="post-check-item" data-id="' + (post.id || '') + '"></td>' +
                             '<td>' + numOrBadge + '</td>' +
-                            '<td class="td-board-title" style="cursor:pointer;" onclick="openPostDetailDirect(\'' + (post.id || '') + '\')"><span class="post-link-text" style="' + (post.isNotice ? 'color:#eb5757; font-weight:700;' : '') + '">' + (post.title || '(제목 없음)') + '</span><span class="badge-n-dot">N</span></td>' +
+                            '<td class="td-board-title" style="cursor:pointer;" onclick="openPostDetailDirect(\'' + (post.id || '') + '\')"><span class="post-link-text" style="' + (post.isNotice ? 'color:#eb5757; font-weight:700;' : '') + '">' + (post.title || '(제목 없음)') + '</span>' + commBadge + '<span class="badge-n-dot">N</span></td>' +
                             '<td>' + (post.author || '익명') + '</td>' +
                             '<td>' + pTime + '</td>' +
                             '<td>' + (post.views || 0) + '</td>' +
@@ -518,7 +682,7 @@
 
             if (typeof rawItem === "object" && rawItem !== null) {
                 nickname = (rawItem.nickname || rawItem.name || "").trim();
-                rawId = (rawItem.id || rawItem.username || rawItem.email || "").trim();
+                rawId = (rawItem.username || rawItem.id || rawItem.email || "").trim();
             } else if (typeof rawItem === "string") {
                 var str = rawItem.trim();
                 var match = str.match(/^(.+?)\s*\(([^)]+)\)$/);
@@ -539,25 +703,34 @@
             var curUser = (localStorage.getItem("naverLoggedInUser") || "").trim();
             var curEmail = (localStorage.getItem("naverLoggedInEmail") || "").trim();
             var curEmailId = curEmail ? curEmail.split("@")[0].trim() : "";
-            var curId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
+            var curUsername = (localStorage.getItem("naverLoggedInUsername") || "").trim();
 
-            if (!rawId || rawId === nickname) {
+            // Detect and filter out raw PB internal 15-char hash IDs
+            var isPbHash = rawId.length === 15 && /^[a-z0-9]+$/.test(rawId) && !rawId.includes("user") && !rawId.includes("test");
+
+            if (!rawId || rawId === nickname || isPbHash) {
                 if (isManager) {
                     if (defaultMgrName === "오픈마인드효과") rawId = "tlh0917";
                     else if (defaultMgrName === "조이" || defaultMgrName === "조이네") rawId = "joy";
-                    else if (defaultMgrName === "홍길동") rawId = "gildong";
-                    else if (defaultMgrName === "연습용") rawId = "eduver_admin";
-                    else if (curUser && (curUser === defaultMgrName || defaultMgrName.includes(curUser))) rawId = curEmailId || curId || "admin";
-                    else rawId = "admin";
+                    else if (defaultMgrName === "홍길동") rawId = "student";
+                    else if (defaultMgrName === "연습용") {
+                        rawId = curUsername || curEmailId || "practice";
+                    } else if (curUser && (curUser === defaultMgrName || defaultMgrName.includes(curUser))) {
+                        rawId = curUsername || curEmailId || "admin";
+                    } else {
+                        rawId = "admin";
+                    }
                 } else {
                     if (curUser && (curUser === nickname || nickname.includes(curUser))) {
-                        rawId = curEmailId || curId || "edu_user";
+                        rawId = curUsername || curEmailId || "edu_user";
                     } else if (nickname === "조이" || nickname === "조이네") {
                         rawId = "joy";
                     } else if (nickname === "홍길동") {
-                        rawId = "gildong";
+                        rawId = "student";
                     } else if (nickname === "오픈마인드효과") {
                         rawId = "tlh0917";
+                    } else if (nickname.indexOf("테스트") > -1) {
+                        rawId = "test" + (nickname.replace(/[^0-9]/g, "") || "user");
                     } else {
                         var num = Math.abs(nickname.split("").reduce(function(acc, c) { return acc + c.charCodeAt(0); }, 0));
                         rawId = "user" + (num % 10000);
@@ -788,11 +961,13 @@
                                             if (post.isNotice) tr.className = 'notice-tr';
                                             var numOrBadge = post.isNotice ? '<span class="badge-table-notice">공지</span>' : (posts.length - index);
                                             var pTime = (post.time && typeof post.time === 'string') ? (post.time.indexOf(' ') > -1 ? post.time.split(' ')[0] : post.time) : '2026.08.23';
+                                            var commCount = Array.isArray(post.comments) ? post.comments.length : (parseInt(post.commentsCount, 10) || 0);
+                                            var commBadge = commCount > 0 ? '<span class="badge-post-comment-count">[' + commCount + ']</span>' : '';
 
                                             tr.innerHTML = 
                                                 '<td class="td-check"><input type="checkbox" class="post-check-item" data-id="' + (post.id || '') + '"></td>' +
                                                 '<td>' + numOrBadge + '</td>' +
-                                                '<td class="td-board-title" style="cursor:pointer;" onclick="openPostDetailDirect(\'' + (post.id || '') + '\')"><span class="post-link-text" style="' + (post.isNotice ? 'color:#eb5757; font-weight:700;' : '') + '">' + (post.title || '(제목 없음)') + '</span><span class="badge-n-dot">N</span></td>' +
+                                                '<td class="td-board-title" style="cursor:pointer;" onclick="openPostDetailDirect(\'' + (post.id || '') + '\')"><span class="post-link-text" style="' + (post.isNotice ? 'color:#eb5757; font-weight:700;' : '') + '">' + (post.title || '(제목 없음)') + '</span>' + commBadge + '<span class="badge-n-dot">N</span></td>' +
                                                 '<td>' + (post.author || cafe.manager || '익명') + '</td>' +
                                                 '<td>' + pTime + '</td>' +
                                                 '<td>' + (post.views || 0) + '</td>' +
@@ -877,10 +1052,7 @@
                         <i class="fa-solid fa-wand-magic-sparkles promo-deco-icon"></i>
                     </div>
 
-                    <!-- Member Age / Requirement Badge -->
-                    <div class="sidebar-age-box">
-                        <span>1950년 ~ 2015년 출생자</span>
-                    </div>
+
 
                     <!-- Dynamic Action Buttons (카페 가입하기 vs 카페 글쓰기) -->
                     <button type="button" class="btn-cafe-join" id="btn-sidebar-join-cafe" onclick="openCafeJoinViewDirect()">
@@ -1146,9 +1318,9 @@
 
                             <!-- Comment Write Box (Matching Screenshot) -->
                             <div class="comment-write-box">
-                                <div class="comment-user-title" id="comment-write-user-name">오픈마인드효과</div>
+                                <div class="comment-user-title" id="comment-write-user-name">조이</div>
                                 <div class="comment-input-wrap">
-                                    <textarea id="comment-input-text" class="comment-textarea" placeholder="댓글을 남겨보세요" rows="2"></textarea>
+                                    <textarea id="comment-input-text" class="comment-textarea" placeholder="댓글을 남겨보세요" rows="2" oninput="var b=document.getElementById('btn-comment-submit');if(b){if(this.value.trim().length>0)b.classList.add('active');else b.classList.remove('active');}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitCommentDirect();}"></textarea>
                                 </div>
                                 <div class="comment-bottom-bar">
                                     <div class="comment-tools-left">
@@ -1156,7 +1328,7 @@
                                         <button type="button" class="btn-comment-tool" title="이모티콘"><i class="fa-regular fa-face-smile"></i></button>
                                         <input type="file" id="comment-photo-file" accept="image/*" style="display: none;">
                                     </div>
-                                    <button type="button" class="btn-comment-submit" id="btn-comment-submit">등록</button>
+                                    <button type="button" class="btn-comment-submit" id="btn-comment-submit" onclick="submitCommentDirect()">등록</button>
                                 </div>
                             </div>
                         </div>

@@ -1059,9 +1059,18 @@ input:checked + .fake-toggle::after {
     cursor: pointer;
 }
 
-.td-board-title:hover span {
+.td-board-title:hover .post-link-text {
     text-decoration: underline;
     color: #03c75a;
+}
+
+.badge-post-comment-count {
+    color: #e53935;
+    font-weight: 700;
+    font-size: 12px;
+    margin-left: 4px;
+    text-decoration: none !important;
+    display: inline-block;
 }
 
 .badge-n-dot {
@@ -1076,6 +1085,7 @@ input:checked + .fake-toggle::after {
     align-items: center;
     justify-content: center;
     margin-left: 4px;
+    vertical-align: middle;
 }
 
 /* Table Bottom Action Row (전체선택 체크박스, 삭제, 글쓰기) */

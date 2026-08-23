@@ -1034,7 +1034,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Persist login state on load
     if (localStorage.getItem("naverIsLoggedIn") === "true") {
         const savedName = localStorage.getItem("naverLoggedInUser") || "홍길동";
-        const savedEmail = localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com";
+        let savedEmail = (localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com").replace(/@(edunaver|edunver|naver)\.com$/i, "@eduver.com");
+        localStorage.setItem("naverLoggedInEmail", savedEmail);
+        
         if (loginLoggedOut && loginLoggedIn) {
             loginLoggedOut.style.display = "none";
             loginLoggedIn.style.display = "block";
@@ -1068,18 +1070,23 @@ document.addEventListener("DOMContentLoaded", () => {
             let emailAddr = "";
             let loggedIn = false;
 
+            let actualLoginId = "";
+
             // 1. Check local mock credentials first
-            if ((idInput === "abc@eduver.com" || idInput === "abc@naver.com" || idInput === "abc") && pwInput === "abcd1234") {
+            if ((idInput === "abc@eduver.com" || idInput === "abc@edunaver.com" || idInput === "abc@naver.com" || idInput === "abc") && pwInput === "abcd1234") {
                 finalName = "abc";
                 emailAddr = "abc@eduver.com";
+                actualLoginId = "abc";
                 loggedIn = true;
-            } else if ((idInput === "apple@eduver.com" || idInput === "apple@naver.com" || idInput === "apple") && pwInput === "abcd1234") {
+            } else if ((idInput === "apple@eduver.com" || idInput === "apple@edunaver.com" || idInput === "apple@naver.com" || idInput === "apple") && pwInput === "abcd1234") {
                 finalName = "apple";
                 emailAddr = "apple@eduver.com";
+                actualLoginId = "apple";
                 loggedIn = true;
             } else if (idInput === "student" && pwInput === "1234") {
                 finalName = "홍길동";
                 emailAddr = "gildong@eduver.com";
+                actualLoginId = "student";
                 loggedIn = true;
             }
 
@@ -1100,12 +1107,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     if (response.ok) {
                         const data = await response.json();
-                        finalName = data.record.name || data.record.username;
-                        emailAddr = data.record.email || `${data.record.username}@eduver.com`;
+                        finalName = data.record.name || data.record.username || idInput.split("@")[0];
+                        actualLoginId = data.record.username || (data.record.email ? data.record.email.split("@")[0] : idInput.split("@")[0]);
+                        emailAddr = (data.record.email || `${actualLoginId}@eduver.com`).replace(/@(edunaver|edunver|naver)\.com$/i, "@eduver.com");
                         loggedIn = true;
 
                         // Save PocketBase user profile info
-                        if (data.record.id) localStorage.setItem("naverLoggedInUserId", data.record.id);
+                        localStorage.setItem("naverLoggedInUsername", actualLoginId);
+                        localStorage.setItem("naverLoggedInUserId", actualLoginId);
+                        if (data.record.id) localStorage.setItem("naverPbRecordId", data.record.id);
                         if (data.record.avatarUrl) {
                             localStorage.setItem(`naverBlogAvatar_${finalName}`, data.record.avatarUrl);
                             if (data.record.username) localStorage.setItem(`naverBlogAvatar_${data.record.username}`, data.record.avatarUrl);
@@ -1129,6 +1139,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
+            emailAddr = emailAddr.replace(/@(edunaver|edunver|naver)\.com$/i, "@eduver.com");
+
             loginFormContainer.style.display = "none";
             loginLoggedIn.style.display = "block";
             userDisplayName.textContent = finalName;
@@ -1151,6 +1163,8 @@ document.addEventListener("DOMContentLoaded", () => {
             // Set persistence
             localStorage.setItem("naverIsLoggedIn", "true");
             localStorage.setItem("naverLoggedInUser", finalName);
+            localStorage.setItem("naverLoggedInUsername", actualLoginId);
+            localStorage.setItem("naverLoggedInUserId", actualLoginId);
             localStorage.setItem("naverLoggedInEmail", emailAddr);
             updateUnreadCounts();
         });

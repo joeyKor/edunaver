@@ -128,6 +128,10 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? (post.time.includes(" ") ? post.time.split(" ")[0] : post.time)
                 : "2026.08.23";
 
+            const commList = Array.isArray(post.comments) ? post.comments : [];
+            const commCount = commList.length || parseInt(post.commentsCount, 10) || 0;
+            const commBadge = commCount > 0 ? `<span class="badge-post-comment-count">[${commCount}]</span>` : '';
+
             tr.innerHTML = `
                 <td class="td-check">
                     <input type="checkbox" class="post-check-item" data-id="${post.id || ''}">
@@ -135,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <td>${numOrBadge}</td>
                 <td class="td-board-title">
                     <span class="post-link-text" style="${post.isNotice ? 'color:#eb5757; font-weight:700;' : ''}">${post.title || '(제목 없음)'}</span>
+                    ${commBadge}
                     <span class="badge-n-dot">N</span>
                 </td>
                 <td>${post.author || '익명'}</td>
@@ -371,10 +376,17 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
+        // Set active comment author name
+        const commentWriteUserEl = document.getElementById("comment-write-user-name");
+        const activeCommentNick = localStorage.getItem("naverLoggedInUser") || loggedInUser || "조이";
+        if (commentWriteUserEl) {
+            commentWriteUserEl.textContent = activeCommentNick;
+        }
+
         // Render Comments List (Only for members)
         const commentSectionWrap = document.getElementById("comment-section-wrap");
         if (commentSectionWrap) {
-            commentSectionWrap.style.display = isUserMember() ? "flex" : "none";
+            commentSectionWrap.style.display = isUserMember() ? "block" : "none";
         }
         renderComments(post);
 
@@ -436,6 +448,13 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!isAuthCheck) {
             alert("로그인이 필요한 서비스입니다.");
             location.href = "index.html?redirect=" + encodeURIComponent(location.href);
+            return;
+        }
+
+        if (!isUserMember()) {
+            if (confirm("카페 멤버만 글을 작성할 수 있습니다.\n지금 카페에 가입하시겠습니까?")) {
+                showJoinView();
+            }
             return;
         }
 
@@ -569,7 +588,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const customNick = (document.getElementById("join-nickname-input") ? document.getElementById("join-nickname-input").value.trim() : "") || "새회원";
-        const loggedInId = localStorage.getItem("naverLoggedInUserId") || "";
+        const loggedInId = (localStorage.getItem("naverLoggedInUsername") || (localStorage.getItem("naverLoggedInEmail") ? localStorage.getItem("naverLoggedInEmail").split("@")[0] : "") || localStorage.getItem("naverLoggedInUserId") || "").trim();
 
         // Save nickname as active login session
         localStorage.setItem("naverIsLoggedIn", "true");
@@ -577,7 +596,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!currentCafe.joinedMembers) currentCafe.joinedMembers = [];
         
-        // Add nickname and userId (if present)
+        // Add nickname and loginId (if present)
         const memberKey = loggedInId ? `${customNick} (${loggedInId})` : customNick;
         if (!currentCafe.joinedMembers.includes(memberKey) && !currentCafe.joinedMembers.includes(customNick)) {
             currentCafe.joinedMembers.push(memberKey);
@@ -621,11 +640,13 @@ document.addEventListener("DOMContentLoaded", () => {
         comments.forEach(c => {
             const item = document.createElement("div");
             item.className = "comment-item";
+            const authorNick = c.author || "익명";
+            const avatarUrl = localStorage.getItem(`naverBlogAvatar_${authorNick}`) || "default-avatar.svg";
             item.innerHTML = `
-                <div class="comment-avatar"><i class="fa-regular fa-user"></i></div>
+                <div class="comment-avatar"><img src="${avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"></div>
                 <div class="comment-body">
                     <div class="comment-header-line">
-                        <span class="comment-author">${c.author}</span>
+                        <span class="comment-author">${authorNick}</span>
                         <span class="comment-date">${c.time}</span>
                     </div>
                     <div class="comment-text">${c.text}</div>

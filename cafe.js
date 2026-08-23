@@ -189,18 +189,22 @@ document.addEventListener("DOMContentLoaded", () => {
             const card = document.createElement("div");
             card.className = "cafe-group-card";
 
-            const postsHtml = (cafe.posts || []).map(p => `
+            const postsHtml = (cafe.posts || []).map(p => {
+                const commList = Array.isArray(p.comments) ? p.comments : [];
+                const commCount = commList.length || (parseInt(p.comments, 10) || parseInt(p.commentsCount, 10) || 0);
+                const commBadge = commCount > 0 ? `<span class="badge-post-comment-count">[${commCount}]</span>` : '';
+                return `
                 <li class="cafe-post-item">
                     <div class="post-item-left">
                         <span class="post-item-title" onclick="location.href='cafe-detail.html?id=${cafe.id}&name=${encodeURIComponent(cafe.name)}'">${p.title}</span>
-                        ${p.comments > 0 ? `<span class="post-item-comment-count"><i class="fa-regular fa-comment-dots" style="font-size:10px;"></i> ${p.comments}</span>` : ''}
+                        ${commBadge}
                     </div>
                     <div class="post-item-right">
                         <span class="post-item-author">${p.author}</span>
                         <span class="post-item-time">· ${p.time}</span>
                     </div>
                 </li>
-            `).join("");
+            `}).join("");
 
             card.innerHTML = `
                 <div class="cafe-group-header">
