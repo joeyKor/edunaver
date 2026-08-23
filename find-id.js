@@ -1,4 +1,4 @@
-// EDUNAVER Find ID Logic with PocketBase integration
+// EDUVER Find ID Logic with PocketBase integration
 
 document.addEventListener("DOMContentLoaded", () => {
     const findForm = document.getElementById("find-id-form");
@@ -100,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         card.innerHTML = `
                             <div style="text-align: left;">
                                 <div class="found-id-text">${user.username}</div>
-                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">${user.email || user.username + '@edunaver.com'}</div>
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-top: 2px;">${user.email || user.username + '@eduver.com'}</div>
                             </div>
                             <div class="found-created-text">${createdStr}</div>
                         `;

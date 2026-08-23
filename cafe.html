@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUVER 카페 - 우리들의 이야기 공간 (에듀버)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="cafe.css?v=20260822_2">
+</head>
+<body>
+
+    <!-- 1. Top GNB Header -->
+    <header class="cafe-header">
+        <div class="cafe-header-inner">
+            <div class="cafe-logo-group">
+                <a href="index.html" class="naver-badge" title="EDUVER 메인으로 이동">E</a>
+                <a href="cafe.html" class="cafe-logo-text">Café</a>
+                <span class="logo-divider"></span>
+                <a href="#" class="fleamarket-badge"><span class="flea-dot"></span>플리마켓</a>
+            </div>
+
+            <div class="cafe-search-wrap">
+                <form class="cafe-search-form" id="cafe-search-form">
+                    <input type="text" placeholder="원하는 카페, 글을 찾아보세요" id="cafe-search-input" autocomplete="off">
+                    <button type="button" class="cafe-search-help" title="검색도움말"><i class="fa-regular fa-circle-question"></i></button>
+                    <button type="submit" class="cafe-search-btn" aria-label="검색"><i class="fa-solid fa-magnifying-glass"></i></button>
+                </form>
+            </div>
+
+            <div class="cafe-header-right">
+                <div class="cafe-user-profile" id="cafe-user-profile-badge">
+                    <div class="cafe-user-avatar">
+                        <img src="default-avatar.svg" id="cafe-avatar-img" alt="프로필">
+                    </div>
+                    <span class="cafe-username" id="cafe-username">조이님</span>
+                    <i class="fa-solid fa-caret-down"></i>
+                </div>
+
+                <div class="cafe-gnb-icons">
+                    <button class="cafe-icon-btn" title="말풍선"><i class="fa-solid fa-comment"></i></button>
+                    <button class="cafe-icon-btn" title="알림"><i class="fa-solid fa-bell"></i></button>
+                    <a href="mail.html" class="cafe-icon-btn mail-btn" title="메일">
+                        <i class="fa-solid fa-envelope"></i>
+                        <span class="badge">99+</span>
+                    </a>
+                    <a href="index.html" class="cafe-icon-btn" title="전체 서비스"><i class="fa-solid fa-table-cells"></i></a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 2. Blue Top Banner Strip -->
+    <div class="cafe-top-banner">
+        <div class="top-banner-inner">
+            <span class="banner-text">믿고 쓰는 중고거래, 지금 시작하세요</span>
+            <span class="flea-banner-btn"><i class="fa-solid fa-store"></i> 플리마켓 <i class="fa-solid fa-arrow-right"></i></span>
+        </div>
+    </div>
+
+    <!-- 3. Main 3-Column Layout Container -->
+    <main class="cafe-main-container">
+        <!-- Left Sidebar Navigation -->
+        <aside class="cafe-left-sidebar">
+            <nav class="cafe-menu-nav">
+                <a href="#" class="cafe-menu-item active" id="nav-cafe-home">
+                    <i class="fa-solid fa-house"></i>
+                    <span>카페홈</span>
+                </a>
+                <a href="#" class="cafe-menu-item" id="nav-all-cafes">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>전체 카페</span>
+                    <span class="count-badge green-bg" id="sidebar-all-cafes-count">0</span>
+                </a>
+                <a href="#" class="cafe-menu-item">
+                    <i class="fa-regular fa-compass"></i>
+                    <span>이웃 <span class="beta-tag">beta</span></span>
+                </a>
+                <a href="#" class="cafe-menu-item">
+                    <i class="fa-regular fa-bookmark"></i>
+                    <span>구독</span>
+                    <span class="count-badge red-bg">161</span>
+                </a>
+                <a href="#" class="cafe-menu-item">
+                    <i class="fa-solid fa-fire"></i>
+                    <span>인기글</span>
+                    <span class="new-dot">N</span>
+                </a>
+                <a href="#" class="cafe-menu-item">
+                    <i class="fa-regular fa-bell"></i>
+                    <span>내소식</span>
+                    <span class="count-badge red-circle">1</span>
+                </a>
+                <a href="#" class="cafe-menu-item">
+                    <i class="fa-regular fa-comments"></i>
+                    <span>채팅</span>
+                </a>
+            </nav>
+
+            <div class="cafe-category-list">
+                <a href="#" class="cat-link" id="cat-all-cafes-link">전체 카페 목록</a>
+                <a href="#" class="cat-link">주제별 카페</a>
+                <a href="#" class="cat-link">지역별 카페</a>
+                <a href="#" class="cat-link">인기 팬카페</a>
+                <a href="#" class="cat-link">대표 카페</a>
+                <a href="#" class="cat-link">카페 랭킹</a>
+            </div>
+
+            <!-- Turtle Lucky Mascot Widget -->
+            <div class="cafe-lucky-widget">
+                <div class="lucky-bubble">행운을 부르는<br><strong>거북이</strong></div>
+                <div class="lucky-avatar">
+                    <img src="https://images.unsplash.com/photo-1548767797-d8c844163c4c?w=100&auto=format&fit=crop&q=80" alt="거북이">
+                </div>
+                <button class="lucky-close-btn" onclick="this.parentElement.style.display='none'">✕</button>
+            </div>
+        </aside>
+
+        <!-- Center Content Area -->
+        <section class="cafe-center-content">
+            <!-- 1) Cafe Home Feed View -->
+            <div id="cafe-home-view">
+                <div class="cafe-home-title-row">
+                    <h2>카페홈</h2>
+                </div>
+
+                <!-- Purple Promotion Event Banner -->
+                <div class="cafe-promo-banner">
+                    <div class="promo-text-wrap">
+                        <h3>글 1개만 남겨도 <span>귀여운 스티커 100% 지급</span></h3>
+                        <p>카페에서 내가 제일 귀여워 (｡･∀･)ﾉﾞ</p>
+                    </div>
+                    <div class="promo-img-wrap">
+                        <div class="promo-badge-tag">찐꿀팁 공유해요</div>
+                        <img src="https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=150&auto=format&fit=crop&q=80" alt="스티커 프로모션" class="promo-img">
+                    </div>
+                </div>
+
+                <!-- Feed Tabs (내 카페 / 즐겨찾는 게시판) -->
+                <div class="cafe-feed-tabs-row">
+                    <div class="feed-tabs-left">
+                        <button class="feed-tab-btn active" id="tab-my-cafe">내 카페</button>
+                        <button class="feed-tab-btn" id="tab-fav-board">즐겨찾는 게시판</button>
+                    </div>
+                    <button class="feed-manage-btn"><i class="fa-solid fa-gear"></i> 내 카페 관리</button>
+                </div>
+
+                <!-- Cafe Feed List -->
+                <div class="cafe-feed-list" id="cafe-feed-list">
+                    <!-- Populated dynamically via cafe.js -->
+                </div>
+            </div>
+
+            <!-- 1-B) All Cafes Directory View (전체 카페 리스트 보기) -->
+            <div id="cafe-all-list-view" style="display: none;">
+                <div class="cafe-home-title-row" style="display: flex; align-items: center; justify-content: space-between;">
+                    <h2>전체 개설 카페 <span class="all-cafes-total" id="all-cafes-total-badge" style="font-size: 14px; color: #03c75a; font-weight: 700; margin-left: 6px;">0</span></h2>
+                    <button type="button" class="btn-goto-create" onclick="document.getElementById('btn-open-create-cafe').click();" style="background:#eafaf1; border:1px solid #c2eed5; color:#03c75a; font-weight:700; padding:6px 14px; border-radius:4px; cursor:pointer; font-size:12.5px;">+ 새 카페 만들기</button>
+                </div>
+
+                <!-- All Cafes List (Matching User Screenshot) -->
+                <div class="all-cafes-list" id="all-cafes-list">
+                    <!-- Populated dynamically via cafe.js -->
+                </div>
+            </div>
+
+            <!-- 2) Real Cafe Creation Form View (실제 카페 만들기 페이지) -->
+            <div id="cafe-create-view" style="display: none;">
+                <div class="create-page-header">
+                    <h2>카페 만들기</h2>
+                </div>
+
+                <form id="real-create-cafe-form" class="create-cafe-table-form">
+                    <!-- 카페이름 -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">카페이름</span>
+                            <span class="required-star">*</span>
+                            <button type="button" class="label-help-btn"><i class="fa-regular fa-circle-question"></i></button>
+                        </div>
+                        <div class="create-form-input-wrap">
+                            <input type="text" id="create-cafe-name" class="create-text-input" placeholder="카페 이름을 입력해주세요" required>
+                        </div>
+                    </div>
+
+                    <!-- 카페아이콘 -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">카페아이콘</span>
+                        </div>
+                        <div class="create-form-input-wrap cafe-icon-upload-wrap">
+                            <div class="cafe-icon-preview-box" id="cafe-icon-preview-box">
+                                <i class="fa-solid fa-mug-saucer default-icon"></i>
+                                <div class="icon-camera-badge">
+                                    <i class="fa-solid fa-camera"></i>
+                                </div>
+                                <input type="file" id="create-cafe-icon-file" accept="image/*" style="display: none;">
+                            </div>
+                            <div class="cafe-icon-desc">
+                                <p>모바일에서 우리 카페를 표현할 카페 아이콘을 등록해주세요.</p>
+                                <p>등록하신 아이콘은 모바일 웹, 카페 앱 및 PC 카페 &gt; 네임 카페 등에 활용됩니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 주제 (대분류) -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">주제</span>
+                            <span class="required-star">*</span>
+                            <button type="button" class="label-help-btn"><i class="fa-regular fa-circle-question"></i></button>
+                        </div>
+                        <div class="create-form-input-wrap">
+                            <select id="create-cafe-cat-main" class="create-select" required>
+                                <option value="" disabled selected>주제 선택</option>
+                                <option value="IT/컴퓨터">IT/컴퓨터</option>
+                                <option value="경제/금융">경제/금융</option>
+                                <option value="교육/학습">교육/학습</option>
+                                <option value="취미/여가">취미/여가</option>
+                                <option value="생활/쇼핑">생활/쇼핑</option>
+                                <option value="게임/만화">게임/만화</option>
+                                <option value="스포츠/레저">스포츠/레저</option>
+                                <option value="팬카페/스타">팬카페/스타</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 카페 설명 -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">카페 설명</span>
+                            <span class="required-star">*</span>
+                        </div>
+                        <div class="create-form-input-wrap">
+                            <textarea id="create-cafe-desc" class="create-textarea" placeholder="카페 설명을 입력해주세요." maxlength="100" required></textarea>
+                            <div class="textarea-footer">
+                                <span class="guide-text">입력한 내용이 카페 메인, 검색결과등의 카페리스트에 반영 됩니다.</span>
+                                <span class="char-count" id="desc-char-count">0/100</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 카페 검색어 -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">카페 검색어</span>
+                            <button type="button" class="label-help-btn"><i class="fa-regular fa-circle-question"></i></button>
+                        </div>
+                        <div class="create-form-input-wrap">
+                            <div class="keyword-input-box">
+                                <input type="text" id="create-cafe-keywords" class="create-text-input" placeholder="검색어를 입력해주세요">
+                                <button type="button" class="btn-keyword-reg" id="btn-keyword-reg">등록</button>
+                            </div>
+                            <div class="tags-preview-row" id="tags-preview-row"></div>
+                            <p class="guide-subtext">최대 10개까지 등록이 가능합니다.<br>공백은 자동으로 붙여쓰기하여 한 키워드로 등록됩니다.</p>
+                        </div>
+                    </div>
+
+                    <!-- 지역 -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">지역</span>
+                            <button type="button" class="label-help-btn"><i class="fa-regular fa-circle-question"></i></button>
+                        </div>
+                        <div class="create-form-input-wrap">
+                            <button type="button" class="btn-add-region" id="btn-add-region">+ 추가</button>
+                            <span id="selected-region-text" class="selected-region-text"></span>
+                            <p class="guide-subtext">카페가 특정 지역을 기반으로 활동하는 경우, 지역을 설정해주세요.</p>
+                        </div>
+                    </div>
+
+                    <!-- 보안 절차 -->
+                    <div class="create-form-row">
+                        <div class="create-form-label">
+                            <span class="label-title">보안 절차</span>
+                            <span class="required-star">*</span>
+                        </div>
+                        <div class="create-form-input-wrap captcha-wrap">
+                            <div class="captcha-img-box" id="captcha-img-box">
+                                <span class="captcha-fake-noise">JL58</span>
+                            </div>
+                            <div class="captcha-controls">
+                                <p class="guide-text">프로그램을 이용한 자동 개설을 방지하기 위해서 보안절차를 거치고 있습니다.<br>왼쪽 이미지를 보이는 대로 입력해주세요.</p>
+                                <input type="text" id="captcha-input" class="create-text-input captcha-input" placeholder="보안문자 입력" required autocomplete="off">
+                                <div class="captcha-actions">
+                                    <button type="button" class="btn-captcha-action" id="btn-captcha-refresh"><i class="fa-solid fa-rotate-right"></i> 새로고침</button>
+                                    <button type="button" class="btn-captcha-action" id="btn-captcha-audio"><i class="fa-solid fa-volume-high"></i> 음성으로 듣기</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 정책 동의 -->
+                    <div class="create-form-row terms-row">
+                        <div class="create-form-label">
+                            <span class="label-title">정책 동의</span>
+                            <span class="required-star">*</span>
+                        </div>
+                        <div class="create-form-input-wrap">
+                            <div class="terms-check-line">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="agree-policy" required>
+                                    <span>카페 개인정보보호정책에 동의합니다.</span>
+                                </label>
+                                <a href="#" class="terms-link">자세히보기</a>
+                            </div>
+                            <div class="terms-notice-line">
+                                <span>카페를 상거래 목적으로 운영하는 경우, 전자상거래법에 따라 사업자정보를 표시해야 합니다.</span>
+                                <a href="#" class="terms-link">자세히보기</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit & Cancel Buttons -->
+                    <div class="create-form-btn-row">
+                        <button type="button" class="btn-create-cancel" id="btn-real-create-cancel">취소</button>
+                        <button type="submit" class="btn-create-submit" id="btn-real-create-submit">만들기</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right Sidebar Area -->
+        <aside class="cafe-right-sidebar">
+            <!-- User Login Box (Logged in vs Logged out) -->
+            <div class="cafe-login-card" id="cafe-logged-in-box" style="display: none;">
+                <div class="cafe-user-card-top">
+                    <div class="user-card-avatar">
+                        <img src="default-avatar.svg" id="card-avatar-img" alt="아바타">
+                    </div>
+                    <div class="user-card-info">
+                        <div class="user-name-line">
+                            <strong id="card-user-name">조이님</strong>
+                            <button class="btn-cafe-logout" id="btn-cafe-logout">로그아웃 <i class="fa-solid fa-arrow-right-from-bracket"></i></button>
+                        </div>
+                        <div class="user-card-sub">
+                            <span>보관함</span>
+                            <span class="sub-sep">|</span>
+                            <span>쪽지 <strong class="highlight-count" id="card-note-count">0</strong></span>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn-create-cafe" id="btn-create-cafe">
+                    <i class="fa-solid fa-plus"></i> 카페 만들기
+                </button>
+            </div>
+
+            <!-- Logged out Box (로그아웃 상태 카드) -->
+            <div class="cafe-login-card cafe-logged-out-card" id="cafe-logged-out-box">
+                <p class="logged-out-msg">에듀버를 더 안전하고 편리하게 이용하세요.</p>
+                <a href="index.html" class="btn-cafe-login-link"><span class="edu-badge">EDU</span> 로그인</a>
+                <div class="logged-out-links">
+                    <a href="find-id.html">아이디 찾기</a>
+                    <span class="sep">|</span>
+                    <a href="find-password.html">비밀번호 찾기</a>
+                    <span class="sep">|</span>
+                    <a href="index.html">회원가입</a>
+                </div>
+            </div>
+
+            <!-- Notice Box -->
+            <div class="cafe-notice-card">
+                <div class="notice-card-header">
+                    <h4>공지사항</h4>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </div>
+                <ul class="notice-list">
+                    <li><a href="#">공정거래위원회 협조 요청에 따른 사업자...</a></li>
+                    <li><a href="#">[업데이트 소식] 게시글 작성 시 댓글이 ...</a></li>
+                    <li><a href="#">2026 에듀버 카페 프로모션 '티키타카페'...</a></li>
+                    <li><a href="#">[사전 안내] 카페 관리를 위한 새로운 관...</a></li>
+                </ul>
+            </div>
+
+            <!-- Official Cafe Link Banner -->
+            <a href="#" class="cafe-official-card">
+                <div class="official-icon"><i class="fa-solid fa-mug-saucer"></i></div>
+                <div class="official-text">
+                    <strong>카페팀 공식카페 바로가기</strong>
+                </div>
+            </a>
+
+            <!-- Happybean Side Ad Card -->
+            <div class="cafe-ad-card">
+                <div class="ad-happybean-badge"><span class="n-box">E</span> 해피빈</div>
+                <h4 class="ad-title">더 진하고 든든한<br><span class="ad-highlight">홍콩식 4색 두유</span></h4>
+                <div class="ad-img-box">
+                    <img src="https://images.unsplash.com/photo-1544787219-7f47ccb76574?w=300&auto=format&fit=crop&q=80" alt="홍콩식 4색 두유">
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Create Cafe Modal -->
+    <div class="cafe-modal-backdrop" id="create-cafe-modal" style="display: none;">
+        <div class="cafe-modal-box">
+            <div class="cafe-modal-header">
+                <h3>새 카페 만들기</h3>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <form id="create-cafe-form">
+                <div class="form-group">
+                    <label>카페 이름</label>
+                    <input type="text" id="new-cafe-name" placeholder="예: 코딩 공부 모임" required>
+                </div>
+                <div class="form-group">
+                    <label>카페 설명</label>
+                    <textarea id="new-cafe-desc" rows="3" placeholder="카페 소개글을 작성해주세요."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>주제 카테고리</label>
+                    <select id="new-cafe-cat">
+                        <option value="IT·컴퓨터">IT·컴퓨터</option>
+                        <option value="재테크·경제">재테크·경제</option>
+                        <option value="교육·학습">교육·학습</option>
+                        <option value="취미·동호회">취미·동호회</option>
+                    </select>
+                </div>
+                <div class="modal-btn-row">
+                    <button type="button" class="btn-cancel" id="btn-modal-cancel">취소</button>
+                    <button type="submit" class="btn-submit">개설하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Write Quick Post Modal -->
+    <div class="cafe-modal-backdrop" id="write-post-modal" style="display: none;">
+        <div class="cafe-modal-box">
+            <div class="cafe-modal-header">
+                <h3 id="write-post-cafe-title">카페 새 글 쓰기</h3>
+                <button class="modal-close-btn" id="write-modal-close-btn">&times;</button>
+            </div>
+            <form id="write-post-form">
+                <input type="hidden" id="write-post-cafe-id">
+                <div class="form-group">
+                    <label>글 제목</label>
+                    <input type="text" id="new-post-title" placeholder="제목을 입력하세요" required>
+                </div>
+                <div class="form-group">
+                    <label>글 내용</label>
+                    <textarea id="new-post-content" rows="4" placeholder="내용을 작성해주세요." required></textarea>
+                </div>
+                <div class="modal-btn-row">
+                    <button type="button" class="btn-cancel" id="btn-write-cancel">취소</button>
+                    <button type="submit" class="btn-submit">등록</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Test Direct Navigation & PB Verification Buttons -->
+    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
+        <button type="button" onclick="location.href='cafe-detail.html?name=%ED%86%B5%EC%9E%A5%EB%AA%A8%EC%9E%84'" style="padding: 12px 20px; background: #03c75a; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            🚀 테스트: 무조건 [통장모임] 카페 입장
+        </button>
+        <button type="button" id="btn-test-pb-manager" style="padding: 12px 20px; background: #1e3a8a; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+            🔍 테스트2: [통장모임] PB manager 조회
+        </button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const btnTest2 = document.getElementById("btn-test-pb-manager");
+            if (btnTest2) {
+                btnTest2.addEventListener("click", async () => {
+                    try {
+                        btnTest2.textContent = "조회 중...";
+                        const res = await fetch("https://pb.joyfamkr.synology.me/api/collections/cafes/records?perPage=50");
+                        if (!res.ok) throw new Error("PocketBase 응답 에러: " + res.status);
+                        const data = await res.json();
+                        const targetCafe = (data.items || []).find(i => i.name === "통장모임" || (i.name && i.name.includes("통장모임")));
+                        
+                        if (targetCafe) {
+                            alert(`[PocketBase 통장모임 조회 성공!]\n\n• 카페 ID: ${targetCafe.id}\n• 카페 이름: ${targetCafe.name}\n• 매니저(manager): ${targetCafe.manager || '(없음)'}\n• 회원수: ${targetCafe.members}\n• 등록된 글 수: ${targetCafe.posts ? (typeof targetCafe.posts === 'string' ? JSON.parse(targetCafe.posts).length : targetCafe.posts.length) : 0}개`);
+                        } else {
+                            alert("⚠️ PocketBase에서 '통장모임' 이름의 카페를 찾지 못했습니다.\n현재 등록된 카페 목록:\n" + (data.items || []).map(i => i.name).join(", "));
+                        }
+                    } catch (err) {
+                        alert("❌ PocketBase 조회 실패: " + err.message);
+                    } finally {
+                        btnTest2.textContent = "🔍 테스트2: [통장모임] PB manager 조회";
+                    }
+                });
+            }
+        });
+    </script>
+
+    <script src="cafe.js?v=20260823_latest"></script>
+</body>
+</html>

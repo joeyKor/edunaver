@@ -1,4 +1,4 @@
-// EDUNAVER Password Reset Logic with Modal-based JoyBank Authentication
+// EDUVER Password Reset Logic with Modal-based JoyBank Authentication
 
 document.addEventListener("DOMContentLoaded", () => {
     const verifyForm = document.getElementById("verify-user-form");
@@ -270,7 +270,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     amount: { integerValue: "1" },
                     description: { stringValue: senderTag },
                     senderName: { stringValue: senderTag },
-                    senderAccountNumber: { stringValue: "EDUNAVER" },
+                    senderAccountNumber: { stringValue: "EDUVER" },
                     balanceAfter: { doubleValue: currentBalance + 1 },
                     timestamp: { timestampValue: new Date().toISOString() }
                 }
@@ -286,8 +286,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const notificationUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/users/${joybankUserId}/notifications`;
             const notificationBody = {
                 fields: {
-                    title: { stringValue: "EDUNAVER 본인인증" },
-                    body: { stringValue: `[EDUNAVER] 인증번호는 [${senderTag}]입니다.` },
+                    title: { stringValue: "EDUVER 본인인증" },
+                    body: { stringValue: `[EDUVER] 인증번호는 [${senderTag}]입니다.` },
                     timestamp: { timestampValue: new Date().toISOString() }
                 }
             };
@@ -479,7 +479,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 // Create new record with same info & new password
                 const newRecordData = {
                     username: originalUser.username,
-                    email: originalUser.email || `${originalUser.username}@edunaver.com`,
+                    email: originalUser.email || `${originalUser.username}@eduver.com`,
                     emailVisibility: true,
                     password: newPw,
                     passwordConfirm: newPwConfirm,

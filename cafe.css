@@ -1,0 +1,1695 @@
+/* ====================================================
+   NAVER Cafe Styling (cafe.css)
+   Pixel-perfect recreation of Naver Cafe Home & Create UI
+   ==================================================== */
+
+:root {
+    --cafe-green: #03c75a;
+    --cafe-dark: #111111;
+    --cafe-gray-bg: #f8f9fa;
+    --cafe-border: #e3e7ed;
+    --cafe-subtext: #888888;
+    --cafe-blue-banner: #4f5fe9;
+    --cafe-purple-banner: #392baf;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    background-color: #ffffff;
+    color: #222222;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* ----------------------------------------------------
+   1. GNB Header
+   ---------------------------------------------------- */
+.cafe-header {
+    background: #ffffff;
+    border-bottom: 1px solid #ebeef2;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.cafe-header-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    gap: 20px;
+}
+
+.cafe-logo-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.naver-badge {
+    background: #03c75a;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 900;
+    font-family: 'Inter', sans-serif;
+    width: 26px;
+    height: 26px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cafe-logo-text {
+    font-size: 22px;
+    font-weight: 900;
+    color: #03c75a;
+    letter-spacing: -0.5px;
+    font-family: 'Inter', sans-serif;
+}
+
+.logo-divider {
+    width: 1px;
+    height: 14px;
+    background: #d8dde3;
+    margin: 0 4px;
+}
+
+.fleamarket-badge {
+    font-size: 15px;
+    font-weight: 800;
+    color: #111;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.flea-dot {
+    width: 4px;
+    height: 4px;
+    background: #03c75a;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Search Box */
+.cafe-search-wrap {
+    flex: 1;
+    max-width: 460px;
+}
+
+.cafe-search-form {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #03c75a;
+    border-radius: 22px;
+    padding: 6px 14px;
+    background: #fff;
+    transition: box-shadow 0.15s;
+}
+
+.cafe-search-form:focus-within {
+    box-shadow: 0 2px 8px rgba(3, 199, 90, 0.2);
+}
+
+.cafe-search-form input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-size: 14px;
+    color: #222;
+    background: transparent;
+}
+
+.cafe-search-form input::placeholder {
+    color: #999;
+}
+
+.cafe-search-help {
+    background: none;
+    border: none;
+    color: #a0a6b1;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 6px;
+}
+
+.cafe-search-btn {
+    background: none;
+    border: none;
+    color: #03c75a;
+    font-size: 16px;
+    cursor: pointer;
+    padding-left: 6px;
+}
+
+/* Header Right */
+.cafe-header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.cafe-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 20px;
+    transition: background 0.15s;
+}
+
+.cafe-user-profile:hover {
+    background: #f5f6f8;
+}
+
+.cafe-user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #e9ecef;
+}
+
+.cafe-user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cafe-username {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+}
+
+.cafe-user-profile i {
+    font-size: 10px;
+    color: #888;
+}
+
+.cafe-gnb-icons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cafe-icon-btn {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 16px;
+    cursor: pointer;
+    position: relative;
+    padding: 6px;
+    border-radius: 50%;
+    transition: background 0.15s, color 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cafe-icon-btn:hover {
+    background: #f1f3f5;
+    color: #111;
+}
+
+.cafe-icon-btn.mail-btn .badge {
+    position: absolute;
+    top: 0;
+    right: -4px;
+    background: #03c75a;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 8px;
+}
+
+/* ----------------------------------------------------
+   2. Blue Top Banner Strip
+   ---------------------------------------------------- */
+.cafe-top-banner {
+    background: linear-gradient(90deg, #4456e8 0%, #3547d9 100%);
+    color: #ffffff;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.top-banner-inner {
+    max-width: 1200px;
+    width: 100%;
+    padding: 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.flea-banner-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.flea-banner-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+/* ----------------------------------------------------
+   3. Main 3-Column Layout Container
+   ---------------------------------------------------- */
+.cafe-main-container {
+    max-width: 1200px;
+    margin: 24px auto 60px auto;
+    padding: 0 16px;
+    display: grid;
+    grid-template-columns: 160px 1fr 280px;
+    gap: 28px;
+    align-items: start;
+}
+
+/* --- Left Sidebar --- */
+.cafe-left-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.cafe-menu-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cafe-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #495057;
+    transition: background 0.15s, color 0.15s;
+    position: relative;
+}
+
+.cafe-menu-item:hover {
+    background: #f8f9fa;
+    color: #111;
+}
+
+.cafe-menu-item.active {
+    background: #eafaf1;
+    color: #03c75a;
+    font-weight: 700;
+}
+
+.cafe-menu-item.active i {
+    color: #03c75a;
+}
+
+.cafe-menu-item i {
+    font-size: 16px;
+    width: 18px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.beta-tag {
+    font-size: 10px;
+    color: #ff5252;
+    font-style: italic;
+    font-weight: 800;
+}
+
+.count-badge.green-bg {
+    margin-left: auto;
+    background: #03c75a;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.count-badge.red-bg {
+    margin-left: auto;
+    background: #eb5757;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.count-badge.red-circle {
+    margin-left: auto;
+    background: #eb5757;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.new-dot {
+    margin-left: auto;
+    background: #eb5757;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* All Cafes Horizontal Row List (Matching User Screenshot) */
+.all-cafes-list {
+    display: flex;
+    flex-direction: column;
+    margin-top: 14px;
+    background: #ffffff;
+}
+
+.cafe-row-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 8px;
+    border-bottom: 1px solid #f1f3f5;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.cafe-row-item:hover {
+    background: #fafbfc;
+}
+
+.cafe-row-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    overflow: hidden;
+    background: #f1f3f5;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.cafe-row-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cafe-row-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+}
+
+.cafe-row-title-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.cafe-row-name {
+    font-size: 16px;
+    font-weight: 800;
+    color: #111;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: -0.3px;
+}
+
+.cafe-tag-rep {
+    background: #50b058;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 5px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.cafe-row-desc {
+    font-size: 13px;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.4;
+}
+
+.cafe-row-meta-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+}
+
+.cafe-row-meta-line .sep {
+    color: #ced4da;
+}
+
+.cafe-meta-icon {
+    font-size: 11px;
+    margin-right: 2px;
+}
+
+.cafe-growth-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    color: #888;
+}
+
+.cafe-growth-stat i {
+    font-size: 10px;
+    color: #888;
+}
+
+.cafe-category-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 14px;
+    border-top: 1px solid #ebeef2;
+}
+
+.cat-link {
+    font-size: 13px;
+    color: #666;
+    padding: 4px 12px;
+    transition: color 0.15s;
+}
+
+.cat-link:hover {
+    color: #03c75a;
+    font-weight: 600;
+}
+
+/* Lucky Turtle Widget */
+.cafe-lucky-widget {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+    position: relative;
+    margin-top: 10px;
+}
+
+.lucky-bubble {
+    display: inline-block;
+    background: #03c75a;
+    color: #fff;
+    font-size: 11px;
+    line-height: 1.3;
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.lucky-avatar {
+    width: 54px;
+    height: 54px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.lucky-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.lucky-close-btn {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #adb5bd;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+/* --- Center Content Area --- */
+.cafe-center-content {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.cafe-home-title-row h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+}
+
+/* Purple Promo Banner */
+.cafe-promo-banner {
+    background: linear-gradient(135deg, #3725b8 0%, #4f3ce0 100%);
+    border-radius: 12px;
+    padding: 22px 28px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(55, 37, 184, 0.2);
+}
+
+.promo-text-wrap h3 {
+    font-size: 19px;
+    font-weight: 800;
+    margin-bottom: 6px;
+}
+
+.promo-text-wrap h3 span {
+    color: #ffdf38;
+}
+
+.promo-text-wrap p {
+    font-size: 13.5px;
+    opacity: 0.9;
+}
+
+.promo-img-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.promo-badge-tag {
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.promo-img {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #fff;
+}
+
+/* Feed Tabs */
+.cafe-feed-tabs-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #ebeef2;
+    padding-bottom: 12px;
+    margin-top: 6px;
+}
+
+.feed-tabs-left {
+    display: flex;
+    gap: 8px;
+}
+
+.feed-tab-btn {
+    background: #f1f3f5;
+    border: 1px solid transparent;
+    color: #495057;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.feed-tab-btn.active {
+    background: #03c75a;
+    color: #ffffff;
+}
+
+.feed-manage-btn {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.feed-manage-btn:hover {
+    color: #111;
+}
+
+/* Feed List Cards */
+.cafe-feed-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.cafe-group-card {
+    background: #ffffff;
+    border-bottom: 1px solid #ebeef2;
+    padding-bottom: 22px;
+}
+
+.cafe-group-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.cafe-group-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.cafe-icon-thumb {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 1px solid #e3e7ed;
+}
+
+.cafe-group-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.cafe-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    font-weight: 800;
+    color: #111;
+}
+
+.cafe-name-row:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.cafe-tag-green {
+    background: #03c75a;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 1px 4px;
+    border-radius: 3px;
+}
+
+.cafe-members-count {
+    font-size: 11px;
+    color: #1f3bb3;
+    font-weight: 700;
+    background: #ebf0ff;
+    padding: 1px 6px;
+    border-radius: 10px;
+}
+
+.cafe-new-posts-count {
+    font-size: 12px;
+    color: #888;
+}
+
+.cafe-fav-star {
+    background: none;
+    border: none;
+    color: #ced4da;
+    font-size: 17px;
+    cursor: pointer;
+    transition: color 0.15s;
+}
+
+.cafe-fav-star.active, .cafe-fav-star:hover {
+    color: #ffc107;
+}
+
+/* Post list inside cafe card */
+.cafe-post-items {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding-left: 48px;
+}
+
+.cafe-post-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13.5px;
+}
+
+.post-item-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.post-item-title {
+    color: #333;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.post-item-title:hover {
+    text-decoration: underline;
+    color: #03c75a;
+}
+
+.post-item-comment-count {
+    font-size: 12px;
+    color: #03c75a;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.post-item-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #888;
+    flex-shrink: 0;
+}
+
+.post-item-author {
+    color: #666;
+}
+
+/* --- Right Sidebar --- */
+.cafe-right-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* User Login Card */
+.cafe-login-card {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.cafe-user-card-top {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+}
+
+.user-card-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #f1f3f5;
+}
+
+.user-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-card-info {
+    flex: 1;
+}
+
+.user-name-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+}
+
+.user-name-line strong {
+    font-size: 14px;
+    color: #111;
+}
+
+.btn-cafe-logout {
+    background: #fff;
+    border: 1px solid #e1e4e8;
+    color: #666;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-cafe-logout:hover {
+    background: #f8f9fa;
+    color: #111;
+}
+
+.user-card-sub {
+    font-size: 12px;
+    color: #777;
+    display: flex;
+    gap: 6px;
+}
+
+.sub-sep {
+    color: #d1d5db;
+}
+
+.highlight-count {
+    color: #eb5757;
+}
+
+.btn-create-cafe {
+    width: 100%;
+    background: #ebfaf1;
+    border: 1px solid #c2ebd0;
+    color: #03c75a;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.15s;
+}
+
+.btn-create-cafe:hover {
+    background: #03c75a;
+    color: #ffffff;
+    border-color: #03c75a;
+}
+
+/* Logged out Cafe Card */
+.cafe-logged-out-card {
+    text-align: center;
+    padding: 24px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.logged-out-msg {
+    font-size: 12px;
+    color: #777;
+    margin: 0;
+}
+
+.btn-cafe-login-link {
+    background: #03c75a;
+    color: #ffffff;
+    font-size: 14.5px;
+    font-weight: 800;
+    padding: 12px 0;
+    border-radius: 4px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+
+.btn-cafe-login-link:hover {
+    background: #02b350;
+    color: #ffffff;
+}
+
+.btn-cafe-login-link .edu-badge {
+    background: rgba(255,255,255,0.25);
+    font-size: 11px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
+
+.logged-out-links {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #888;
+    margin-top: 4px;
+}
+
+.logged-out-links a {
+    color: #888;
+    text-decoration: none;
+}
+
+.logged-out-links a:hover {
+    color: #333;
+    text-decoration: underline;
+}
+
+.logged-out-links .sep {
+    color: #e5e8eb;
+}
+
+/* Notice Card */
+.cafe-notice-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.notice-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    cursor: pointer;
+}
+
+.notice-card-header h4 {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #222;
+}
+
+.notice-card-header i {
+    font-size: 11px;
+    color: #888;
+}
+
+.notice-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.notice-list li a {
+    font-size: 12px;
+    color: #495057;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.notice-list li a:hover {
+    text-decoration: underline;
+    color: #111;
+}
+
+/* Official Cafe Card */
+.cafe-official-card {
+    background: #f0fbf4;
+    border: 1px solid #d1f2dc;
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+}
+
+.cafe-official-card:hover {
+    background: #e2f7ea;
+}
+
+.official-icon {
+    width: 32px;
+    height: 32px;
+    background: #03c75a;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+}
+
+.official-text strong {
+    font-size: 13px;
+    color: #111;
+}
+
+/* Happybean Ad Card */
+.cafe-ad-card {
+    background: #fff8eb;
+    border: 1px solid #fae6c2;
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+}
+
+.ad-happybean-badge {
+    font-size: 11.5px;
+    font-weight: 800;
+    color: #03c75a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 6px;
+}
+
+.ad-happybean-badge .n-box {
+    background: #03c75a;
+    color: #fff;
+    padding: 0 3px;
+    border-radius: 2px;
+    font-size: 9px;
+}
+
+.ad-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #333;
+    line-height: 1.35;
+    margin-bottom: 12px;
+}
+
+.ad-highlight {
+    color: #b7321a;
+}
+
+.ad-img-box {
+    border-radius: 8px;
+    overflow: hidden;
+    height: 140px;
+}
+
+.ad-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* ----------------------------------------------------
+   4. Real Cafe Creation Form (실제 카페 만들기 화면 스타일)
+   ---------------------------------------------------- */
+.create-page-header {
+    border-bottom: 2px solid #111;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+}
+
+.create-page-header h2 {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+}
+
+.create-cafe-table-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.create-form-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    padding: 18px 0;
+    border-bottom: 1px solid #f1f3f5;
+    align-items: start;
+}
+
+.create-form-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-top: 8px;
+}
+
+.label-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+}
+
+.required-star {
+    color: #03c75a;
+    font-weight: 900;
+    font-size: 14px;
+}
+
+.label-help-btn {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 2px;
+}
+
+.create-form-input-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.create-text-input {
+    width: 100%;
+    max-width: 480px;
+    height: 42px;
+    background: #f8f9fa;
+    border: 1px solid #e2e5e8;
+    border-radius: 6px;
+    padding: 0 14px;
+    font-size: 14px;
+    color: #222;
+    outline: none;
+    transition: all 0.15s;
+}
+
+.create-text-input:focus {
+    background: #ffffff;
+    border-color: #03c75a;
+    box-shadow: 0 0 0 3px rgba(3, 199, 90, 0.1);
+}
+
+.create-textarea {
+    width: 100%;
+    max-width: 520px;
+    height: 100px;
+    background: #f8f9fa;
+    border: 1px solid #e2e5e8;
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-size: 13.5px;
+    color: #222;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    transition: all 0.15s;
+}
+
+.create-textarea:focus {
+    background: #ffffff;
+    border-color: #03c75a;
+    box-shadow: 0 0 0 3px rgba(3, 199, 90, 0.1);
+}
+
+.textarea-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 520px;
+    font-size: 12px;
+    color: #888;
+}
+
+/* Cafe Icon Upload */
+.cafe-icon-upload-wrap {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+}
+
+.cafe-icon-preview-box {
+    width: 86px;
+    height: 86px;
+    background: #eef1f4;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.15s;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.cafe-icon-preview-box:hover {
+    background: #e2e7ed;
+}
+
+.cafe-icon-preview-box .default-icon {
+    font-size: 32px;
+    color: #a8b3c0;
+}
+
+.icon-camera-badge {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    width: 24px;
+    height: 24px;
+    background: #343a40;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+}
+
+.cafe-icon-desc {
+    font-size: 12.5px;
+    color: #777;
+    line-height: 1.6;
+}
+
+/* Category Selects */
+.selects-row {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.create-select {
+    width: 200px;
+    height: 42px;
+    background: #f8f9fa;
+    border: 1px solid #e2e5e8;
+    border-radius: 6px;
+    padding: 0 12px;
+    font-size: 13.5px;
+    color: #333;
+    outline: none;
+    cursor: pointer;
+}
+
+.create-select:focus {
+    background: #ffffff;
+    border-color: #03c75a;
+}
+
+/* Keywords */
+.keyword-input-box {
+    display: flex;
+    gap: 8px;
+    max-width: 480px;
+}
+
+.btn-keyword-reg {
+    background: #555;
+    border: none;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 0 16px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.btn-keyword-reg:hover {
+    background: #333;
+}
+
+.tags-preview-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.keyword-tag-pill {
+    background: #eafaf1;
+    color: #03c75a;
+    border: 1px solid #c2ebd0;
+    padding: 4px 10px;
+    border-radius: 16px;
+    font-size: 12px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.keyword-tag-pill .remove-kw-btn {
+    background: none;
+    border: none;
+    color: #03c75a;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+/* Region */
+.btn-add-region {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    width: fit-content;
+}
+
+.btn-add-region:hover {
+    background: #f8f9fa;
+    color: #111;
+}
+
+.selected-region-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #03c75a;
+}
+
+.guide-subtext {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.5;
+}
+
+/* Captcha */
+.captcha-wrap {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.captcha-img-box {
+    width: 140px;
+    height: 60px;
+    background: #495057;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 900;
+    font-family: monospace;
+    letter-spacing: 4px;
+    background-image: repeating-linear-gradient(45deg, transparent, transparent 5px, rgba(255,255,255,0.1) 5px, rgba(255,255,255,0.1) 10px);
+    user-select: none;
+}
+
+.captcha-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.captcha-input {
+    max-width: 180px;
+    height: 38px;
+}
+
+.captcha-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.btn-captcha-action {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-captcha-action:hover {
+    color: #03c75a;
+}
+
+/* Terms */
+.terms-row {
+    border-bottom: none;
+    padding-bottom: 24px;
+}
+
+.terms-check-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #333;
+}
+
+.terms-link {
+    font-size: 12px;
+    color: #555;
+    text-decoration: underline;
+    margin-left: 8px;
+}
+
+.terms-notice-line {
+    font-size: 12.5px;
+    color: #777;
+    margin-top: 6px;
+}
+
+/* Form Action Buttons */
+.create-form-btn-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 30px;
+    padding-top: 20px;
+}
+
+.btn-create-cancel {
+    background: #f1f3f5;
+    border: 1px solid #e1e4e8;
+    color: #495057;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-create-cancel:hover {
+    background: #e9ecef;
+    color: #111;
+}
+
+.btn-create-submit {
+    background: #eafaf1;
+    border: 1px solid #c2ebd0;
+    color: #03c75a;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 12px 36px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-create-submit:hover {
+    background: #03c75a;
+    color: #ffffff;
+}
+
+/* ----------------------------------------------------
+   5. Modals & Helpers
+   ---------------------------------------------------- */
+.cafe-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.cafe-modal-box {
+    background: #ffffff;
+    width: 100%;
+    max-width: 480px;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+}
+
+.cafe-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.cafe-modal-header h3 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #111;
+}
+
+.modal-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #888;
+    cursor: pointer;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #333;
+}
+
+.form-group input, .form-group textarea, .form-group select {
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 9px 12px;
+    font-size: 13.5px;
+    outline: none;
+    font-family: inherit;
+}
+
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+    border-color: #03c75a;
+}
+
+.modal-btn-row {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.btn-cancel {
+    background: #f1f3f5;
+    border: 1px solid #e1e4e8;
+    color: #555;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-submit {
+    background: #03c75a;
+    border: none;
+    color: #ffffff;
+    padding: 8px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+/* ----------------------------------------------------
+   6. Responsive Breakpoints
+   ---------------------------------------------------- */
+@media (max-width: 1024px) {
+    .cafe-main-container {
+        grid-template-columns: 1fr 280px;
+    }
+    .cafe-left-sidebar {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .cafe-main-container {
+        grid-template-columns: 1fr;
+    }
+    .cafe-right-sidebar {
+        display: none;
+    }
+    .cafe-header-inner {
+        padding: 0 12px;
+    }
+    .cafe-search-wrap {
+        max-width: 200px;
+    }
+}

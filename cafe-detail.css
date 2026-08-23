@@ -1,0 +1,2753 @@
+/* ====================================================
+   Individual Cafe Page Styling (cafe-detail.css)
+   Recreating the exact Individual Naver Cafe Home, Board, Detail & Full Editor UI
+   ==================================================== */
+
+:root {
+    --cafe-green: #03c75a;
+    --cafe-dark: #111111;
+    --cafe-gray-bg: #f8f9fa;
+    --cafe-border: #e3e7ed;
+    --cafe-text-sub: #888888;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif;
+    background-color: #ffffff;
+    color: #222222;
+    font-size: 13px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    font-family: inherit;
+}
+
+/* ----------------------------------------------------
+   1. Top Mini GNB Header
+   ---------------------------------------------------- */
+.detail-header {
+    background: #ffffff;
+    border-bottom: 1px solid #ebeef2;
+    height: 38px;
+    font-size: 12px;
+}
+
+.detail-header-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+}
+
+.naver-word-logo {
+    color: #03c75a;
+    font-size: 14px;
+    font-weight: 900;
+    font-family: 'Inter', sans-serif;
+    letter-spacing: -0.5px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: #555;
+}
+
+.header-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-nav-links .nav-item {
+    color: #555;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.header-nav-links .nav-item:hover {
+    color: #03c75a;
+}
+
+.header-nav-links .sep {
+    color: #e5e8eb;
+    font-size: 10px;
+}
+
+.badge-num {
+    background: #eb5757;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 8px;
+}
+
+.badge-dot {
+    background: #eb5757;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 700;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.header-user-menu {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.header-user-menu i {
+    font-size: 10px;
+    color: #888;
+}
+
+.header-icons {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-icons .icon-link {
+    color: #666;
+    font-size: 14px;
+}
+
+/* ----------------------------------------------------
+   2. Cafe Hero Banner Graphic Box
+   ---------------------------------------------------- */
+.cafe-wrapper {
+    max-width: 1080px;
+    margin: 0 auto 60px auto;
+    padding: 16px 12px;
+}
+
+.cafe-hero-banner {
+    border: 1px solid #e3e7ed;
+    border-radius: 8px;
+    height: 150px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 36px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.hero-brand-area {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 2;
+}
+
+.cafe-badge-symbol {
+    font-size: 19px;
+    font-weight: 900;
+    font-family: 'Inter', sans-serif;
+    color: #111;
+    letter-spacing: -0.5px;
+}
+
+.cafe-title-main {
+    font-size: 28px;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: -1px;
+}
+
+.cafe-url-sub {
+    font-size: 12px;
+    color: #888;
+}
+
+/* Geometric Decorative Art Shapes */
+.hero-art-shapes {
+    position: absolute;
+    right: 40px;
+    top: 0;
+    bottom: 0;
+    width: 480px;
+    pointer-events: none;
+}
+
+.shape-triangle {
+    position: absolute;
+    top: 24px;
+    left: 40px;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 18px solid #a2e8c2;
+    transform: rotate(-15deg);
+}
+
+.shape-circle-brown {
+    position: absolute;
+    top: 18px;
+    left: 110px;
+    width: 22px;
+    height: 22px;
+    background: #e8987b;
+    border-radius: 50%;
+    border: 2px solid #222;
+}
+
+.shape-blob-blue {
+    position: absolute;
+    top: 22px;
+    left: 160px;
+    width: 60px;
+    height: 38px;
+    background: #5d889e;
+    border-radius: 40px 10px 40px 10px;
+}
+
+.shape-cone {
+    position: absolute;
+    top: 28px;
+    left: 250px;
+    width: 0;
+    height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-bottom: 20px solid #f7c9b8;
+    transform: rotate(20deg);
+}
+
+.shape-cross-1 {
+    position: absolute;
+    top: 18px;
+    right: 40px;
+    font-size: 28px;
+    font-weight: 300;
+    color: #222;
+}
+
+.shape-cross-2 {
+    position: absolute;
+    bottom: 30px;
+    left: 80px;
+    font-size: 28px;
+    font-weight: 300;
+    color: #222;
+}
+
+.shape-zigzag {
+    position: absolute;
+    top: 66px;
+    right: 60px;
+    width: 40px;
+    height: 10px;
+    border-bottom: 3px dashed #222;
+}
+
+.shape-capsule-green {
+    position: absolute;
+    bottom: 12px;
+    left: 140px;
+    width: 130px;
+    height: 52px;
+    background: #68b845;
+    border-radius: 10px 30px 30px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 12px;
+}
+
+.capsule-inner-pill {
+    width: 32px;
+    height: 32px;
+    background: #ffffff;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 5px #e6f4d0;
+}
+
+.shape-circle-ring-1 {
+    position: absolute;
+    bottom: 22px;
+    left: 45px;
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid #222;
+    border-radius: 50%;
+    background: #ffdf85;
+}
+
+.shape-circle-ring-2 {
+    position: absolute;
+    bottom: 24px;
+    right: 24px;
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid #222;
+    border-radius: 50%;
+    background: #a2e8c2;
+}
+
+/* ----------------------------------------------------
+   3. Cafe Body Layout Grid
+   ---------------------------------------------------- */
+.cafe-layout-grid {
+    display: grid;
+    grid-template-columns: 210px 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* --- Left Sidebar --- */
+.cafe-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.sidebar-tabs {
+    display: flex;
+    border-bottom: 2px solid #222;
+}
+
+.s-tab-btn {
+    flex: 1;
+    background: #f8f9fa;
+    border: 1px solid #e3e7ed;
+    border-bottom: none;
+    padding: 8px 0;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #666;
+    cursor: pointer;
+}
+
+.s-tab-btn.active {
+    background: #ffffff;
+    border-color: #222 #222 transparent #222;
+    color: #111;
+}
+
+/* Cafe Profile Card */
+.cafe-profile-card {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.profile-top-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.profile-avatar-box {
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: #eef1f4;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.profile-avatar-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-info-text {
+    flex: 1;
+    overflow: hidden;
+}
+
+.manager-name-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #111;
+}
+
+.badge-manager {
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: #666;
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 2px;
+    font-weight: 600;
+}
+
+.cafe-created-date {
+    font-size: 11px;
+    color: #888;
+    margin: 2px 0;
+}
+
+.cafe-intro-link {
+    font-size: 11px;
+    color: #555;
+}
+
+.cafe-intro-link:hover {
+    text-decoration: underline;
+}
+
+.cafe-manage-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #666;
+    border-top: 1px solid #f1f3f5;
+    border-bottom: 1px solid #f1f3f5;
+    padding: 6px 0;
+}
+
+.cafe-manage-actions .sep {
+    color: #e5e8eb;
+}
+
+.cafe-manage-actions a:hover {
+    color: #111;
+}
+
+.cafe-level-row {
+    font-size: 11.5px;
+    color: #555;
+}
+
+.level-icon {
+    color: #8d6e63;
+    font-weight: 600;
+}
+
+.cafe-members-stat {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #444;
+}
+
+.btn-invite-link {
+    color: #666;
+    font-size: 11px;
+    text-decoration: underline;
+}
+
+/* Sidebar Promo Badge (티키타 프로모션) */
+.sidebar-promo-badge {
+    background: #fffde7;
+    border: 1px solid #f0e68c;
+    border-radius: 6px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+}
+
+.promo-badge-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.promo-badge-text strong {
+    font-size: 12px;
+    color: #222;
+}
+
+.badge-on {
+    font-size: 10.5px;
+    color: #333;
+    font-weight: 600;
+}
+
+.badge-on i {
+    font-size: 7px;
+    color: #03c75a;
+    margin-right: 2px;
+}
+
+.promo-deco-icon {
+    font-size: 16px;
+    color: #f59f00;
+}
+
+/* Age Box */
+.sidebar-age-box {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 8px;
+    text-align: center;
+    font-size: 11.5px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Cafe Join Button (Dark Charcoal) */
+.btn-cafe-join {
+    background: #495057;
+    border: none;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 800;
+    padding: 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+}
+
+.btn-cafe-join:hover {
+    background: #343a40;
+}
+
+.btn-cafe-write {
+    background: #545b62;
+    border: none;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+}
+
+.btn-cafe-write:hover {
+    background: #343a40;
+}
+
+.btn-cafe-chat {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    color: #333;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+}
+
+.btn-cafe-chat:hover {
+    background: #f8f9fa;
+}
+
+/* Sidebar Search Box */
+.sidebar-search-box {
+    display: flex;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.sidebar-search-box input {
+    flex: 1;
+    border: none;
+    padding: 6px 8px;
+    font-size: 12px;
+    outline: none;
+}
+
+.btn-sidebar-search {
+    background: #03c75a;
+    border: none;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 0 12px;
+    cursor: pointer;
+}
+
+/* Sidebar Menu Card */
+.sidebar-menu-card {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.menu-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #222;
+    cursor: pointer;
+}
+
+.star-fav {
+    color: #03c75a;
+    font-size: 11px;
+}
+
+.board-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.board-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12.5px;
+    color: #495057;
+}
+
+.board-item:hover, .board-item.active {
+    background: #f1f3f5;
+    color: #111;
+    font-weight: 600;
+}
+
+.board-item i {
+    font-size: 12px;
+    color: #888;
+    margin-right: 4px;
+}
+
+.post-total-badge {
+    font-size: 11px;
+    color: #888;
+}
+
+.new-dot {
+    background: #eb5757;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.menu-divider {
+    height: 1px;
+    background: #f1f3f5;
+    margin: 4px 0;
+}
+
+/* Recent Comments Card */
+.sidebar-recent-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 4px;
+    padding: 12px;
+}
+
+.sidebar-recent-card h4 {
+    font-size: 12px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 6px;
+}
+
+.sidebar-recent-card .empty-text {
+    font-size: 11.5px;
+    color: #888;
+}
+
+/* Bot Banner */
+.sidebar-bot-banner {
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #ffffff;
+}
+
+.bot-icon {
+    font-size: 20px;
+    color: #03c75a;
+}
+
+.bot-text {
+    font-size: 11px;
+    color: #555;
+    line-height: 1.35;
+}
+
+.bot-beta {
+    color: #eb5757;
+    font-style: italic;
+    font-weight: 800;
+}
+
+/* --- Main Content Area --- */
+.cafe-main-content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Welcome Hero Card (Matching Screenshot) */
+.welcome-hero-card {
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    padding: 32px 36px 16px 36px;
+    position: relative;
+    background: #ffffff;
+    min-height: 240px;
+}
+
+.welcome-text-wrap h2 {
+    font-size: 24px;
+    font-weight: 900;
+    color: #111;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+}
+
+.welcome-sub {
+    font-size: 13.5px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.btn-deco-gate {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-deco-gate:hover {
+    background: #f8f9fa;
+    color: #111;
+}
+
+/* Cloud & Flag Art on Welcome Card */
+.welcome-img-graphic {
+    position: absolute;
+    right: 48px;
+    top: 40px;
+    width: 200px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.cloud-graphic {
+    position: absolute;
+    width: 140px;
+    height: 46px;
+    background: #e8f4fc;
+    border-radius: 30px;
+    bottom: 30px;
+    left: 0;
+    opacity: 0.8;
+}
+
+.flag-cafe-graphic {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    width: 80px;
+    height: 48px;
+    background: #50b058;
+    border-radius: 4px 14px 14px 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 15px;
+    font-family: 'Inter', sans-serif;
+    box-shadow: -4px 6px 0px #3c8f43;
+}
+
+.flag-cafe-graphic::before {
+    content: "";
+    position: absolute;
+    left: -6px;
+    top: 0;
+    width: 6px;
+    height: 80px;
+    background: #888;
+    border-radius: 3px;
+}
+
+.welcome-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+    font-size: 11px;
+    color: #888;
+}
+
+.welcome-card-footer button {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.welcome-card-footer button:hover {
+    color: #111;
+}
+
+/* ----------------------------------------------------
+   4. Board Section & Table Controls (Replicating Screenshot)
+   ---------------------------------------------------- */
+.board-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #ffffff;
+}
+
+.board-top-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+}
+
+.board-title-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.board-main-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -0.5px;
+}
+
+.btn-star-board {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #adb5bd;
+    cursor: pointer;
+}
+
+.btn-star-board:hover {
+    color: #03c75a;
+}
+
+.btn-board-stat {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    font-size: 12px;
+    color: #333;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-board-stat:hover {
+    background: #f8f9fa;
+}
+
+/* Secondary Filter Bar */
+.board-sub-control-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #555;
+    padding-bottom: 6px;
+}
+
+.sub-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.sub-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.fake-toggle {
+    width: 32px;
+    height: 18px;
+    background: #ced4da;
+    border-radius: 10px;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.fake-toggle::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    background: #ffffff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+}
+
+input:checked + .fake-toggle {
+    background: #03c75a;
+}
+
+input:checked + .fake-toggle::after {
+    transform: translateX(14px);
+}
+
+.sub-hide-notice {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.view-icons-group {
+    display: flex;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.btn-view-icon {
+    background: #ffffff;
+    border: none;
+    border-right: 1px solid #dee2e6;
+    padding: 4px 8px;
+    color: #888;
+    cursor: pointer;
+    font-size: 11px;
+}
+
+.btn-view-icon:last-child {
+    border-right: none;
+}
+
+.btn-view-icon.active {
+    color: #03c75a;
+    background: #f8f9fa;
+}
+
+.select-page-size {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 6px;
+    font-size: 12px;
+    color: #333;
+    outline: none;
+}
+
+/* Cafe Board Table */
+.cafe-board-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-top: 1px solid #222;
+}
+
+.cafe-board-table th {
+    background: #fbfbfb;
+    border-bottom: 1px solid #ebeef2;
+    padding: 10px 6px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 600;
+    text-align: center;
+}
+
+.cafe-board-table th.th-title {
+    text-align: center;
+}
+
+.cafe-board-table td {
+    border-bottom: 1px solid #f1f3f5;
+    padding: 10px 6px;
+    font-size: 12.5px;
+    color: #495057;
+    text-align: center;
+}
+
+.cafe-board-table tr:hover td {
+    background: #fafbfc;
+}
+
+.cafe-board-table tr.notice-tr td {
+    background: #fffcfb;
+}
+
+.td-check input {
+    cursor: pointer;
+}
+
+.badge-table-notice {
+    background: #fff;
+    border: 1px solid #eb5757;
+    color: #eb5757;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+    display: inline-block;
+}
+
+.td-board-title {
+    text-align: left !important;
+    color: #222;
+    cursor: pointer;
+}
+
+.td-board-title:hover span {
+    text-decoration: underline;
+    color: #03c75a;
+}
+
+.badge-n-dot {
+    background: #eb5757;
+    color: #fff;
+    font-size: 9px;
+    font-weight: 900;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 4px;
+}
+
+/* Table Bottom Action Row (전체선택 체크박스, 삭제, 글쓰기) */
+.table-bottom-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0 16px 0;
+    border-bottom: 1px solid #ebeef2;
+}
+
+.action-left .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+    cursor: pointer;
+}
+
+.action-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-board-action {
+    padding: 7px 16px;
+    border-radius: 4px;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-board-delete {
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: #333;
+}
+
+.btn-board-delete:hover {
+    background: #e9ecef;
+    color: #eb5757;
+}
+
+.btn-board-write {
+    background: #eafaf1;
+    border: 1px solid #c2eed5;
+    color: #03c75a;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-board-write:hover {
+    background: #03c75a;
+    color: #ffffff;
+    border-color: #03c75a;
+}
+
+/* Board Pagination */
+.board-pagination-row {
+    display: flex;
+    justify-content: center;
+    padding: 18px 0;
+}
+
+.page-num {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #333;
+}
+
+.page-num.active {
+    background: #333;
+    color: #fff;
+    border-color: #333;
+}
+
+/* Board Bottom Search Bar */
+.board-bottom-search-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 0 20px 0;
+}
+
+.board-search-period, .board-search-target {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    color: #333;
+    outline: none;
+}
+
+.board-search-input-box {
+    display: flex;
+    align-items: center;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    overflow: hidden;
+    width: 260px;
+}
+
+.board-search-input-box input {
+    flex: 1;
+    border: none;
+    padding: 7px 10px;
+    font-size: 12.5px;
+    outline: none;
+}
+
+.btn-bottom-search-submit {
+    background: #50b058;
+    border: none;
+    color: #ffffff;
+    padding: 0 14px;
+    height: 33px;
+    cursor: pointer;
+}
+
+.btn-bottom-search-submit:hover {
+    background: #03c75a;
+}
+
+/* ----------------------------------------------------
+   5. Post Detail View Styles (Replicating User Screenshot)
+   ---------------------------------------------------- */
+.post-detail-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.post-detail-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 8px;
+}
+
+.topbar-left, .topbar-right {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-detail-action {
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-detail-action:hover {
+    background: #e9ecef;
+    color: #000;
+}
+
+.btn-detail-action.btn-list {
+    background: #ffffff;
+    border-color: #ced4da;
+}
+
+/* Post Detail Card */
+.post-detail-card {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    padding: 24px 28px;
+    display: flex;
+    flex-direction: column;
+}
+
+.post-category-tag {
+    font-size: 13px;
+    color: #03c75a;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.post-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.badge-notice {
+    background: #ffffff;
+    border: 1px solid #eb5757;
+    color: #eb5757;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 3px;
+}
+
+.post-main-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #111;
+    letter-spacing: -0.5px;
+}
+
+/* Post Meta Header */
+.post-meta-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0 16px 0;
+}
+
+.author-profile-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.author-avatar {
+    width: 38px;
+    height: 38px;
+    background: #eef1f4;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 18px;
+}
+
+.author-meta-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.author-name-line strong {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #222;
+}
+
+.post-date-line {
+    font-size: 11.5px;
+    color: #888;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.post-meta-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    color: #666;
+}
+
+.btn-copy-url {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.btn-copy-url:hover {
+    text-decoration: underline;
+    color: #111;
+}
+
+.btn-more-dots {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+.post-detail-divider {
+    height: 1px;
+    background: #f1f3f5;
+    margin-bottom: 24px;
+}
+
+/* Post Content Visual Art Bouquet */
+.post-content-visual {
+    display: flex;
+    justify-content: flex-start;
+    padding: 10px 0 20px 10px;
+}
+
+.flower-bouquet-graphic {
+    position: relative;
+    width: 140px;
+    height: 150px;
+}
+
+.flower {
+    position: absolute;
+    font-size: 22px;
+}
+
+.flower.f1 { top: 10px; left: 40px; color: #e67e22; font-size: 26px; }
+.flower.f2 { top: 30px; left: 10px; color: #3498db; }
+.flower.f3 { top: 30px; right: 20px; color: #f1c40f; }
+.flower.f4 { top: 45px; left: 45px; color: #e74c3c; font-size: 32px; }
+
+.flower-wrap-cone {
+    position: absolute;
+    bottom: 10px;
+    left: 30px;
+    width: 0;
+    height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-top: 55px solid #f5f0eb;
+    display: flex;
+    justify-content: center;
+}
+
+.ribbon-bow {
+    position: absolute;
+    top: -55px;
+    font-size: 18px;
+}
+
+/* Post Content Body */
+.post-content-body {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #222;
+    min-height: 180px;
+    white-space: pre-line;
+    margin-bottom: 40px;
+}
+
+.post-content-body a {
+    color: #03c75a;
+    text-decoration: underline;
+}
+
+/* Author Bottom Bar */
+.author-bottom-bar {
+    border-top: 1px solid #f1f3f5;
+    padding-top: 16px;
+    margin-bottom: 16px;
+}
+
+.author-bottom-profile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #444;
+    cursor: pointer;
+}
+
+.bottom-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #eef1f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 11px;
+}
+
+/* Reactions Bar (좋아요 / 댓글 / 공유) */
+.post-reaction-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #f1f3f5;
+    padding-top: 16px;
+    font-size: 12.5px;
+    color: #666;
+}
+
+.reactions-left, .reactions-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.btn-reaction {
+    background: none;
+    border: none;
+    color: #333;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-reaction i {
+    font-size: 15px;
+    color: #e03131;
+}
+
+.btn-share {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-share:hover {
+    color: #111;
+}
+
+/* ----------------------------------------------------
+   6. Full Cafe Write Editor Styles (Replicating Screenshot)
+   ---------------------------------------------------- */
+.cafe-write-full-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 10px;
+}
+
+.write-top-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 2px solid #222;
+    padding-bottom: 12px;
+}
+
+.write-page-title {
+    font-size: 24px;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: -0.5px;
+}
+
+.write-top-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-temp-save {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    color: #333;
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.temp-count {
+    color: #03c75a;
+    font-weight: 800;
+    margin-left: 4px;
+}
+
+.btn-full-submit {
+    background: #eafaf1;
+    border: 1px solid #c2eed5;
+    color: #03c75a;
+    font-size: 13px;
+    font-weight: 800;
+    padding: 7px 22px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-full-submit:hover {
+    background: #03c75a;
+    color: #ffffff;
+    border-color: #03c75a;
+}
+
+/* Write Layout Grid (Editor Left: 1fr, Settings Right: 240px) */
+.write-layout-grid {
+    display: grid;
+    grid-template-columns: 1fr 240px;
+    gap: 20px;
+    align-items: start;
+}
+
+.write-editor-card {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+}
+
+.write-category-row {
+    display: flex;
+    gap: 16px;
+    padding: 16px 20px 10px 20px;
+}
+
+.write-select {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px 14px;
+    font-size: 13.5px;
+    color: #222;
+    outline: none;
+    font-family: inherit;
+    min-width: 180px;
+}
+
+.write-title-input-row {
+    padding: 4px 20px 16px 20px;
+}
+
+.full-title-input {
+    width: 100%;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    padding: 14px 18px;
+    font-size: 15px;
+    color: #222;
+    outline: none;
+    font-family: inherit;
+}
+
+.full-title-input:focus {
+    background: #ffffff;
+    border-color: #03c75a;
+}
+
+/* Editor Toolbar 1 */
+.editor-toolbar-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 10px 16px;
+    background: #ffffff;
+    border-top: 1px solid #f1f3f5;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.btn-tool-icon {
+    background: none;
+    border: none;
+    color: #555;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 4px;
+    position: relative;
+}
+
+.btn-tool-icon i {
+    font-size: 16px;
+    color: #495057;
+}
+
+.btn-tool-icon:hover {
+    background: #f1f3f5;
+    color: #111;
+}
+
+.mini-caret {
+    font-size: 8px !important;
+    position: absolute;
+    right: 2px;
+    bottom: 4px;
+    color: #888;
+}
+
+/* Formatting Bar */
+.editor-formatting-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.format-select {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 12px;
+    outline: none;
+}
+
+.fmt-sep {
+    color: #dee2e6;
+    font-size: 11px;
+    margin: 0 4px;
+}
+
+.btn-fmt {
+    background: none;
+    border: none;
+    padding: 5px 7px;
+    color: #555;
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.btn-fmt:hover {
+    background: #f1f3f5;
+    color: #03c75a;
+}
+
+/* Editor Content Area */
+.editor-content-area {
+    min-height: 380px;
+    padding: 24px 20px;
+    font-size: 14.5px;
+    line-height: 1.8;
+    color: #222;
+    outline: none;
+    overflow-y: auto;
+}
+
+.editor-content-area[data-placeholder]:empty:before {
+    content: attr(data-placeholder);
+    color: #adb5bd;
+    cursor: text;
+}
+
+.editor-content-area img {
+    max-width: 100%;
+    border-radius: 4px;
+    margin: 10px 0;
+}
+
+/* Tags Row */
+.editor-tags-row {
+    padding: 14px 20px;
+    border-top: 1px solid #f1f3f5;
+}
+
+.full-tags-input {
+    width: 100%;
+    border: none;
+    font-size: 13px;
+    color: #555;
+    outline: none;
+}
+
+/* Right Settings Column */
+.write-settings-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.settings-box {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 4px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-check-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12.5px;
+    color: #333;
+    cursor: pointer;
+}
+
+.settings-check-label input {
+    cursor: pointer;
+}
+
+.help-icon {
+    font-size: 11px;
+    color: #888;
+    margin-left: 2px;
+}
+
+.settings-box-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #222;
+    cursor: pointer;
+}
+
+.settings-tree-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-left: 6px;
+    font-size: 12px;
+    color: #666;
+}
+
+.tree-branch {
+    color: #adb5bd;
+    font-weight: bold;
+}
+
+/* ----------------------------------------------------
+   7. Comment Section & Detail Bottom Toolbar
+   ---------------------------------------------------- */
+.comment-section-wrap {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.cleanbot-header {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.cleanbot-badge {
+    font-size: 11.5px;
+    color: #03c75a;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.comment-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.comment-item {
+    display: flex;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f3f5;
+}
+
+.comment-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #eef1f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.comment-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.comment-header-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.comment-author {
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+}
+
+.comment-date {
+    font-size: 11px;
+    color: #888;
+}
+
+.comment-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+/* Comment Write Box (Matching Screenshot) */
+.comment-write-box {
+    border: 1px solid #e3e7ed;
+    border-radius: 6px;
+    padding: 14px 16px 10px 16px;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s;
+}
+
+.comment-write-box:focus-within {
+    border-color: #03c75a;
+}
+
+.comment-user-title {
+    font-size: 13px;
+    font-weight: 800;
+    color: #222;
+}
+
+.comment-textarea {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #222;
+    resize: none;
+    font-family: inherit;
+    background: transparent;
+}
+
+.comment-textarea::placeholder {
+    color: #adb5bd;
+}
+
+.comment-bottom-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+}
+
+.comment-tools-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-comment-tool {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-comment-tool:hover {
+    color: #111;
+}
+
+.btn-comment-submit {
+    background: none;
+    border: none;
+    color: #adb5bd;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.btn-comment-submit.active {
+    color: #03c75a;
+}
+
+/* Detail Bottom Toolbar */
+.detail-bottom-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 16px;
+    padding-bottom: 30px;
+}
+
+.bottom-tools-left, .bottom-tools-right {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-bottom-tool {
+    background: #f1f3f5;
+    border: 1px solid #dee2e6;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-bottom-tool:hover {
+    background: #e9ecef;
+    color: #000;
+}
+
+.btn-tool-write {
+    background: #eafaf1;
+    border-color: #c2eed5;
+    color: #03c75a;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-tool-write:hover {
+    background: #03c75a;
+    color: #ffffff;
+    border-color: #03c75a;
+}
+
+.btn-tool-list {
+    background: #ffffff;
+    border-color: #ced4da;
+}
+
+.btn-tool-top {
+    background: #ffffff;
+    border-color: #ced4da;
+    color: #666;
+}
+
+/* ----------------------------------------------------
+   Member-Only Post Lock Card (미가입자 본문 비공개 잠금 카드)
+   ---------------------------------------------------- */
+.member-only-lock-card {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 48px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin: 20px 0 30px 0;
+}
+
+.lock-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #eef1f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #868e96;
+    font-size: 20px;
+    margin-bottom: 4px;
+}
+
+.lock-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #222;
+}
+
+.lock-card-desc {
+    font-size: 13px;
+    color: #666;
+    max-width: 380px;
+    line-height: 1.5;
+}
+
+.btn-lock-join-now {
+    margin-top: 8px;
+    background: #03c75a;
+    border: none;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 800;
+    padding: 10px 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.btn-lock-join-now:hover {
+    background: #02b350;
+}
+
+/* ----------------------------------------------------
+   8. Full Cafe Join Form View (카페 가입하기 - Matching Screenshot)
+   ---------------------------------------------------- */
+.cafe-join-view {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.join-view-header {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-bottom: 12px;
+}
+
+.join-view-header h2 {
+    font-size: 26px;
+    font-weight: 900;
+    color: #111;
+    letter-spacing: -0.5px;
+}
+
+.join-sub-desc {
+    font-size: 13px;
+    color: #666;
+}
+
+.cafe-join-form-card {
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 8px;
+    padding: 32px 36px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.join-form-row {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 20px;
+    align-items: start;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #f5f6f8;
+}
+
+.join-label {
+    font-size: 14px;
+    font-weight: 800;
+    color: #222;
+    padding-top: 4px;
+}
+
+.join-value-text {
+    font-size: 13.5px;
+    color: #333;
+    line-height: 1.6;
+}
+
+/* Profile Set */
+.profile-set-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.join-profile-preview {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #eef1f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    font-size: 26px;
+    overflow: hidden;
+}
+
+.join-profile-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-btn-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.profile-help-note {
+    font-size: 12px;
+    color: #888;
+}
+
+.profile-action-btns {
+    display: flex;
+    gap: 6px;
+}
+
+.btn-prof-action {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    color: #333;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.btn-prof-action:hover {
+    background: #f8f9fa;
+}
+
+/* Nickname Input */
+.join-nickname-input-box {
+    position: relative;
+    max-width: 380px;
+}
+
+.join-nickname-input {
+    width: 100%;
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 10px 32px 10px 12px;
+    font-size: 13.5px;
+    color: #222;
+    outline: none;
+}
+
+.join-nickname-input:focus {
+    border-color: #03c75a;
+}
+
+.btn-clear-nick {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #adb5bd;
+    border: none;
+    color: #fff;
+    font-size: 11px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.join-nickname-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 380px;
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+.status-msg {
+    color: #03c75a;
+    font-weight: 600;
+}
+
+.bytes-count {
+    color: #888;
+}
+
+/* Captcha Block */
+.join-captcha-wrap {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.captcha-img-box {
+    width: 170px;
+    height: 90px;
+    background: #343a40 url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="50" opacity="0.1"><text y="20" font-size="20">///</text></svg>');
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #dee2e6;
+}
+
+.captcha-txt {
+    font-size: 32px;
+    font-weight: 900;
+    color: #e9ecef;
+    letter-spacing: 5px;
+    transform: skew(-10deg) rotate(-2deg);
+    text-shadow: 2px 2px 4px #000;
+    user-select: none;
+}
+
+.captcha-guide-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.captcha-desc {
+    font-size: 12px;
+    color: #555;
+    line-height: 1.4;
+}
+
+.captcha-btn-row {
+    display: flex;
+    gap: 8px;
+}
+
+.btn-captcha-action {
+    background: #ffffff;
+    border: 1px solid #ced4da;
+    color: #495057;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.btn-captcha-action:hover {
+    background: #f8f9fa;
+}
+
+.captcha-input-line {
+    margin-top: 4px;
+}
+
+.join-captcha-input {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 8px 12px;
+    font-size: 13px;
+    width: 170px;
+    outline: none;
+}
+
+.join-captcha-input:focus {
+    border-color: #03c75a;
+}
+
+/* Policy List */
+.join-policy-notice-box {
+    padding: 16px 0 8px 0;
+}
+
+.join-policy-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: #777;
+    line-height: 1.5;
+}
+
+.join-policy-list li::before {
+    content: "· ";
+    font-weight: bold;
+}
+
+.join-policy-list strong {
+    color: #333;
+}
+
+/* Submit Row */
+.join-submit-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.btn-submit-join {
+    background: #eafaf1;
+    border: 1px solid #c2eed5;
+    color: #03c75a;
+    font-size: 14.5px;
+    font-weight: 800;
+    padding: 12px 36px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-submit-join:hover {
+    background: #03c75a;
+    color: #ffffff;
+    border-color: #03c75a;
+}
+
+/* ----------------------------------------------------
+   10. Authentic Member-Only Post Lock & Join CTA (Matching User Screenshot)
+   ---------------------------------------------------- */
+.member-lock-wrapper {
+    position: relative;
+    padding: 20px 0 40px 0;
+}
+
+.blurred-preview-content {
+    filter: blur(4.5px);
+    opacity: 0.35;
+    user-select: none;
+    pointer-events: none;
+    line-height: 1.8;
+    color: #444;
+    font-size: 14.5px;
+    margin-bottom: 24px;
+}
+
+.blurred-preview-content p {
+    margin-bottom: 12px;
+}
+
+.member-lock-guide-text {
+    text-align: center;
+    font-size: 13.5px;
+    color: #888;
+    margin-bottom: 30px;
+    letter-spacing: -0.3px;
+}
+
+.member-lock-divider {
+    height: 1px;
+    background: #f1f3f5;
+    margin: 24px auto 36px auto;
+    width: 100%;
+}
+
+.member-lock-cta-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 20px 30px 20px;
+}
+
+.cta-main-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #111;
+    line-height: 1.45;
+    margin-bottom: 10px;
+    letter-spacing: -0.5px;
+}
+
+.cta-main-title .cta-cafe-name {
+    color: #2b6cb0;
+    font-weight: 900;
+}
+
+.cta-cafe-sub {
+    font-size: 13.5px;
+    color: #999;
+    margin-bottom: 22px;
+}
+
+.cta-visitor-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    color: #555;
+    margin-bottom: 26px;
+}
+
+.cta-sparkle-icon {
+    font-size: 16px;
+    color: #4299e1;
+}
+
+.btn-lock-join-10s {
+    background: #03c75a;
+    border: none;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 14px 44px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(3, 199, 90, 0.25);
+    transition: all 0.15s ease-in-out;
+}
+
+.btn-lock-join-10s:hover {
+    background: #02b350;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(3, 199, 90, 0.35);
+}
+
+/* ====================================================
+   Cafe Member List & Intro Subtabs Styles
+   ==================================================== */
+.cafe-member-list-view {
+    margin-bottom: 30px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.cafe-info-subtabs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.cafe-info-subtabs .subtab-btn {
+    background: #ffffff;
+    border: 1px solid #e1e4e8;
+    border-radius: 20px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #555555;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.cafe-info-subtabs .subtab-btn:hover {
+    background: #f8fafc;
+    color: #222222;
+}
+
+.cafe-info-subtabs .subtab-btn.active {
+    background: #333333;
+    border-color: #333333;
+    color: #ffffff;
+    font-weight: 700;
+}
+
+.member-list-card {
+    background: #ffffff;
+    border: 1px solid #e5e8eb;
+    border-radius: 4px;
+    padding: 20px 24px;
+    min-height: 280px;
+}
+
+.member-filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #ebebeb;
+    margin-bottom: 8px;
+}
+
+.member-filter-tabs {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+}
+
+.btn-member-filter {
+    background: none;
+    border: none;
+    font-size: 13px;
+    color: #666666;
+    cursor: pointer;
+    padding: 0;
+    font-weight: 500;
+    font-family: inherit;
+    transition: color 0.15s;
+}
+
+.btn-member-filter strong {
+    font-weight: 700;
+}
+
+.btn-member-filter.active {
+    color: #111111;
+    font-weight: 700;
+}
+
+.member-filter-tabs .filter-sep {
+    color: #e5e8eb;
+    font-size: 11px;
+}
+
+.member-search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.member-search-wrap input {
+    border: 1px solid #d5d8dc;
+    border-radius: 2px;
+    padding: 5px 30px 5px 10px;
+    font-size: 12px;
+    width: 170px;
+    color: #333;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.15s;
+}
+
+.member-search-wrap input:focus {
+    border-color: #03c75a;
+}
+
+.member-search-wrap .btn-search-icon {
+    position: absolute;
+    right: 8px;
+    background: none;
+    border: none;
+    color: #888888;
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.member-search-wrap .btn-search-icon:hover {
+    color: #03c75a;
+}
+
+.member-items-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.member-item-row {
+    display: flex;
+    align-items: center;
+    padding: 16px 10px;
+    border-bottom: 1px solid #f2f4f6;
+    transition: background-color 0.15s;
+}
+
+.member-item-row:hover {
+    background-color: #fbfcfd;
+}
+
+.member-avatar-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 14px;
+    background: #f0f2f5;
+    flex-shrink: 0;
+}
+
+.member-avatar-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.member-info-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.member-name-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.member-nickname {
+    font-size: 14px;
+    font-weight: 700;
+    color: #222222;
+    letter-spacing: -0.3px;
+}
+
+.badge-role {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    line-height: 1.3;
+    font-weight: 600;
+}
+
+.badge-role-manager {
+    background: #eefaf2;
+    color: #03c75a;
+    border: 1px solid #c2ecd0;
+}
+
+.badge-role-staff {
+    background: #f0f4ff;
+    color: #3b82f6;
+    border: 1px solid #d0dffe;
+}
+
+.badge-role-member {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    font-weight: 500;
+}
+
+.badge-n-icon {
+    background: #ff5058;
+    color: #ffffff;
+    font-size: 9px;
+    font-weight: 900;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.member-pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 24px;
+    padding-top: 14px;
+}
+
+.member-pagination .page-num.active {
+    width: 28px;
+    height: 28px;
+    border: 1px solid #d5d8dc;
+    color: #222222;
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+}
+
+.member-empty-msg {
+    text-align: center;
+    padding: 40px 20px;
+    color: #888888;
+    font-size: 13px;
+}
+
+
+
+

@@ -1,5 +1,5 @@
 // ====================================================
-// NAVER BLOG - Core Engine & Interactive Data Manager
+// EDUVER BLOG - Core Engine & Interactive Data Manager
 // ====================================================
 
 // Initial seed blog posts for demonstration
@@ -221,7 +221,7 @@ function getLoggedInUser() {
     const name = localStorage.getItem("naverLoggedInUser") || "조이네";
     return {
         name: name,
-        email: localStorage.getItem("naverLoggedInEmail") || `${name}@edunaver.com`,
+        email: localStorage.getItem("naverLoggedInEmail") || `${name}@eduver.com`,
         blogTitle: localStorage.getItem(`naverMyBlogTitle_${name}`) || `${name}의 일상 & 지식 서재`,
         blogDesc: localStorage.getItem(`naverMyBlogDesc_${name}`) || "배움과 소소한 일상을 기록하는 공간입니다."
     };

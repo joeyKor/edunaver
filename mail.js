@@ -2,12 +2,12 @@
 // If hosted on Synology Web Station or locally, enter your Pocketbase API URL (e.g. "http://192.168.0.10:8090").
 const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
 
-// EDUNAVER Mail Client - Interactive Logic Script
+// EDUVER Mail Client - Interactive Logic Script
 
 document.addEventListener("DOMContentLoaded", () => {
     // Read logged-in username and email from localStorage or default
     const userName = localStorage.getItem("naverLoggedInUser") || "홍길동";
-    const userEmail = localStorage.getItem("naverLoggedInEmail") || "gildong@edunaver.com";
+    const userEmail = localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com";
     const headerUserName = document.getElementById("header-user-name");
     if (headerUserName) {
         headerUserName.textContent = userName;

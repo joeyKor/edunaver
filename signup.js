@@ -1,4 +1,4 @@
-// EDUNAVER Sign-up Logic with PocketBase integration
+// EDUVER Sign-up Logic with PocketBase integration
 
 document.addEventListener("DOMContentLoaded", () => {
     const signupForm = document.getElementById("signup-form");
@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
         try {
             const signupData = {
                 username: usernameVal,
-                email: `${usernameVal}@edunaver.com`,
+                email: `${usernameVal}@eduver.com`,
                 emailVisibility: true,
                 password: passwordVal,
                 passwordConfirm: passwordConfirmVal,

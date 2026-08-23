@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDUNAVER - 대한민국 대표 교육 포털</title>
+    <title>EDUVER - 대한민국 대표 교육 포털 (에듀버)</title>
     <!-- Google Fonts for modern typography -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -302,6 +302,142 @@
             text-decoration: none !important;
         }
 
+        /* Official Site Card Styles (Brand/Site Rich Card) */
+        .official-site-card {
+            background: #ffffff !important;
+            border: 1px solid #e3e7ed !important;
+            border-radius: 12px !important;
+            padding: 20px 22px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+            margin-bottom: 20px !important;
+            position: relative !important;
+        }
+
+        .official-site-header {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-between !important;
+            margin-bottom: 8px !important;
+        }
+
+        .official-site-source {
+            display: flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            text-decoration: none !important;
+        }
+
+        .official-site-favicon {
+            width: 22px !important;
+            height: 22px !important;
+            border-radius: 6px !important;
+            object-fit: cover !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            font-size: 13px !important;
+            color: #fff !important;
+            flex-shrink: 0 !important;
+        }
+
+        .official-site-name {
+            font-size: 14px !important;
+            font-weight: 700 !important;
+            color: #111 !important;
+        }
+
+        .official-site-domain {
+            font-size: 13px !important;
+            color: #767676 !important;
+        }
+
+        .official-site-more-btn {
+            background: none !important;
+            border: none !important;
+            color: #999 !important;
+            cursor: pointer !important;
+            font-size: 14px !important;
+            padding: 4px !important;
+        }
+
+        .official-site-title {
+            font-size: 19px !important;
+            font-weight: 700 !important;
+            margin: 0 0 10px 0 !important;
+            line-height: 1.3 !important;
+        }
+
+        .official-site-title a {
+            color: #035fe5 !important;
+            text-decoration: none !important;
+            transition: color 0.15s !important;
+        }
+
+        .official-site-title a:hover {
+            text-decoration: underline !important;
+            color: #0040b3 !important;
+        }
+
+        .official-site-sublinks {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            align-items: center !important;
+            gap: 6px 12px !important;
+            margin-bottom: 12px !important;
+        }
+
+        .official-site-sublinks a {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #1f3bb3 !important;
+            text-decoration: none !important;
+            position: relative !important;
+        }
+
+        .official-site-sublinks a:hover {
+            text-decoration: underline !important;
+        }
+
+        .official-site-sublinks .sublink-dot {
+            color: #d1d5db !important;
+            font-size: 11px !important;
+            user-select: none !important;
+        }
+
+        .official-site-desc {
+            font-size: 14px !important;
+            color: #4b525d !important;
+            line-height: 1.55 !important;
+            margin: 0 0 14px 0 !important;
+        }
+
+        .official-site-tags-row {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            gap: 6px !important;
+        }
+
+        .official-site-pill {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            background: #f8f9fa !important;
+            border: 1px solid #e5e8eb !important;
+            color: #495057 !important;
+            padding: 6px 12px !important;
+            border-radius: 20px !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            text-decoration: none !important;
+            transition: all 0.15s !important;
+        }
+
+        .official-site-pill:hover {
+            background: #eef1f4 !important;
+            border-color: #d0d7de !important;
+            color: #111 !important;
+        }
+
         @media (max-width: 860px) {
             .search-results-body {
                 grid-template-columns: 1fr !important;
@@ -332,9 +468,9 @@
             <!-- Central Search Area -->
             <div class="header-center">
                 <div class="logo-container">
-                    <a href="#" class="logo-link">
+                    <a href="index.html" class="logo-link" id="main-logo-link">
                         <span class="logo-text">
-                            EDU<span class="logo-highlight">N<span class="cap-icon"><i class="fa-solid fa-graduation-cap"></i></span>V</span>ER
+                            EDU<span class="logo-highlight">V<span class="cap-icon"><i class="fa-solid fa-graduation-cap"></i></span></span>ER
                         </span>
                     </a>
                 </div>
@@ -395,7 +531,7 @@
                 <div class="icon-circle mail"><i class="fa-solid fa-envelope"></i></div>
                 <span>메일</span>
             </a>
-            <a href="#" class="service-item">
+            <a href="cafe.html" class="service-item" id="nav-cafe-btn">
                 <div class="icon-circle cafe"><i class="fa-solid fa-users"></i></div>
                 <span>학습 카페</span>
             </a>
@@ -449,9 +585,6 @@
                     <button class="search-tab-btn" data-tab="news"><i class="fa-regular fa-newspaper"></i> 뉴스</button>
                     <button class="search-tab-btn" data-tab="image"><i class="fa-regular fa-image"></i> 이미지</button>
                 </div>
-                <button class="btn-close-search-results" id="btn-close-search-results">
-                    <i class="fa-solid fa-xmark"></i> 메인으로 돌아가기
-                </button>
             </div>
 
             <div class="search-results-body">
@@ -482,7 +615,7 @@
                     </div>
                     <div class="search-side-card" style="margin-top: 16px;">
                         <h4>블로그 바로가기</h4>
-                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">지식과 일상이 가득한 에듀네이버 블로그</p>
+                        <p style="font-size: 12px; color: #666; margin-bottom: 10px;">지식과 일상이 가득한 에듀버 블로그</p>
                         <a href="blog.html" class="btn-side-blog-link"><i class="fa-solid fa-arrow-up-right-from-square"></i> 블로그 홈</a>
                     </div>
                 </div>
@@ -571,9 +704,9 @@
                 <!-- Premium Naver-style Login Container -->
                 <section class="login-card-container" id="login-card-container">
                     <div class="login-card-logged-out" id="login-logged-out">
-                        <p class="login-prompt">에듀네이버를 더 안전하고 유익하게 이용하세요</p>
+                        <p class="login-prompt">에듀버를 더 안전하고 유익하게 이용하세요</p>
                         <button class="login-btn-green" id="show-login-form-btn">
-                            <span class="edu-logo-inline">EDU</span><b>NAVER</b> 로그인
+                            <span class="edu-logo-inline">EDU</span><b>VER</b> 로그인
                         </button>
                         <div class="login-links">
                             <a href="find-id.html">아이디 찾기</a>
@@ -587,7 +720,7 @@
                     <!-- Toggleable Form (Hidden initially, slides down on click) -->
                     <div class="login-form-container" id="login-form-container" style="display: none;">
                         <div class="form-header">
-                            <h3>EDUNAVER 로그인</h3>
+                            <h3>EDUVER 로그인</h3>
                             <button class="form-close-btn" id="close-login-btn"><i class="fa-solid fa-xmark"></i></button>
                         </div>
                         <form id="auth-form" class="auth-form">
@@ -636,7 +769,7 @@
                                     <span class="profile-name" id="user-display-name">홍길동</span>님
                                     <span class="profile-id-badge">EDU ID <i class="fa-solid fa-lock"></i></span>
                                 </div>
-                                <div class="profile-email">gildong@edunaver.com</div>
+                                <div class="profile-email">gildong@eduver.com</div>
                                 <div class="profile-tokens">
                                     <span class="token-item"><i class="fa-solid fa-envelope-open-text token-n"></i>멤버십</span>
                                     <span class="token-item">쪽지 <strong class="highlight-green" id="profile-note-count">0</strong></span>
@@ -652,7 +785,7 @@
                                 <span class="nav-menu-label">메일</span>
                                 <span class="nav-menu-count" id="profile-mail-count">0</span>
                             </button>
-                            <button class="nav-menu-item">
+                            <button class="nav-menu-item" id="card-cafe-btn" onclick="location.href='cafe.html'">
                                 <span class="nav-menu-label">카페</span>
                                 <span class="nav-menu-count" id="profile-cafe-count">0</span>
                             </button>
@@ -768,7 +901,7 @@
             <a href="#">청소년보호정책</a>
             <a href="#">고객센터</a>
         </div>
-        <p class="copyright">Copyright © EDUNAVER Corp. All Rights Reserved.</p>
+        <p class="copyright">Copyright © EDUVER Corp. All Rights Reserved.</p>
     </footer>
 
 

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   pocketbase:
     image: pocketbase/pocketbase:latest
-    container_name: edunaver-pocketbase
+    container_name: eduver-pocketbase
     ports:
       - "8090:8090"
     volumes:
@@ -16,7 +16,7 @@ services:
 
   web:
     image: nginx:alpine
-    container_name: edunaver-web
+    container_name: eduver-web
     ports:
       - "8080:80"
     volumes:
