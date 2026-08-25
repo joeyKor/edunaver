@@ -19,6 +19,122 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const currentUserEmail = userEmail;
+    const currentUserName = userName;
+
+    // User Directory Cache for resolving email to display name
+    const userDirectory = {
+        "notify@style24.com": "스타일24",
+        "teacher@school.net": "김선생님",
+        "admin@eduver.com": "에듀버 관리자",
+        "help@eduver.com": "에듀버 고객센터",
+        "security@eduver.com": "에듀버 보안센터",
+        "naver@naver.com": "네이버"
+    };
+
+    if (currentUserEmail) {
+        userDirectory[currentUserEmail.toLowerCase()] = currentUserName;
+    }
+    const currentUserId = (localStorage.getItem("naverLoggedInUserId") || "").toLowerCase();
+    if (currentUserId) {
+        userDirectory[currentUserId] = currentUserName;
+        userDirectory[`${currentUserId}@eduver.com`] = currentUserName;
+    }
+
+    const loadUserDirectory = async () => {
+        try {
+            const response = await fetch(`${POCKETBASE_URL}/api/collections/users/records?perPage=200`);
+            if (response.ok) {
+                const data = await response.json();
+                (data.items || []).forEach(u => {
+                    const displayName = u.name || u.username;
+                    if (u.email) userDirectory[u.email.toLowerCase()] = displayName;
+                    if (u.username) {
+                        userDirectory[u.username.toLowerCase()] = displayName;
+                        userDirectory[`${u.username.toLowerCase()}@eduver.com`] = displayName;
+                        userDirectory[`${u.username.toLowerCase()}@edunaver.com`] = displayName;
+                        userDirectory[`${u.username.toLowerCase()}@naver.com`] = displayName;
+                    }
+                });
+            }
+        } catch (e) {
+            console.warn("Could not preload user directory:", e);
+        }
+    };
+
+    const getSenderInfo = (rawStr) => {
+        if (!rawStr) return { name: "알 수 없음", email: "", fullDisplay: "알 수 없음" };
+        
+        // Match "Name <email@domain.com>"
+        const match = String(rawStr).match(/^(.*?)\s*<([^>]+)>/);
+        if (match) {
+            const name = match[1].trim();
+            const email = match[2].trim();
+            return { name: name || email, email: email, fullDisplay: `${name || email} <${email}>` };
+        }
+
+        const clean = String(rawStr).trim();
+        const lower = clean.toLowerCase();
+
+        if (userDirectory[lower]) {
+            const email = clean.includes("@") ? clean : `${clean}@eduver.com`;
+            return {
+                name: userDirectory[lower],
+                email: email,
+                fullDisplay: `${userDirectory[lower]} <${email}>`
+            };
+        }
+
+        if (clean.includes("@")) {
+            const userPart = clean.split("@")[0].toLowerCase();
+            if (userDirectory[userPart]) {
+                return {
+                    name: userDirectory[userPart],
+                    email: clean,
+                    fullDisplay: `${userDirectory[userPart]} <${clean}>`
+                };
+            }
+            return {
+                name: clean.split("@")[0],
+                email: clean,
+                fullDisplay: `${clean.split("@")[0]} <${clean}>`
+            };
+        }
+
+        return {
+            name: clean,
+            email: `${clean}@eduver.com`,
+            fullDisplay: `${clean} <${clean}@eduver.com>`
+        };
+    };
+
+    const formatKoreanDate = (dateVal) => {
+        if (!dateVal) return "";
+        try {
+            const d = new Date(String(dateVal).replace(" ", "T"));
+            if (isNaN(d.getTime())) return String(dateVal);
+
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            const year = d.getFullYear();
+            const month = d.getMonth() + 1;
+            const date = d.getDate();
+            const day = dayNames[d.getDay()];
+            let hours = d.getHours();
+            const ampm = hours < 12 ? '오전' : '오후';
+            hours = hours % 12 || 12;
+            const minutes = String(d.getMinutes()).padStart(2, '0');
+
+            return `${year}년 ${month}월 ${date}일 (${day}) ${ampm} ${hours}:${minutes}`;
+        } catch (e) {
+            return String(dateVal);
+        }
+    };
+
+    const buildEmailFilter = (field, emailStr) => {
+        const clean = (emailStr || "").toLowerCase().trim();
+        const user = clean.includes("@") ? clean.split("@")[0] : clean;
+        const expr = `(${field}='${clean}' || ${field}='${user}@eduver.com' || ${field}='${user}@edunaver.com' || ${field}='${user}@naver.com' || ${field}='${user}')`;
+        return encodeURIComponent(expr);
+    };
 
     // View Panels selection
     const inboxPanel = document.getElementById("inbox-panel");
@@ -44,7 +160,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Celebration screen
     const celebrationScreen = document.getElementById("celebration-screen");
-    const celebrationConfirmBtn = document.getElementById("celebration-confirm-btn");
+    const celebrationCloseBtn = document.getElementById("celebration-close-btn");
+    const celebrationXBtn = document.getElementById("celebration-x-btn");
 
     // Lists and Badges
     const sentList = document.getElementById("sent-list");
@@ -58,25 +175,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // (Pocketbase integration replaces sentEmails local array)
 
-    // Sub-tab elements
-    const tabInboxUnread = document.getElementById("tab-inbox-unread");
-    const tabInboxAll = document.getElementById("tab-inbox-all");
+    // Sub-tab & Filter elements
+    const tabInboxMain = document.getElementById("tab-inbox-main");
+    const filterUnreadToggle = document.getElementById("filter-unread-toggle");
     const allMailCount = document.getElementById("all-mail-count");
 
     // ----------------------------------------------------
     // 1. View Switcher Helper
     // ----------------------------------------------------
     let currentPanel = "inbox";
-    let inboxFilterMode = "unread"; // 'unread' (받은메일함: 읽지 않은 메일만) or 'all' (전체메일: 읽은 메일 포함 모두)
+    let inboxFilterMode = "all"; // 'all' (전체메일 기본) or 'unread' (안읽은 메일만 필터)
 
-    const updateSubTabStyles = () => {
-        if (tabInboxUnread && tabInboxAll) {
+    const updateUnreadFilterBtnUI = () => {
+        const filterBtn = document.getElementById("filter-unread-toggle");
+        const filterIcon = document.getElementById("filter-unread-icon");
+        if (filterBtn && filterIcon) {
             if (inboxFilterMode === "unread") {
-                tabInboxUnread.classList.add("active");
-                tabInboxAll.classList.remove("active");
+                filterBtn.classList.add("active");
+                filterIcon.className = "fa-solid fa-square-check unread-check-icon";
             } else {
-                tabInboxAll.classList.add("active");
-                tabInboxUnread.classList.remove("active");
+                filterBtn.classList.remove("active");
+                filterIcon.className = "fa-regular fa-square unread-check-icon";
             }
         }
     };
@@ -97,17 +216,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (panelName === "inbox") {
             currentPanel = "inbox";
-            inboxFilterMode = filterMode || "unread";
+            inboxFilterMode = filterMode || "all";
             inboxPanel.style.display = "flex";
             if (folderInboxBtn) folderInboxBtn.classList.add("active");
-            updateSubTabStyles();
+            if (tabInboxMain) tabInboxMain.textContent = "받은메일함";
+            updateUnreadFilterBtnUI();
             renderInboxEmailsList();
         } else if (panelName === "all") {
             currentPanel = "all";
             inboxFilterMode = "all";
             inboxPanel.style.display = "flex";
             if (folderAllBtn) folderAllBtn.classList.add("active");
-            updateSubTabStyles();
+            if (tabInboxMain) tabInboxMain.textContent = "전체메일";
+            updateUnreadFilterBtnUI();
             renderInboxEmailsList();
         } else if (panelName === "sent") {
             currentPanel = "sent";
@@ -135,7 +256,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sidebarWriteBtn.addEventListener("click", () => showPanel("compose"));
     }
     if (folderInboxBtn) {
-        folderInboxBtn.addEventListener("click", () => showPanel("inbox", "unread"));
+        folderInboxBtn.addEventListener("click", () => showPanel("inbox", "all"));
     }
     if (folderAllBtn) {
         folderAllBtn.addEventListener("click", () => showPanel("all", "all"));
@@ -147,19 +268,20 @@ document.addEventListener("DOMContentLoaded", () => {
         folderReceiptBtn.addEventListener("click", () => showPanel("receipt"));
     }
 
-    // Inbox Sub-Tab Clicks
-    if (tabInboxUnread) {
-        tabInboxUnread.addEventListener("click", () => {
-            folderItems.forEach(item => item.classList.remove("active"));
-            if (folderInboxBtn) folderInboxBtn.classList.add("active");
-            showPanel("inbox", "unread");
+    // Inbox Sub-Tab & Unread Toggle Clicks
+    if (tabInboxMain) {
+        tabInboxMain.addEventListener("click", () => {
+            inboxFilterMode = "all";
+            updateUnreadFilterBtnUI();
+            renderInboxEmailsList();
         });
     }
-    if (tabInboxAll) {
-        tabInboxAll.addEventListener("click", () => {
-            folderItems.forEach(item => item.classList.remove("active"));
-            if (folderAllBtn) folderAllBtn.classList.add("active");
-            showPanel("all", "all");
+
+    if (filterUnreadToggle) {
+        filterUnreadToggle.addEventListener("click", () => {
+            inboxFilterMode = (inboxFilterMode === "unread") ? "all" : "unread";
+            updateUnreadFilterBtnUI();
+            renderInboxEmailsList();
         });
     }
 
@@ -221,11 +343,25 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    if (celebrationConfirmBtn) {
-        celebrationConfirmBtn.addEventListener("click", () => {
+    const closeCelebrationModal = () => {
+        if (celebrationScreen) {
             celebrationScreen.style.display = "none";
-            resetComposerForm();
-            showPanel("sent");
+        }
+        resetComposerForm();
+        showPanel("sent");
+    };
+
+    if (celebrationCloseBtn) {
+        celebrationCloseBtn.addEventListener("click", closeCelebrationModal);
+    }
+    if (celebrationXBtn) {
+        celebrationXBtn.addEventListener("click", closeCelebrationModal);
+    }
+    if (celebrationScreen) {
+        celebrationScreen.addEventListener("click", (e) => {
+            if (e.target === celebrationScreen) {
+                closeCelebrationModal();
+            }
         });
     }
 
@@ -282,6 +418,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const inboxUnreadCount = document.getElementById("inbox-unread-count");
         if (inboxUnreadCount) inboxUnreadCount.textContent = unreadCount;
 
+        const subtabUnreadCount = document.getElementById("subtab-unread-count");
+        if (subtabUnreadCount) subtabUnreadCount.textContent = unreadCount;
+
         if (allMailCount) {
             allMailCount.textContent = allEmails.length;
         }
@@ -325,11 +464,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 ? '<i class="fa-regular fa-envelope-open icon-mail-open"></i>' 
                 : '<i class="fa-solid fa-envelope icon-unread-mail"></i>';
 
+            const senderInfo = getSenderInfo(email.sender);
+
             li.innerHTML = `
                 <div class="col-check"><i class="fa-regular fa-square"></i></div>
                 <div class="col-star"><i class="fa-regular fa-star"></i></div>
                 <div class="col-read-icon">${readIcon}</div>
-                <div class="col-sender" title="${email.sender}">${email.sender}</div>
+                <div class="col-sender" title="${senderInfo.fullDisplay}"><strong>${senderInfo.name}</strong></div>
                 <div class="col-subject">
                     <span class="subj-text">${email.subject}</span>
                     <i class="fa-solid fa-magnifying-glass icon-hover" title="본문 검색"></i>
@@ -346,7 +487,8 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!inboxList) return;
 
         try {
-            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=recipient='${currentUserEmail}'`);
+            const filterParam = buildEmailFilter('recipient', currentUserEmail);
+            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=${filterParam}`);
             if (!response.ok) throw new Error("API error");
             const data = await response.json();
             renderInboxRows(data.items || []);
@@ -367,10 +509,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!sentList) return;
 
         try {
-            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=sender='${currentUserEmail}'`);
+            const filterParam = buildEmailFilter('sender', currentUserEmail);
+            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=${filterParam}`);
             if (!response.ok) throw new Error("API error");
             const data = await response.json();
-            const emails = data.items;
+            const emails = data.items || [];
 
             if (sentMailboxCount) sentMailboxCount.textContent = emails.length;
             if (sentMailCountSidebar) sentMailCountSidebar.textContent = emails.length;
@@ -406,11 +549,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<div class="col-receipt read-receipt" title="상대방이 읽음"><i class="fa-regular fa-envelope-open receipt-icon"></i> ${timeStr}</div>`
                     : `<div class="col-receipt unread-receipt" title="상대방이 아직 읽지 않음">읽지않음</div>`;
 
+                const recipientInfo = getSenderInfo(email.recipient);
+
                 li.innerHTML = `
                     <div class="col-check"><i class="fa-regular fa-square"></i></div>
                     <div class="col-star"><i class="fa-regular fa-star"></i></div>
                     <div class="col-read-icon"><i class="fa-regular fa-envelope-open icon-mail-open"></i></div>
-                    <div class="col-sender" title="${email.recipient}">${email.recipient}</div>
+                    <div class="col-sender" title="${recipientInfo.fullDisplay}">${recipientInfo.name}</div>
                     <div class="col-subject">
                         <span class="subj-text">${email.subject}</span>
                         <i class="fa-solid fa-magnifying-glass icon-hover" title="본문 검색"></i>
@@ -438,10 +583,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!receiptList) return;
 
         try {
-            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=sender='${currentUserEmail}'`);
+            const filterParam = buildEmailFilter('sender', currentUserEmail);
+            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=${filterParam}`);
             if (!response.ok) throw new Error("API error");
             const data = await response.json();
-            const emails = data.items;
+            const emails = data.items || [];
 
             if (receiptMailboxCount) receiptMailboxCount.textContent = emails.length;
 
@@ -476,11 +622,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? `<div class="col-receipt read-receipt" title="상대방이 읽음"><i class="fa-regular fa-envelope-open receipt-icon"></i> ${timeStr}</div>`
                     : `<div class="col-receipt unread-receipt" title="상대방이 아직 읽지 않음">읽지않음</div>`;
 
+                const recipientInfo = getSenderInfo(email.recipient);
+
                 li.innerHTML = `
                     <div class="col-check"><i class="fa-regular fa-square"></i></div>
                     <div class="col-star"><i class="fa-regular fa-star"></i></div>
                     <div class="col-read-icon"><i class="fa-solid fa-user-check" style="color: #9aa0a6; font-size: 13px;"></i></div>
-                    <div class="col-sender" title="${email.recipient}">${email.recipient}</div>
+                    <div class="col-sender" title="${recipientInfo.fullDisplay}">${recipientInfo.name}</div>
                     <div class="col-subject">
                         <span class="subj-text">${email.subject}</span>
                         <i class="fa-solid fa-magnifying-glass icon-hover" title="본문 검색"></i>
@@ -698,25 +846,45 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             }
 
+            const senderInfo = getSenderInfo(email.sender);
+            const recipientInfo = getSenderInfo(email.recipient);
+
             // Populate detail view fields
-            document.getElementById("detail-subject").textContent = email.subject;
-            document.getElementById("detail-sender").textContent = email.sender;
-            document.getElementById("detail-recipient").textContent = email.recipient;
-            
-            let timeStr = email.created;
-            try {
-                const dateObj = new Date(email.created.replace(" ", "T"));
-                if (!isNaN(dateObj.getTime())) {
-                    timeStr = dateObj.toLocaleString('ko-KR');
-                }
-            } catch (e) {}
-            document.getElementById("detail-time").textContent = timeStr;
-            document.getElementById("detail-body").innerHTML = email.body || "";
+            const detailSubject = document.getElementById("detail-subject");
+            if (detailSubject) detailSubject.textContent = email.subject || "제목 없음";
+
+            const detailSenderName = document.getElementById("detail-sender-name");
+            const detailSenderEmail = document.getElementById("detail-sender-email");
+            if (detailSenderName) detailSenderName.textContent = senderInfo.name;
+            if (detailSenderEmail) detailSenderEmail.textContent = senderInfo.email;
+
+            const detailRecipientName = document.getElementById("detail-recipient-name");
+            const detailRecipientEmail = document.getElementById("detail-recipient-email");
+            if (detailRecipientName) detailRecipientName.textContent = recipientInfo.name;
+            if (detailRecipientEmail) detailRecipientEmail.textContent = recipientInfo.email;
+
+            const detailTime = document.getElementById("detail-time");
+            if (detailTime) {
+                detailTime.textContent = formatKoreanDate(email.created);
+            }
+
+            const detailBody = document.getElementById("detail-body");
+            if (detailBody) {
+                detailBody.innerHTML = email.body || "";
+            }
 
             // Save active detail mail ID on delete button
             const deleteBtn = document.getElementById("detail-delete-btn");
             if (deleteBtn) {
                 deleteBtn.setAttribute("data-id", email.id);
+            }
+
+            // Reset star button state
+            const detailStarBtn = document.getElementById("detail-star-btn");
+            if (detailStarBtn) {
+                detailStarBtn.classList.remove("active");
+                const icon = detailStarBtn.querySelector("i");
+                if (icon) icon.className = "fa-regular fa-star";
             }
 
             showPanel("detail");
@@ -758,7 +926,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     const countBadge = document.querySelector("#folder-inbox-btn .badge-count");
                     const countSidebar = document.getElementById("unread-sidebar-count");
                     const countToolbar = document.getElementById("inbox-unread-count");
-                    [countBadge, countSidebar, countToolbar].forEach(el => {
+                    const countSubtab = document.getElementById("subtab-unread-count");
+                    [countBadge, countSidebar, countToolbar, countSubtab].forEach(el => {
                         if (el) {
                             const val = parseInt(el.textContent);
                             if (val > 0) el.textContent = val - 1;
@@ -821,15 +990,35 @@ document.addEventListener("DOMContentLoaded", () => {
     if (detailBackBtn) detailBackBtn.addEventListener("click", handleDetailBack);
     if (detailBackTopBtn) detailBackTopBtn.addEventListener("click", handleDetailBack);
 
+    // Detail star button toggle
+    const detailStarBtn = document.getElementById("detail-star-btn");
+    if (detailStarBtn) {
+        detailStarBtn.addEventListener("click", () => {
+            detailStarBtn.classList.toggle("active");
+            const icon = detailStarBtn.querySelector("i");
+            if (icon) {
+                if (detailStarBtn.classList.contains("active")) {
+                    icon.className = "fa-solid fa-star";
+                } else {
+                    icon.className = "fa-regular fa-star";
+                }
+            }
+        });
+    }
+
     // Reply function
     const handleReply = (isReplyAll = false) => {
         if (!currentDetailEmail) return;
 
         resetComposerForm();
         
+        const senderInfo = getSenderInfo(currentDetailEmail.sender);
+        const recipientInfo = getSenderInfo(currentDetailEmail.recipient);
+        const formattedTime = formatKoreanDate(currentDetailEmail.created);
+
         // If reply: To = original sender; If replyAll: To = sender + recipient
         if (inputTo) {
-            inputTo.value = currentDetailEmail.sender;
+            inputTo.value = senderInfo.email || currentDetailEmail.sender;
         }
 
         // Subject: Re: [Original Subject]
@@ -840,16 +1029,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Quoted Body
         if (inputBody) {
-            let formattedTime = currentDetailEmail.created;
-            try {
-                const d = new Date(currentDetailEmail.created.replace(" ", "T"));
-                if (!isNaN(d.getTime())) formattedTime = d.toLocaleString('ko-KR');
-            } catch (e) {}
-
             inputBody.innerHTML = `<br><br><div style="border-left: 2px solid #ccc; padding-left: 10px; margin-top: 20px; color: #666; font-size: 13px;">
                 <p style="margin: 0 0 6px 0;"><strong>----- 원본 메일 -----</strong></p>
-                <p style="margin: 0 0 4px 0;"><strong>보낸사람:</strong> ${currentDetailEmail.sender}</p>
-                <p style="margin: 0 0 4px 0;"><strong>받는사람:</strong> ${currentDetailEmail.recipient}</p>
+                <p style="margin: 0 0 4px 0;"><strong>보낸사람:</strong> ${senderInfo.fullDisplay}</p>
+                <p style="margin: 0 0 4px 0;"><strong>받는사람:</strong> ${recipientInfo.fullDisplay}</p>
                 <p style="margin: 0 0 4px 0;"><strong>날짜:</strong> ${formattedTime}</p>
                 <p style="margin: 0 0 10px 0;"><strong>제목:</strong> ${currentDetailEmail.subject}</p>
                 <div>${currentDetailEmail.body || ""}</div>
@@ -884,16 +1067,14 @@ document.addEventListener("DOMContentLoaded", () => {
                 inputSubject.value = origSubj.startsWith("Fwd:") ? origSubj : `Fwd: ${origSubj}`;
             }
             if (inputBody) {
-                let formattedTime = currentDetailEmail.created;
-                try {
-                    const d = new Date(currentDetailEmail.created.replace(" ", "T"));
-                    if (!isNaN(d.getTime())) formattedTime = d.toLocaleString('ko-KR');
-                } catch (e) {}
+                const senderInfo = getSenderInfo(currentDetailEmail.sender);
+                const recipientInfo = getSenderInfo(currentDetailEmail.recipient);
+                const formattedTime = formatKoreanDate(currentDetailEmail.created);
 
                 inputBody.innerHTML = `<br><br><div style="border-left: 2px solid #ccc; padding-left: 10px; margin-top: 20px; color: #666; font-size: 13px;">
                     <p style="margin: 0 0 6px 0;"><strong>----- 전달된 메일 -----</strong></p>
-                    <p style="margin: 0 0 4px 0;"><strong>보낸사람:</strong> ${currentDetailEmail.sender}</p>
-                    <p style="margin: 0 0 4px 0;"><strong>받는사람:</strong> ${currentDetailEmail.recipient}</p>
+                    <p style="margin: 0 0 4px 0;"><strong>보낸사람:</strong> ${senderInfo.fullDisplay}</p>
+                    <p style="margin: 0 0 4px 0;"><strong>받는사람:</strong> ${recipientInfo.fullDisplay}</p>
                     <p style="margin: 0 0 4px 0;"><strong>날짜:</strong> ${formattedTime}</p>
                     <p style="margin: 0 0 10px 0;"><strong>제목:</strong> ${currentDetailEmail.subject}</p>
                     <div>${currentDetailEmail.body || ""}</div>
@@ -945,7 +1126,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Initial fetch of received emails & sent email counts on DOM load
-    renderInboxEmailsList();
+    // Initial fetch of directory, received emails & sent email counts on DOM load
+    showPanel("inbox", "all");
     renderSentEmailsList();
+    loadUserDirectory().then(() => {
+        renderInboxEmailsList();
+    });
 });
+

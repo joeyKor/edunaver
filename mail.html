@@ -168,15 +168,23 @@
                 <!-- 1. INBOX MAIL LIST VIEW -->
                 <div class="mail-view-panel" id="inbox-panel">
                     
-                    <!-- Inner Sub-Tabs (받은메일함, 전체메일, 프로모션, 청구결제, SNS, 카페) -->
+                    <!-- Inner Sub-Tabs (받은메일함, 프로모션, 청구결제, SNS, 카페 + 우측 안읽은 메일 선택 옵션) -->
                     <div class="mail-sub-tabs">
-                        <button class="sub-tab active" id="tab-inbox-unread">받은메일함 (안읽은 메일)</button>
-                        <button class="sub-tab" id="tab-inbox-all">전체메일 (모든 메일)</button>
-                        <button class="sub-tab">프로모션</button>
-                        <button class="sub-tab">청구·결제</button>
-                        <button class="sub-tab">SNS</button>
-                        <button class="sub-tab">카페</button>
-                        <button class="sub-tab add-btn" title="탭 추가"><i class="fa-solid fa-plus"></i></button>
+                        <div class="sub-tabs-left">
+                            <button class="sub-tab active" id="tab-inbox-main">받은메일함</button>
+                            <button class="sub-tab">프로모션</button>
+                            <button class="sub-tab">청구·결제</button>
+                            <button class="sub-tab">SNS</button>
+                            <button class="sub-tab">카페</button>
+                            <button class="sub-tab add-btn" title="탭 추가"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div class="sub-tabs-right">
+                            <button class="unread-filter-btn" id="filter-unread-toggle" title="안읽은 메일만 보기">
+                                <i class="fa-regular fa-square unread-check-icon" id="filter-unread-icon"></i>
+                                <span class="filter-label">안읽은 메일</span>
+                                <span class="unread-filter-badge" id="subtab-unread-count">0</span>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- Toolbar Actions bar -->
@@ -309,16 +317,34 @@
                             <button class="tb-action-btn" id="detail-back-btn"><i class="fa-solid fa-arrow-left"></i> 목록</button>
                         </div>
                     </div>
-                    <div class="mail-detail-container" style="padding: 24px; background: #fff; flex: 1; overflow-y: auto;">
-                        <div class="detail-header" style="border-bottom: 1px solid #eee; padding-bottom: 16px; margin-bottom: 20px;">
-                            <h2 id="detail-subject" style="font-size: 20px; font-weight: bold; margin-bottom: 12px; color: #222;">제목</h2>
-                            <div class="detail-meta" style="font-size: 13px; color: #666; display: flex; flex-direction: column; gap: 6px;">
-                                <div><strong>보낸사람:</strong> <span id="detail-sender">sender@eduver.com</span></div>
-                                <div><strong>받는사람:</strong> <span id="detail-recipient">recipient@eduver.com</span></div>
-                                <div><strong>보낸시간:</strong> <span id="detail-time">2026-08-14 06:45</span></div>
+                    <div class="mail-detail-container">
+                        <div class="detail-header">
+                            <div class="detail-title-row">
+                                <button class="detail-star-btn" id="detail-star-btn" title="중요메일 표시"><i class="fa-regular fa-star"></i></button>
+                                <h2 id="detail-subject">제목</h2>
+                                <button class="detail-popout-btn" title="새 창으로 열기"><i class="fa-solid fa-arrow-up-right-from-square"></i></button>
+                            </div>
+                            <div class="detail-meta">
+                                <div class="detail-meta-row">
+                                    <span class="detail-meta-label"><i class="fa-solid fa-angle-down" style="font-size: 11px; margin-right: 5px; color: #555;"></i>보낸사람</span>
+                                    <span class="sender-pill" id="detail-sender-pill">
+                                        <span class="sender-name" id="detail-sender-name">스타일24</span>
+                                        <span class="sender-email">&lt;<span id="detail-sender-email">notify@style24.com</span>&gt;</span>
+                                    </span>
+                                </div>
+                                <div class="detail-meta-row" id="detail-recipient-row">
+                                    <span class="detail-meta-label" style="padding-left: 14px;">받는사람</span>
+                                    <span class="sender-pill" id="detail-recipient-pill">
+                                        <span class="sender-name" id="detail-recipient-name">홍길동</span>
+                                        <span class="sender-email">&lt;<span id="detail-recipient-email">gildong@eduver.com</span>&gt;</span>
+                                    </span>
+                                </div>
+                                <div class="detail-meta-time" id="detail-time">
+                                    2026년 8월 15일 (토) 오전 2:32
+                                </div>
                             </div>
                         </div>
-                        <div id="detail-body" style="font-size: 14px; line-height: 1.6; color: #333; min-height: 200px; white-space: pre-wrap; word-break: break-all;">
+                        <div id="detail-body" class="detail-body-content">
                             본문 내용
                         </div>
                     </div>
@@ -464,13 +490,11 @@
     <!-- Sent Confirmation Modal (Replaces old celebration popup) -->
     <div class="celebration-overlay" id="celebration-screen" style="display: none;">
         <div class="celebration-card">
-            <div class="popper-icon green-icon"><i class="fa-regular fa-circle-check"></i></div>
+            <button class="modal-card-close-x" id="celebration-x-btn" aria-label="닫기"><i class="fa-solid fa-xmark"></i></button>
+            <div class="popper-icon"><i class="fa-regular fa-circle-check"></i></div>
             <h3>메일을 성공적으로 보냈습니다.</h3>
             <p>보내신 메일은 '보낸메일함'에서 확인하실 수 있습니다.</p>
-            <div class="sent-actions-row">
-                <button class="ok-btn inbox-goto-btn" id="celebration-inbox-btn">받은메일함 가기</button>
-                <button class="ok-btn" id="celebration-confirm-btn">보낸메일함 가기</button>
-            </div>
+            <button class="celebration-close-btn" id="celebration-close-btn">닫기</button>
         </div>
     </div>
 

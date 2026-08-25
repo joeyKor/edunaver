@@ -1189,30 +1189,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const cardMailBtn = document.getElementById("card-mail-btn");
     const subnavMailBtn = document.getElementById("nav-mail-btn");
 
-    const isUserLoggedIn = () => {
-        return localStorage.getItem("naverIsLoggedIn") === "true";
-    };
-
     const handleMailNavigation = (e) => {
         if (e) e.preventDefault();
-        
-        if (!isUserLoggedIn()) {
-            alert("로그인이 필요한 서비스입니다.");
-            const idInput = document.getElementById("user-id");
-            if (idInput && loginLoggedOut.style.display !== "none") {
-                loginLoggedOut.style.display = "none";
-                loginFormContainer.style.display = "block";
-                idInput.focus();
-            }
-            return;
-        }
-
-        // Navigate to the full dedicated mail page!
         window.location.href = "mail.html";
     };
 
     if (cardMailBtn) {
         cardMailBtn.addEventListener("click", handleMailNavigation);
+    }
+    if (subnavMailBtn) {
+        subnavMailBtn.addEventListener("click", handleMailNavigation);
     }
 
     const cardCafeBtn = document.getElementById("card-cafe-btn");
@@ -1236,11 +1222,13 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
         const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
-        const currentUserEmail = localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com";
+        const currentUserEmail = (localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com").toLowerCase().trim();
+        const user = currentUserEmail.includes("@") ? currentUserEmail.split("@")[0] : currentUserEmail;
+        const filterParam = encodeURIComponent(`(recipient='${currentUserEmail}' || recipient='${user}@eduver.com' || recipient='${user}@edunaver.com' || recipient='${user}@naver.com' || recipient='${user}')`);
         
         let unreadCount = 0;
         try {
-            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?filter=recipient='${currentUserEmail}'`);
+            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?filter=${filterParam}`);
             if (response.ok) {
                 const data = await response.json();
                 unreadCount = (data.items || []).filter(m => !m.is_read).length;

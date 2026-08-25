@@ -453,43 +453,6 @@
         </div>
     </div>
 
-    <!-- Test Direct Navigation & PB Verification Buttons -->
-    <div style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; align-items: flex-end;">
-        <button type="button" onclick="location.href='cafe-detail.html?name=%ED%86%B5%EC%9E%A5%EB%AA%A8%EC%9E%84'" style="padding: 12px 20px; background: #03c75a; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-            🚀 테스트: 무조건 [통장모임] 카페 입장
-        </button>
-        <button type="button" id="btn-test-pb-manager" style="padding: 12px 20px; background: #1e3a8a; color: white; border: none; border-radius: 25px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
-            🔍 테스트2: [통장모임] PB manager 조회
-        </button>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const btnTest2 = document.getElementById("btn-test-pb-manager");
-            if (btnTest2) {
-                btnTest2.addEventListener("click", async () => {
-                    try {
-                        btnTest2.textContent = "조회 중...";
-                        const res = await fetch("https://pb.joyfamkr.synology.me/api/collections/cafes/records?perPage=50");
-                        if (!res.ok) throw new Error("PocketBase 응답 에러: " + res.status);
-                        const data = await res.json();
-                        const targetCafe = (data.items || []).find(i => i.name === "통장모임" || (i.name && i.name.includes("통장모임")));
-                        
-                        if (targetCafe) {
-                            alert(`[PocketBase 통장모임 조회 성공!]\n\n• 카페 ID: ${targetCafe.id}\n• 카페 이름: ${targetCafe.name}\n• 매니저(manager): ${targetCafe.manager || '(없음)'}\n• 회원수: ${targetCafe.members}\n• 등록된 글 수: ${targetCafe.posts ? (typeof targetCafe.posts === 'string' ? JSON.parse(targetCafe.posts).length : targetCafe.posts.length) : 0}개`);
-                        } else {
-                            alert("⚠️ PocketBase에서 '통장모임' 이름의 카페를 찾지 못했습니다.\n현재 등록된 카페 목록:\n" + (data.items || []).map(i => i.name).join(", "));
-                        }
-                    } catch (err) {
-                        alert("❌ PocketBase 조회 실패: " + err.message);
-                    } finally {
-                        btnTest2.textContent = "🔍 테스트2: [통장모임] PB manager 조회";
-                    }
-                });
-            }
-        });
-    </script>
-
     <script src="cafe.js?v=20260823_latest"></script>
 </body>
 </html>
