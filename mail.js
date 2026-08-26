@@ -253,7 +253,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Sidebar button clicks
     if (sidebarWriteBtn) {
-        sidebarWriteBtn.addEventListener("click", () => showPanel("compose"));
+        sidebarWriteBtn.addEventListener("click", () => {
+            resetComposerForm();
+            showPanel("compose");
+        });
+    }
+    const sidebarWriteSelfBtn = document.querySelector(".compose-btn.write-self");
+    if (sidebarWriteSelfBtn) {
+        sidebarWriteSelfBtn.addEventListener("click", () => {
+            resetComposerForm();
+            if (inputTo) inputTo.value = currentUserEmail;
+            showPanel("compose");
+        });
     }
     if (folderInboxBtn) {
         folderInboxBtn.addEventListener("click", () => showPanel("inbox", "all"));
@@ -267,6 +278,16 @@ document.addEventListener("DOMContentLoaded", () => {
     if (folderReceiptBtn) {
         folderReceiptBtn.addEventListener("click", () => showPanel("receipt"));
     }
+
+    // Compose Toolbar Sub buttons
+    const composeSubBtns = document.querySelectorAll(".compose-sub-btn");
+    composeSubBtns.forEach(btn => {
+        if (btn.textContent.trim() === "내게쓰기") {
+            btn.addEventListener("click", () => {
+                if (inputTo) inputTo.value = currentUserEmail;
+            });
+        }
+    });
 
     // Inbox Sub-Tab & Unread Toggle Clicks
     if (tabInboxMain) {
@@ -287,9 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // (Educational Checklist logic removed)
 
-    // ----------------------------------------------------
-    // 3. Send & Cancel Mail Logic
-    // ----------------------------------------------------
     // ----------------------------------------------------
     // 3. Send & Cancel Mail Logic (Pocketbase Integrated)
     // ----------------------------------------------------
@@ -333,6 +351,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!response.ok) throw new Error("Failed to send mail");
 
+                // Immediately reset composer form content
+                resetComposerForm();
+
                 if (celebrationScreen) {
                     celebrationScreen.style.display = "flex";
                 }
@@ -375,29 +396,55 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const resetComposerForm = () => {
-        inputTo.value = "";
-        inputSubject.value = "";
-        inputBody.value = "";
-        inputBody.style.fontWeight = "normal";
-        inputBody.style.fontStyle = "normal";
-        inputBody.style.textDecoration = "none";
-        inputBody.style.color = "";
-        inputBody.style.backgroundColor = "";
-        inputBody.style.textAlign = "left";
-        inputBody.style.fontSize = "14px";
-        inputBody.style.fontFamily = "";
+        if (inputTo) inputTo.value = "";
+        if (inputSubject) inputSubject.value = "";
+        const inputCc = document.getElementById("input-cc");
+        if (inputCc) inputCc.value = "";
+        const checkIndividual = document.getElementById("check-individual");
+        if (checkIndividual) checkIndividual.checked = false;
+        const checkImportant = document.getElementById("check-important");
+        if (checkImportant) checkImportant.checked = false;
+
+        if (inputBody) {
+            inputBody.innerHTML = "";
+            inputBody.innerText = "";
+            inputBody.textContent = "";
+            inputBody.style.fontWeight = "normal";
+            inputBody.style.fontStyle = "normal";
+            inputBody.style.textDecoration = "none";
+            inputBody.style.color = "";
+            inputBody.style.backgroundColor = "";
+            inputBody.style.textAlign = "left";
+            inputBody.style.fontSize = "14px";
+            inputBody.style.fontFamily = "";
+        }
+
         const edBtnBold = document.getElementById("ed-btn-bold");
         const edBtnItalic = document.getElementById("ed-btn-italic");
         const edBtnUnderline = document.getElementById("ed-btn-underline");
         const edBtnStrike = document.getElementById("ed-btn-strike");
         [edBtnBold, edBtnItalic, edBtnUnderline, edBtnStrike].forEach(btn => btn && btn.classList.remove("active"));
+        
         document.querySelectorAll(".align-btn").forEach(btn => {
             btn.classList.toggle("active", btn.getAttribute("data-align") === "left");
         });
+        
         const edFontSize = document.getElementById("ed-font-size");
         const edFontFamily = document.getElementById("ed-font-family");
         if (edFontSize) edFontSize.value = "14px";
         if (edFontFamily) edFontFamily.value = "'Noto Sans KR', sans-serif";
+
+        const edColorText = document.getElementById("ed-color-text");
+        if (edColorText) edColorText.value = "#333333";
+        const textColorChar = document.querySelector(".text-color-char");
+        if (textColorChar) {
+            textColorChar.style.borderBottomColor = "#333333";
+            textColorChar.style.color = "#333333";
+        }
+        const edColorBg = document.getElementById("ed-color-bg");
+        if (edColorBg) edColorBg.value = "#ffffff";
+        const markerIcon = document.querySelector(".bg-color-label i");
+        if (markerIcon) markerIcon.style.color = "#555";
     };
 
     // ----------------------------------------------------
