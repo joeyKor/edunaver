@@ -2751,11 +2751,58 @@ input:checked + .fake-toggle::after {
     background: #ffffff;
 }
 
-.member-empty-msg {
-    text-align: center;
-    padding: 40px 20px;
-    color: #888888;
-    font-size: 13px;
+/* ----------------------------------------------------
+   Detail Bottom Toolbar (수정, 삭제, 목록, TOP)
+   ---------------------------------------------------- */
+.detail-bottom-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-top: 1px solid #ebeef2;
+    background: #ffffff;
+    margin-top: 12px;
+}
+
+.bottom-tools-left, .bottom-tools-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-bottom-tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 14px;
+    border: 1px solid #d5d8dc;
+    border-radius: 4px;
+    background: #ffffff;
+    color: #333333;
+    font-size: 12.5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.btn-bottom-tool:hover {
+    background: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+.btn-bottom-tool.btn-tool-delete:hover {
+    background: #fff5f5;
+    color: #e03131;
+    border-color: #ffa8a8;
+}
+
+.btn-bottom-tool.btn-tool-list {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.btn-bottom-tool.btn-tool-top {
+    color: #666666;
 }
 
 

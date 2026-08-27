@@ -74,26 +74,21 @@
                 <a href="#" class="cafe-menu-item" id="nav-all-cafes">
                     <i class="fa-solid fa-layer-group"></i>
                     <span>전체 카페</span>
-                    <span class="count-badge green-bg" id="sidebar-all-cafes-count">0</span>
                 </a>
-                <a href="#" class="cafe-menu-item">
-                    <i class="fa-regular fa-compass"></i>
-                    <span>이웃 <span class="beta-tag">beta</span></span>
-                </a>
-                <a href="#" class="cafe-menu-item">
+                <a href="#" class="cafe-menu-item" id="nav-my-joined-cafes">
                     <i class="fa-regular fa-bookmark"></i>
-                    <span>구독</span>
-                    <span class="count-badge red-bg">161</span>
+                    <span>내 가입 카페</span>
+                    <span class="count-badge green-bg" id="sidebar-joined-cafes-count">1</span>
                 </a>
-                <a href="#" class="cafe-menu-item">
+                <a href="#" class="cafe-menu-item" id="nav-cafe-my-news">
+                    <i class="fa-regular fa-bell"></i>
+                    <span>내소식</span>
+                    <span class="count-badge red-circle" id="cafe-my-news-badge">2</span>
+                </a>
+                <a href="#" class="cafe-menu-item" id="nav-cafe-hot-posts">
                     <i class="fa-solid fa-fire"></i>
                     <span>인기글</span>
                     <span class="new-dot">N</span>
-                </a>
-                <a href="#" class="cafe-menu-item">
-                    <i class="fa-regular fa-bell"></i>
-                    <span>내소식</span>
-                    <span class="count-badge red-circle">1</span>
                 </a>
                 <a href="#" class="cafe-menu-item">
                     <i class="fa-regular fa-comments"></i>
@@ -450,6 +445,27 @@
                     <button type="submit" class="btn-submit">등록</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Cafe Notifications Popover (내소식 알림창) -->
+    <div class="cafe-noti-popover" id="cafe-noti-popover" style="display: none;">
+        <div class="noti-popover-header">
+            <div class="noti-header-title">
+                <i class="fa-regular fa-bell" style="color: #03c75a;"></i>
+                <span>내 소식 알림</span>
+                <span class="noti-unread-tag" id="noti-unread-count-tag">2개 안읽음</span>
+            </div>
+            <div class="noti-header-actions">
+                <button type="button" class="noti-read-all-btn" id="btn-cafe-noti-read-all">모두 읽음</button>
+                <button type="button" class="noti-close-btn" id="btn-close-cafe-noti"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+        </div>
+        <div class="noti-popover-list" id="cafe-noti-list">
+            <!-- Dynamically populated via cafe.js -->
+        </div>
+        <div class="noti-popover-footer">
+            <span>내 글의 댓글, 등업, 공감 소식이 실시간으로 표시됩니다.</span>
         </div>
     </div>
 

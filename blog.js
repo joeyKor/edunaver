@@ -137,9 +137,12 @@ async function syncPostsFromPocketBase() {
                     return pbPost;
                 });
 
+                // Only retain purely local unsynced draft posts; do not restore posts deleted on PocketBase
                 localPosts.forEach(lp => {
-                    if (!merged.find(mp => mp.id === lp.id)) {
-                        merged.push(lp);
+                    if (lp.isLocalOnly || (typeof lp.id === "string" && lp.id.startsWith("post_local_"))) {
+                        if (!merged.find(mp => mp.id === lp.id)) {
+                            merged.push(lp);
+                        }
                     }
                 });
 
@@ -487,15 +490,36 @@ function toggleNeighbor(postId, btnEl) {
 }
 
 function toggleLike(postId, btnEl) {
+    const currentUser = localStorage.getItem("naverLoggedInUser");
+    if (!currentUser) {
+        alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
+        return;
+    }
+
     const posts = getBlogPosts();
     const post = posts.find(p => p.id === postId);
     if (post) {
-        post.likes = (post.likes || 0) + 1;
+        if (!Array.isArray(post.likedUsers)) {
+            post.likedUsers = [];
+        }
+
+        const userIndex = post.likedUsers.indexOf(currentUser);
+        if (userIndex >= 0) {
+            // Unlike
+            post.likedUsers.splice(userIndex, 1);
+            post.likes = Math.max(0, (post.likes || 1) - 1);
+            btnEl.classList.remove("liked");
+            btnEl.querySelector("i").className = "fa-regular fa-heart";
+        } else {
+            // Like
+            post.likedUsers.push(currentUser);
+            post.likes = (post.likes || 0) + 1;
+            btnEl.classList.add("liked");
+            btnEl.querySelector("i").className = "fa-solid fa-heart";
+        }
         saveBlogPosts(posts);
-        btnEl.classList.add("liked");
         const countEl = btnEl.querySelector(".like-count");
         if (countEl) countEl.textContent = post.likes;
-        btnEl.querySelector("i").className = "fa-solid fa-heart";
     }
 }
 

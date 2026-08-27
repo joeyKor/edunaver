@@ -178,10 +178,98 @@
         }
         window.openCafeWriteView = openCafeWriteViewDirect;
 
+        window.editCurrentPostDirect = function(post) {
+            if (!post && window.currentViewingPostId) {
+                var cafe = window.currentCafeRecord || {};
+                var posts = typeof cafe.posts === 'string' ? JSON.parse(cafe.posts) : (Array.isArray(cafe.posts) ? cafe.posts : []);
+                post = posts.find(function(p) { return p.id === window.currentViewingPostId; });
+            }
+            if (!post) return;
+
+            window.currentEditingPostId = post.id;
+
+            var grid = document.querySelector(".cafe-layout-grid");
+            var bList = document.getElementById("board-list-container");
+            var pDetail = document.getElementById("post-detail-container");
+            var jView = document.getElementById("cafe-join-view");
+            var wView = document.getElementById("cafe-write-full-view");
+            var mView = document.getElementById("cafe-member-list-view");
+
+            if (grid) grid.style.display = "none";
+            if (bList) bList.style.display = "none";
+            if (pDetail) pDetail.style.display = "none";
+            if (jView) jView.style.display = "none";
+            if (mView) mView.style.display = "none";
+            if (wView) {
+                wView.style.display = "block";
+                wView.style.visibility = "visible";
+            }
+
+            var writePageTitle = document.querySelector(".write-page-title");
+            if (writePageTitle) writePageTitle.textContent = "카페 글 수정";
+            var btnFullSubmit = document.getElementById("btn-full-submit");
+            if (btnFullSubmit) btnFullSubmit.textContent = "수정 완료";
+
+            var titleEl = document.getElementById("full-write-title");
+            var contentEl = document.getElementById("full-write-content");
+            var boardEl = document.getElementById("full-write-board");
+            var noticeEl = document.getElementById("check-write-notice");
+
+            if (titleEl) {
+                titleEl.value = post.title || "";
+                titleEl.focus();
+            }
+            if (contentEl) contentEl.innerHTML = post.content || "";
+            if (boardEl && post.board) boardEl.value = post.board;
+            if (noticeEl) noticeEl.checked = Boolean(post.isNotice);
+
+            window.scrollTo({ top: 80, behavior: 'smooth' });
+        };
+
+        window.deleteCurrentPostDirect = async function(postId) {
+            var targetId = postId || window.currentViewingPostId;
+            if (!targetId) return;
+
+            if (confirm("이 게시글을 삭제하시겠습니까?\n삭제된 글은 복구할 수 없습니다.")) {
+                var cafe = window.currentCafeRecord || {};
+                var posts = typeof cafe.posts === 'string' ? JSON.parse(cafe.posts) : (Array.isArray(cafe.posts) ? cafe.posts : []);
+                cafe.posts = posts.filter(function(p) { return p.id !== targetId; });
+                window.currentCafeRecord = cafe;
+
+                // Sync to localStorage
+                try {
+                    var cafesData = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+                    var cafeId = cafe.id || "vncvhnzfduln0p8";
+                    var cIdx = cafesData.findIndex(function(c) { return String(c.id) === String(cafeId); });
+                    if (cIdx !== -1) {
+                        cafesData[cIdx].posts = cafe.posts;
+                    }
+                    localStorage.setItem("naverCafesData", JSON.stringify(cafesData));
+                } catch(e) {}
+
+                // Sync to PocketBase
+                var cId = cafe.id || "vncvhnzfduln0p8";
+                if (cId && !cId.startsWith("cafe_")) {
+                    try {
+                        await fetch('https://pb.joyfamkr.synology.me/api/collections/cafes/records/' + cId, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ posts: cafe.posts })
+                        });
+                    } catch(err) {}
+                }
+
+                alert("게시글이 삭제되었습니다.");
+                selectBoardDirect("all");
+            }
+        };
+
         window.openPostDetailDirect = function(postId) {
             var isAuth = localStorage.getItem("naverIsLoggedIn") === "true";
             var curUser = (localStorage.getItem("naverLoggedInUser") || "").trim();
             var curId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
+            var curUsername = (localStorage.getItem("naverLoggedInUsername") || "").trim();
+            var curNick = (localStorage.getItem("naverUserNickname") || "").trim();
             var cafe = window.currentCafeRecord || {};
             var mgr = (cafe.manager || "").trim();
             var joinedMembers = Array.isArray(cafe.joinedMembers) ? cafe.joinedMembers : [];
@@ -224,12 +312,42 @@
                     commentWriteUserEl.textContent = activeCommentNick;
                 }
 
+                // Check if current user is the author
+                var postAuthor = (post.author || "").trim();
+                var isMyPost = false;
+                if (postAuthor) {
+                    if (curUser && (postAuthor === curUser || postAuthor.includes(curUser) || curUser.includes(postAuthor))) isMyPost = true;
+                    if (!isMyPost && curId && (postAuthor.includes(curId) || (post.authorId && post.authorId === curId))) isMyPost = true;
+                    if (!isMyPost && curUsername && (postAuthor.includes(curUsername) || (post.authorUsername && post.authorUsername === curUsername))) isMyPost = true;
+                    if (!isMyPost && curNick && (postAuthor.includes(curNick) || curNick.includes(postAuthor))) isMyPost = true;
+                }
+
+                var detailAuthorActions = document.getElementById("detail-author-actions");
+                var btnDetailBottomEdit = document.getElementById("btn-detail-bottom-edit");
+                var btnDetailBottomDelete = document.getElementById("btn-detail-bottom-delete");
+
+                if (detailAuthorActions) {
+                    detailAuthorActions.style.display = isMyPost ? "flex" : "none";
+                }
+                if (btnDetailBottomEdit) {
+                    btnDetailBottomEdit.style.display = isMyPost ? "inline-flex" : "none";
+                    btnDetailBottomEdit.onclick = function() {
+                        window.editCurrentPostDirect(post);
+                    };
+                }
+                if (btnDetailBottomDelete) {
+                    btnDetailBottomDelete.style.display = isMyPost ? "inline-flex" : "none";
+                    btnDetailBottomDelete.onclick = function() {
+                        window.deleteCurrentPostDirect(post.id);
+                    };
+                }
+
                 if (isMember) {
                     if (bodyEl) bodyEl.innerHTML = post.content || `${cafe.name} 카페를 시작합니다.`;
                     if (commentWrap) commentWrap.style.display = 'block';
                     renderCommentsDirect(post);
                 } else {
-                    // Render Member-Only Blur + 10초 만에 가입하기 CTA (Matching Screenshot)
+                    // Render Member-Only Blur + 10초 만에 가입하기 CTA
                     if (bodyEl) {
                         var cafeName = cafe.name || '통장모임';
                         var memberCount = cafe.members || '1';
@@ -404,6 +522,29 @@
         }
         window.submitComment = submitCommentDirect;
 
+        window.triggerPhotoUploadDirect = function() {
+            var fileInput = document.getElementById("write-photo-upload") || document.getElementById("full-write-photo-file");
+            if (fileInput) fileInput.click();
+        };
+
+        window.handlePhotoUploadDirect = function(input) {
+            if (input && input.files && input.files.length > 0) {
+                var contentEl = document.getElementById("full-write-content");
+                Array.from(input.files).forEach(function(file) {
+                    var reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (contentEl) {
+                            contentEl.focus();
+                            var imgHtml = '<p><img src="' + e.target.result + '" alt="첨부 이미지" style="max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.08);"></p><p><br></p>';
+                            document.execCommand("insertHTML", false, imgHtml);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+                input.value = "";
+            }
+        };
+
         function handleFullSubmitDirect() {
             var boardEl = document.getElementById("full-write-board");
             var prefixEl = document.getElementById("full-write-prefix");
@@ -430,6 +571,50 @@
             var month = String(now.getMonth() + 1).padStart(2, "0");
             var day = String(now.getDate()).padStart(2, "0");
             var timeStr = year + "." + month + "." + day + ".";
+
+            if (window.currentEditingPostId) {
+                var editedId = window.currentEditingPostId;
+                window.currentEditingPostId = null;
+
+                if (window.currentCafeRecord && Array.isArray(window.currentCafeRecord.posts)) {
+                    var pIdx = window.currentCafeRecord.posts.findIndex(function(p) { return p.id === editedId; });
+                    if (pIdx !== -1) {
+                        window.currentCafeRecord.posts[pIdx].title = title;
+                        window.currentCafeRecord.posts[pIdx].board = board;
+                        window.currentCafeRecord.posts[pIdx].content = contentHtml || (title + " 본문 내용입니다.");
+                        window.currentCafeRecord.posts[pIdx].isNotice = isNotice;
+                    }
+                }
+
+                // Sync to PocketBase Async
+                var cafeId = (window.currentCafeRecord && window.currentCafeRecord.id) || "vncvhnzfduln0p8";
+                if (cafeId && !cafeId.startsWith("cafe_")) {
+                    fetch('https://pb.joyfamkr.synology.me/api/collections/cafes/records/' + cafeId, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ posts: window.currentCafeRecord.posts })
+                    }).catch(function(err){ console.log("PB direct patch error:", err); });
+                }
+
+                // Update localStorage
+                try {
+                    var cafesData = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+                    var cIdx = cafesData.findIndex(function(c) { return String(c.id) === String(cafeId); });
+                    if (cIdx !== -1) {
+                        cafesData[cIdx].posts = window.currentCafeRecord.posts;
+                    }
+                    localStorage.setItem("naverCafesData", JSON.stringify(cafesData));
+                } catch(e){}
+
+                var wView = document.getElementById("cafe-write-full-view");
+                var grid = document.querySelector(".cafe-layout-grid");
+                if (wView) wView.style.display = "none";
+                if (grid) grid.style.display = "grid";
+
+                alert("게시글이 성공적으로 수정되었습니다!");
+                openPostDetailDirect(editedId);
+                return;
+            }
 
             var newPost = {
                 id: "p_" + Date.now(),
@@ -1334,14 +1519,11 @@
                         </div>
                     </article>
 
-                    <!-- Detail Bottom Toolbar (글쓰기, 수정, 삭제 | 목록, TOP) -->
+                    <!-- Detail Bottom Toolbar (작성자 전용: 수정, 삭제 | 공통: 목록, TOP) -->
                     <div class="detail-bottom-toolbar">
-                        <div class="bottom-tools-left">
-                            <button type="button" class="btn-bottom-tool btn-tool-write" id="btn-detail-bottom-write">
-                                <i class="fa-solid fa-pen-nib"></i> 글쓰기
-                            </button>
+                        <div class="bottom-tools-left" id="detail-author-actions" style="display: none;">
                             <button type="button" class="btn-bottom-tool" id="btn-detail-bottom-edit">수정</button>
-                            <button type="button" class="btn-bottom-tool" id="btn-detail-bottom-delete">삭제</button>
+                            <button type="button" class="btn-bottom-tool btn-tool-delete" id="btn-detail-bottom-delete">삭제</button>
                         </div>
                         <div class="bottom-tools-right">
                             <button type="button" class="btn-bottom-tool btn-tool-list" id="btn-detail-bottom-list">목록</button>
@@ -1602,7 +1784,7 @@
 
                         <!-- Smart Editor Toolbar Row 1 (사진, 동영상, 스티커, 인용구, 구분선, 링크, 장소, 표 등) -->
                         <div class="editor-toolbar-row">
-                            <button type="button" class="btn-tool-icon" id="btn-tool-photo" title="사진"><i class="fa-regular fa-image"></i><span>사진</span></button>
+                            <button type="button" class="btn-tool-icon" id="btn-tool-photo" onclick="triggerPhotoUploadDirect()" title="사진"><i class="fa-regular fa-image"></i><span>사진</span></button>
                             <button type="button" class="btn-tool-icon" title="MYBOX"><i class="fa-solid fa-cloud-arrow-up"></i><span>MYBOX</span></button>
                             <button type="button" class="btn-tool-icon" title="동영상"><i class="fa-solid fa-video"></i><span>동영상</span></button>
                             <button type="button" class="btn-tool-icon" title="스티커"><i class="fa-regular fa-face-smile"></i><span>스티커</span></button>
@@ -1617,7 +1799,7 @@
                             <button type="button" class="btn-tool-icon" title="표"><i class="fa-solid fa-table-cells"></i><span>표</span></button>
                             <button type="button" class="btn-tool-icon" title="소스코드"><i class="fa-solid fa-code"></i><span>소스코드</span></button>
                             <button type="button" class="btn-tool-icon" title="수식"><i class="fa-solid fa-square-root-variable"></i><span>수식</span></button>
-                            <input type="file" id="write-photo-upload" accept="image/*" style="display: none;">
+                            <input type="file" id="write-photo-upload" accept="image/*" multiple style="display: none;" onchange="handlePhotoUploadDirect(this)">
                         </div>
 
                         <!-- Smart Editor Formatting Sub-toolbar (본문, 기본서체, 15, B, I, U, 취소선, 정렬 등) -->

@@ -33,16 +33,18 @@
         }
         .myblog-stats-row {
             display: flex;
-            gap: 20px;
-            font-size: 13px;
-            color: #666;
+            align-items: center;
+            gap: 24px;
+            font-size: 13.5px;
+            color: #444;
             margin-bottom: 24px;
             padding-bottom: 16px;
             border-bottom: 1px solid #edf0f2;
         }
         .stat-badge {
-            color: #00c73c;
+            color: #03c75a;
             font-weight: 700;
+            margin-left: 2px;
         }
         .post-detail-view {
             padding: 20px 0;
@@ -122,6 +124,153 @@
         .btn-post-more-dots:hover {
             background: #f1f3f5;
             color: #111;
+        }
+
+        /* Post Like Box & Liked Bloggers Panel */
+        .post-like-container {
+            margin-top: 28px;
+            margin-bottom: 24px;
+        }
+        .post-like-box {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid #f6b5b5;
+            border-radius: 6px;
+            padding: 6px 14px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(246, 131, 131, 0.08);
+            transition: all 0.15s ease;
+        }
+        .post-like-box:hover {
+            border-color: #ff8e8e;
+            box-shadow: 0 2px 6px rgba(246, 131, 131, 0.15);
+        }
+        .btn-like-main {
+            background: none;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #ff5e78;
+            padding-right: 12px;
+            border-right: 1px solid #f5d4d4;
+        }
+        .btn-like-main i {
+            font-size: 16px;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-like-main.is-liked i {
+            color: #ff3b5c;
+            transform: scale(1.15);
+        }
+        .btn-like-toggle-panel {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #f68383;
+            font-size: 13px;
+            padding-left: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-like-toggle-panel i {
+            transition: transform 0.2s ease;
+        }
+        .btn-like-toggle-panel.active i {
+            transform: rotate(180deg);
+        }
+        .liked-bloggers-panel {
+            display: none;
+            margin-top: 14px;
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .liked-bloggers-panel.active {
+            display: block;
+            animation: fadeInDown 0.2s ease-out;
+        }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .liked-bloggers-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f1f3f5;
+        }
+        .liked-bloggers-title span {
+            color: #ff6b00;
+        }
+        .liked-bloggers-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        .liked-blogger-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+        .blogger-left-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .blogger-avatar-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #eee;
+        }
+        .blogger-text-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .blogger-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #222;
+        }
+        .blogger-desc {
+            font-size: 12.5px;
+            color: #888;
+        }
+        .btn-add-neighbor-mini {
+            background: #ffffff;
+            border: 1px solid #d5d9df;
+            color: #555;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .btn-add-neighbor-mini:hover {
+            border-color: #00c73c;
+            color: #00c73c;
+            background: #f4fbf6;
+        }
+        .btn-add-neighbor-mini.following {
+            background: #e8f9ed;
+            color: #00c73c;
+            border-color: #00c73c;
         }
         .post-action-dropdown-menu {
             position: absolute;
@@ -290,9 +439,7 @@
             <!-- Stats Bar -->
             <div class="myblog-stats-row">
                 <span>전체 포스트 <strong class="stat-badge" id="total-post-count">0</strong></span>
-                <span>오늘 방문자 <strong class="stat-badge">12</strong>명</span>
-                <span>전체 방문자 <strong class="stat-badge">3,450</strong>명</span>
-                <span>이웃 <strong class="stat-badge">24</strong>명</span>
+                <span>전체 방문자 <strong class="stat-badge" id="total-visitor-count">0</strong>명</span>
             </div>
 
             <!-- List View Mode -->
@@ -339,6 +486,29 @@
 
                 <div class="post-detail-body" id="detail-body">
                     포스트 본문 내용이 표시됩니다.
+                </div>
+
+                <!-- Like Box & Liked Bloggers Panel -->
+                <div class="post-like-container">
+                    <div class="post-like-box">
+                        <button type="button" class="btn-like-main" id="btn-detail-like" onclick="toggleDetailLike()">
+                            <i class="fa-regular fa-heart" id="detail-like-icon"></i>
+                            <span id="detail-like-text">공감 <strong id="detail-like-count">0</strong></span>
+                        </button>
+                        <button type="button" class="btn-like-toggle-panel" id="btn-toggle-liked-panel" onclick="toggleLikedBloggersPanel()" title="이 글에 공감한 블로거 보기">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+
+                    <!-- Dropdown Panel -->
+                    <div class="liked-bloggers-panel" id="liked-bloggers-panel">
+                        <div class="liked-bloggers-title">
+                            이 글에 <span>공감한 블로거</span>
+                        </div>
+                        <div class="liked-bloggers-list" id="liked-bloggers-list">
+                            <!-- Dynamic rendering -->
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Comments -->
@@ -441,6 +611,20 @@
             return "default-avatar.svg";
         }
 
+        function parseVisitorsFromDesc(rawDesc) {
+            if (!rawDesc) return { visitors: 0, desc: "배움과 소소한 일상을 기록하는 공간입니다." };
+            const match = String(rawDesc).match(/^\[VISITORS:(\d+)\]\s*(.*)/s);
+            if (match) {
+                return { visitors: parseInt(match[1]) || 0, desc: match[2] };
+            }
+            return { visitors: 0, desc: rawDesc };
+        }
+
+        function formatDescWithVisitors(descText, visitorCount) {
+            const clean = (descText || "배움과 소소한 일상을 기록하는 공간입니다.").replace(/^\[VISITORS:\d+\]\s*/, "");
+            return `[VISITORS:${visitorCount}] ${clean}`;
+        }
+
         async function loadBlogProfile(owner) {
             const targetOwner = owner || blogOwner || localStorage.getItem("naverLoggedInUser") || "조이";
             const currentUser = localStorage.getItem("naverLoggedInUser");
@@ -454,6 +638,19 @@
             document.getElementById("myblog-title").textContent = blogTitle;
             document.getElementById("myblog-desc").textContent = blogDesc;
             document.getElementById("myblog-avatar").src = avatarUrl;
+
+            // Visitor count logic (increment count on every page view & sync to PocketBase)
+            let cachedVisitors = parseInt(localStorage.getItem(`naverBlogTotalVisitors_${targetOwner}`));
+            if (isNaN(cachedVisitors)) {
+                cachedVisitors = 0;
+            }
+            cachedVisitors += 1;
+            localStorage.setItem(`naverBlogTotalVisitors_${targetOwner}`, cachedVisitors);
+
+            const visitorCountEl = document.getElementById("total-visitor-count");
+            if (visitorCountEl) {
+                visitorCountEl.textContent = cachedVisitors.toLocaleString();
+            }
 
             // Background fetch from PocketBase users collection to keep up-to-date across computers
             try {
@@ -473,11 +670,30 @@
                             localStorage.setItem(`naverMyBlogTitle_${targetOwner}`, blogTitle);
                             document.getElementById("myblog-title").textContent = blogTitle;
                         }
+                        
+                        let cleanDesc = blogDesc;
                         if (userRecord.blogDesc) {
-                            blogDesc = userRecord.blogDesc;
-                            localStorage.setItem(`naverMyBlogDesc_${targetOwner}`, blogDesc);
-                            document.getElementById("myblog-desc").textContent = blogDesc;
+                            const parsed = parseVisitorsFromDesc(userRecord.blogDesc);
+                            cleanDesc = parsed.desc;
+                            if (parsed.visitors > cachedVisitors) {
+                                cachedVisitors = parsed.visitors;
+                            }
+                            localStorage.setItem(`naverMyBlogDesc_${targetOwner}`, cleanDesc);
+                            document.getElementById("myblog-desc").textContent = cleanDesc;
                         }
+
+                        localStorage.setItem(`naverBlogTotalVisitors_${targetOwner}`, cachedVisitors);
+                        if (visitorCountEl) {
+                            visitorCountEl.textContent = cachedVisitors.toLocaleString();
+                        }
+
+                        // Patch updated visitors count to PocketBase user record
+                        const newDescPayload = formatDescWithVisitors(cleanDesc, cachedVisitors);
+                        fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userRecord.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ blogDesc: newDescPayload })
+                        }).catch(e => console.warn("PocketBase totalVisitors patch notice:", e));
                     }
                 }
             } catch (err) {
@@ -598,6 +814,151 @@
             closePostActionMenu();
 
             renderComments(post);
+            renderPostLikeState(post);
+        }
+
+        // --- Post Like ("공감") & Liked Bloggers Panel Functions ---
+        function toggleDetailLike() {
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            if (!currentUser) {
+                alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
+                return;
+            }
+
+            if (!currentViewingPostId) return;
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const post = posts.find(p => p.id === currentViewingPostId);
+            if (!post) return;
+
+            if (!Array.isArray(post.likedUsers)) {
+                post.likedUsers = [];
+            }
+
+            const userIndex = post.likedUsers.indexOf(currentUser);
+            if (userIndex >= 0) {
+                // Unlike
+                post.likedUsers.splice(userIndex, 1);
+                post.likes = Math.max(0, (post.likes || 1) - 1);
+            } else {
+                // Like
+                post.likedUsers.push(currentUser);
+                post.likes = (post.likes || 0) + 1;
+            }
+
+            // Save to localStorage
+            localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+
+            // Sync with PocketBase if available
+            try {
+                fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        likes: post.likes,
+                        likedUsers: post.likedUsers
+                    })
+                }).catch(e => console.warn("PocketBase post like patch skipped:", e));
+            } catch (err) {}
+
+            // Refresh UI
+            renderPostLikeState(post);
+        }
+
+        function renderPostLikeState(post) {
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            const likedUsers = Array.isArray(post.likedUsers) ? post.likedUsers : [];
+            const isLikedByMe = currentUser && likedUsers.includes(currentUser);
+
+            const likeBtn = document.getElementById("btn-detail-like");
+            const likeIcon = document.getElementById("detail-like-icon");
+            const likeCountEl = document.getElementById("detail-like-count");
+
+            if (likeCountEl) {
+                likeCountEl.textContent = post.likes || 0;
+            }
+
+            if (likeBtn && likeIcon) {
+                if (isLikedByMe) {
+                    likeBtn.classList.add("is-liked");
+                    likeIcon.className = "fa-solid fa-heart";
+                    likeIcon.style.color = "#ff3b5c";
+                } else {
+                    likeBtn.classList.remove("is-liked");
+                    likeIcon.className = "fa-regular fa-heart";
+                    likeIcon.style.color = "#ff5e78";
+                }
+            }
+
+            renderLikedBloggersList(post);
+        }
+
+        function toggleLikedBloggersPanel() {
+            const panel = document.getElementById("liked-bloggers-panel");
+            const toggleBtn = document.getElementById("btn-toggle-liked-panel");
+            if (panel && toggleBtn) {
+                panel.classList.toggle("active");
+                toggleBtn.classList.toggle("active");
+            }
+        }
+
+        function renderLikedBloggersList(post) {
+            const listEl = document.getElementById("liked-bloggers-list");
+            if (!listEl) return;
+
+            const likedUsers = Array.isArray(post.likedUsers) ? post.likedUsers : [];
+            if (likedUsers.length === 0) {
+                listEl.innerHTML = `<div style="text-align: center; color: #999; font-size: 13px; padding: 16px 0;">아직 공감한 블로거가 없습니다. 첫 공감을 남겨보세요!</div>`;
+                return;
+            }
+
+            listEl.innerHTML = "";
+            likedUsers.forEach(username => {
+                const avatar = localStorage.getItem(`naverBlogAvatar_${username}`) || getDefaultAvatar(username);
+                const desc = localStorage.getItem(`naverMyBlogDesc_${username}`) || `${username}님의 블로그`;
+
+                // Check neighbor status
+                const currentUser = localStorage.getItem("naverLoggedInUser");
+                const neighbors = JSON.parse(localStorage.getItem(`naverBlogNeighbors_${currentUser}`) || "[]");
+                const isNeighbor = neighbors.includes(username);
+
+                const item = document.createElement("div");
+                item.className = "liked-blogger-item";
+                item.innerHTML = `
+                    <div class="blogger-left-info" onclick="location.href='my-blog.html?author=${encodeURIComponent(username)}'">
+                        <img src="${avatar}" class="blogger-avatar-img" alt="${username}">
+                        <div class="blogger-text-col">
+                            <span class="blogger-name">${username}</span>
+                            <span class="blogger-desc">${desc}</span>
+                        </div>
+                    </div>
+                    ${(currentUser && currentUser !== username) ? `
+                        <button type="button" class="btn-add-neighbor-mini ${isNeighbor ? 'following' : ''}" onclick="toggleBloggerNeighbor('${username}', this)">
+                            ${isNeighbor ? '<i class="fa-solid fa-check"></i> 이웃' : '+ 이웃추가'}
+                        </button>
+                    ` : ''}
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        function toggleBloggerNeighbor(targetUser, btnEl) {
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            if (!currentUser) {
+                alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
+                return;
+            }
+            let neighbors = JSON.parse(localStorage.getItem(`naverBlogNeighbors_${currentUser}`) || "[]");
+            const index = neighbors.indexOf(targetUser);
+            if (index >= 0) {
+                neighbors.splice(index, 1);
+                btnEl.classList.remove("following");
+                btnEl.innerHTML = "+ 이웃추가";
+            } else {
+                neighbors.push(targetUser);
+                btnEl.classList.add("following");
+                btnEl.innerHTML = '<i class="fa-solid fa-check"></i> 이웃';
+            }
+            localStorage.setItem(`naverBlogNeighbors_${currentUser}`, JSON.stringify(neighbors));
         }
 
         // Toggle 3-dots post action menu
@@ -843,7 +1204,10 @@
                     const updatePayload = {};
                     if (currentAvatarUrl) updatePayload.avatarUrl = currentAvatarUrl;
                     if (newTitle) updatePayload.blogTitle = newTitle;
-                    if (newDesc) updatePayload.blogDesc = newDesc;
+                    if (newDesc) {
+                        const currentVisitors = parseInt(localStorage.getItem(`naverBlogTotalVisitors_${userName}`)) || 0;
+                        updatePayload.blogDesc = formatDescWithVisitors(newDesc, currentVisitors);
+                    }
 
                     await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userId}`, {
                         method: 'PATCH',

@@ -372,8 +372,40 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
 
+    // ----------------------------------------------------
+    // Wikipedia Open API Real-Time Search Client
+    // ----------------------------------------------------
+    async function fetchWikipediaKnowledge(query) {
+        if (!query || !query.trim()) return [];
+        try {
+            const url = `https://ko.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch=${encodeURIComponent(query.trim())}&gsrlimit=5&prop=pageimages|extracts|info&inprop=url&exintro=1&explaintext=1&exsentences=3&piprop=thumbnail&pithumbsize=300&format=json&origin=*`;
+            const res = await fetch(url);
+            if (!res.ok) return [];
+            const data = await res.json();
+            if (!data.query || !data.query.pages) return [];
+            const pages = Object.values(data.query.pages)
+                .sort((a, b) => (a.index || 0) - (b.index || 0))
+                .filter(p => p.title && (p.extract || p.thumbnail));
+            return pages;
+        } catch (err) {
+            console.warn("Wikipedia API search error:", err);
+            return [];
+        }
+    }
+
     async function renderSearchResultsFeed() {
         if (!searchItemsFeed) return;
+
+        // Show immediate loading state
+        searchItemsFeed.innerHTML = `
+            <div class="search-loading-state">
+                <i class="fa-solid fa-circle-notch fa-spin"></i>
+                <span>'<strong>${activeQuery}</strong>' 실시간 지식 및 검색 결과를 불러오는 중...</span>
+            </div>
+        `;
+
+        // Concurrently fetch Wikipedia & sync PocketBase
+        const wikiPromise = fetchWikipediaKnowledge(activeQuery);
 
         // Try syncing latest posts from PocketBase
         try {
@@ -398,8 +430,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     const localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
                     const merged = [...pbPosts];
                     localPosts.forEach(lp => {
-                        if (!merged.find(mp => mp.id === lp.id)) {
-                            merged.push(lp);
+                        if (lp.isLocalOnly || (typeof lp.id === "string" && lp.id.startsWith("post_local_"))) {
+                            if (!merged.find(mp => mp.id === lp.id)) {
+                                merged.push(lp);
+                            }
                         }
                     });
                     localStorage.setItem("naverBlogPosts", JSON.stringify(merged));
@@ -407,6 +441,37 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         } catch(e) {
             console.warn("PocketBase search sync skipped, using cache");
+        }
+
+        const wikiPages = await wikiPromise;
+
+        // Try syncing latest cafes from PocketBase
+        try {
+            const cafeRes = await fetch(`${POCKETBASE_URL}/api/collections/cafes/records?sort=-created`);
+            if (cafeRes.ok) {
+                const cafeData = await cafeRes.json();
+                if (cafeData.items && cafeData.items.length > 0) {
+                    const pbCafes = cafeData.items.map(item => ({
+                        id: item.id,
+                        name: item.name,
+                        icon: item.icon || "default-avatar.svg",
+                        category: item.category || "자유",
+                        posts: item.posts ? (typeof item.posts === 'string' ? JSON.parse(item.posts) : item.posts) : []
+                    }));
+                    let currentCafes = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+                    pbCafes.forEach(pbc => {
+                        const existingIdx = currentCafes.findIndex(c => c.id === pbc.id);
+                        if (existingIdx >= 0) {
+                            currentCafes[existingIdx] = { ...currentCafes[existingIdx], ...pbc };
+                        } else {
+                            currentCafes.push(pbc);
+                        }
+                    });
+                    localStorage.setItem("naverCafesData", JSON.stringify(currentCafes));
+                }
+            }
+        } catch(e) {
+            console.warn("PocketBase cafes sync skipped, using cache");
         }
 
         // Fetch stored blog posts
@@ -438,10 +503,58 @@ document.addEventListener("DOMContentLoaded", () => {
             ];
         }
 
+        // Fetch stored cafe posts
+        let allCafePosts = [];
+        let allCafes = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+        allCafes.forEach(cafe => {
+            const rawPosts = Array.isArray(cafe.posts)
+                ? cafe.posts
+                : (typeof cafe.posts === "string" ? JSON.parse(cafe.posts || "[]") : []);
+            rawPosts.forEach(cp => {
+                allCafePosts.push({
+                    id: cp.id,
+                    cafeId: cafe.id,
+                    cafeName: cafe.name,
+                    cafeIcon: cafe.icon || "default-avatar.svg",
+                    author: cp.author || "카페 회원",
+                    authorAvatar: cp.authorAvatar || "default-avatar.svg",
+                    time: cp.time || cp.created || "방금 전",
+                    boardName: cp.boardName || "자유게시판",
+                    title: cp.title || "",
+                    content: cp.content || cp.summary || "",
+                    summary: cp.summary || (cp.content ? cp.content.replace(/<[^>]+>/g, '').slice(0, 140) : ""),
+                    thumbnail: cp.thumbnail || (cp.images && cp.images[0]) || "",
+                    views: cp.views || 0,
+                    likes: cp.likes || 0,
+                    comments: cp.comments ? (Array.isArray(cp.comments) ? cp.comments.length : cp.comments) : (cp.commentCount || 0)
+                });
+            });
+        });
+
         // ----------------------------------------------------
         // Official Popular Sites Data (대표 유명 사이트 데이터베이스)
         // ----------------------------------------------------
         const officialSites = [
+            {
+                name: "순천선혜학교",
+                domain: "seonhye.sc.jne.kr",
+                title: "순천선혜학교 - 행복한 도전! 즐거운 배움! 공립 특수학교",
+                url: "http://seonhye.sc.jne.kr/",
+                desc: "전라남도 순천시 조례동에 위치한 공립 특수학교. 유치부, 초등부, 중학부, 고등부, 전공과 운영 및 맞춤형 특수교육 지원.",
+                icon: "fa-solid fa-school",
+                iconBg: "#03c75a",
+                sublinks: [
+                    { title: "학교소개", url: "http://seonhye.sc.jne.kr/" },
+                    { title: "교육과정", url: "http://seonhye.sc.jne.kr/" },
+                    { title: "입학안내", url: "http://seonhye.sc.jne.kr/" },
+                    { title: "학교소식", url: "http://seonhye.sc.jne.kr/" }
+                ],
+                tags: [
+                    { title: "전남교육청", url: "https://www.jne.go.kr" },
+                    { title: "순천교육지원청", url: "http://sced.jne.go.kr" }
+                ],
+                keywords: ["순천선혜", "순천선혜학교", "선혜학교", "선혜", "순천특수학교", "순천선혜초등부", "순천선혜고등부"]
+            },
             {
                 name: "에듀버 (EDUVER)",
                 domain: "eduver.com",
@@ -452,17 +565,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 iconBg: "#03c75a",
                 sublinks: [
                     { title: "웹메일", url: "mail.html" },
+                    { title: "캘린더", url: "calendar.html" },
                     { title: "에듀버 카페", url: "cafe.html" },
                     { title: "블로그", url: "blog.html" },
                     { title: "회원가입", url: "signup.html" },
-                    { title: "아이디 찾기", url: "find-id.html" },
-                    { title: "비밀번호 재설정", url: "find-password.html" }
+                    { title: "아이디 찾기", url: "find-id.html" }
                 ],
                 tags: [
+                    { title: "캘린더 홈", url: "calendar.html" },
                     { title: "포털 홈", url: "index.html" },
                     { title: "스마트에디터", url: "blog-write.html" }
                 ],
-                keywords: ["에듀버", "에듀버 포털", "에듀", "eduver", "edunaver", "edunver", "에듀버 메일", "에듀버 카페", "에듀버 블로그", "교육포털"]
+                keywords: ["에듀버", "에듀버 포털", "에듀", "eduver", "edunaver", "edunver", "에듀버 메일", "에듀버 캘린더", "캘린더", "달력", "학사일정", "에듀버 카페", "에듀버 블로그", "교육포털"]
             },
             {
                 name: "네이버 지도",
@@ -506,7 +620,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     { title: "Google 드라이브", url: "https://drive.google.com" }
                 ],
                 tags: [
-                    { title: "Google Play", url: "https://play.google.com" },
+                    { title: "Google Play", url: "https://play.google.com/store/apps/details?id=com.google.android.googlequicksearchbox" },
                     { title: "Chrome 다운로드", url: "https://www.google.com/chrome" }
                 ],
                 keywords: ["구글", "google", "구글검색", "구글홈", "gogle", "구글포털"]
@@ -734,7 +848,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const q = activeQuery.toLowerCase().trim();
         const rawCleanQuery = q.replace(/\s+/g, "");
 
-        // Find matching official site
+        // 1. Match Official Site (공식 사이트 매칭)
         let matchedOfficialSite = null;
         if (currentSearchTab === "all") {
             matchedOfficialSite = officialSites.find(site => {
@@ -750,7 +864,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        // Filter blog posts by search query
+        // 2. Match Blog Posts (에듀버 블로그 글 매칭)
         let matchedPosts = allPosts.filter(p => {
             const titleMatch = p.title && p.title.toLowerCase().includes(q);
             const summaryMatch = p.summary && p.summary.toLowerCase().includes(q);
@@ -760,41 +874,76 @@ document.addEventListener("DOMContentLoaded", () => {
             return titleMatch || summaryMatch || contentMatch || authorMatch || catMatch;
         });
 
+        // 3. Match Cafe Posts (에듀버 카페 게시글 매칭)
+        let matchedCafePosts = allCafePosts.filter(cp => {
+            const titleMatch = cp.title && cp.title.toLowerCase().includes(q);
+            const contentMatch = cp.content && cp.content.toLowerCase().includes(q);
+            const summaryMatch = cp.summary && cp.summary.toLowerCase().includes(q);
+            const authorMatch = cp.author && cp.author.toLowerCase().includes(q);
+            const cafeMatch = cp.cafeName && cp.cafeName.toLowerCase().includes(q);
+            const boardMatch = cp.boardName && cp.boardName.toLowerCase().includes(q);
+            return titleMatch || contentMatch || summaryMatch || authorMatch || cafeMatch || boardMatch;
+        });
+
         // Tab filtering simulation
         if (currentSearchTab === "image") {
             matchedPosts = matchedPosts.filter(p => p.thumbnail);
+            matchedCafePosts = matchedCafePosts.filter(cp => cp.thumbnail);
         }
 
-        const totalResultsCount = (matchedOfficialSite ? 1 : 0) + matchedPosts.length;
+        // ----------------------------------------------------
+        // Dynamic Related Searches Generator (연관 검색어)
+        // ----------------------------------------------------
+        const relatedTagsContainer = document.getElementById("search-related-tags");
+        if (relatedTagsContainer) {
+            const dynamicTags = [];
+            // Add titles from Wikipedia results
+            if (wikiPages && wikiPages.length > 0) {
+                wikiPages.forEach(p => {
+                    if (p.title && p.title.toLowerCase() !== q && dynamicTags.length < 3) {
+                        dynamicTags.push(p.title);
+                    }
+                });
+            }
+            // Add contextual search extensions
+            const extensions = [
+                `${activeQuery} 정보`,
+                `${activeQuery} 위치`,
+                `${activeQuery} 특징`,
+                `${activeQuery} 후기`,
+                `${activeQuery} 홈페이지`,
+                `${activeQuery} 뉴스`
+            ];
+            extensions.forEach(cand => {
+                if (!dynamicTags.includes(cand) && dynamicTags.length < 6) {
+                    dynamicTags.push(cand);
+                }
+            });
 
-        if (searchTotalCount) {
-            searchTotalCount.textContent = `총 ${totalResultsCount}건`;
+            relatedTagsContainer.innerHTML = "";
+            dynamicTags.forEach(tagText => {
+                const span = document.createElement("span");
+                span.className = "rel-tag";
+                span.textContent = tagText;
+                span.addEventListener("click", () => {
+                    if (searchInput) searchInput.value = tagText;
+                    performMainSearch(tagText);
+                });
+                relatedTagsContainer.appendChild(span);
+            });
         }
 
-        if (!matchedOfficialSite && matchedPosts.length === 0) {
-            searchItemsFeed.innerHTML = `
-                <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 60px 20px; text-align: center; color: #888;">
-                    <i class="fa-solid fa-circle-exclamation" style="font-size: 38px; color: #ced4da; margin-bottom: 14px;"></i>
-                    <h4 style="font-size: 16px; color: #333; margin-bottom: 6px;">'${activeQuery}'에 대한 검색 결과가 없습니다.</h4>
-                    <p style="font-size: 13px;">단어의 철자가 정확한지 확인해 보거나, 다른 검색어로 검색해 보세요.</p>
-                </div>
-            `;
-            return;
-        }
-
-        searchItemsFeed.innerHTML = "";
-
-        // If official site matched and in 'all' tab, render rich Brand Site Card first!
-        if (matchedOfficialSite) {
+        // Helper: Official Site Card
+        const createOfficialSiteCard = (site) => {
             const siteCard = document.createElement("div");
             siteCard.className = "official-site-card";
             
-            const sublinksHtml = matchedOfficialSite.sublinks.map((sub, idx) => `
+            const sublinksHtml = site.sublinks.map((sub, idx) => `
                 ${idx > 0 ? '<span class="sublink-dot">·</span>' : ''}
                 <a href="${sub.url}" target="_blank" rel="noopener noreferrer">${sub.title}</a>
             `).join("");
 
-            const tagsHtml = matchedOfficialSite.tags.map(tag => `
+            const tagsHtml = site.tags.map(tag => `
                 <a href="${tag.url}" class="official-site-pill" target="_blank" rel="noopener noreferrer">
                     <span>${tag.title}</span>
                 </a>
@@ -802,84 +951,394 @@ document.addEventListener("DOMContentLoaded", () => {
 
             siteCard.innerHTML = `
                 <div class="official-site-header">
-                    <a href="${matchedOfficialSite.url}" target="_blank" rel="noopener noreferrer" class="official-site-source">
-                        <div class="official-site-favicon" style="background-color: ${matchedOfficialSite.iconBg};">
-                            <i class="${matchedOfficialSite.icon}"></i>
+                    <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="official-site-source">
+                        <div class="official-site-favicon" style="background-color: ${site.iconBg};">
+                            <i class="${site.icon}"></i>
                         </div>
-                        <span class="official-site-name">${matchedOfficialSite.name}</span>
-                        <span class="official-site-domain">· ${matchedOfficialSite.domain}</span>
+                        <span class="official-site-name">${site.name}</span>
+                        <span class="official-site-domain">· ${site.domain}</span>
                     </a>
                     <button class="official-site-more-btn" title="더보기">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                 </div>
                 <h3 class="official-site-title">
-                    <a href="${matchedOfficialSite.url}" target="_blank" rel="noopener noreferrer">${matchedOfficialSite.title}</a>
+                    <a href="${site.url}" target="_blank" rel="noopener noreferrer">${site.title}</a>
                 </h3>
                 <div class="official-site-sublinks">
                     ${sublinksHtml}
                 </div>
-                <p class="official-site-desc">${matchedOfficialSite.desc}</p>
+                <p class="official-site-desc">${site.desc}</p>
                 <div class="official-site-tags-row">
                     ${tagsHtml}
                 </div>
             `;
-            searchItemsFeed.appendChild(siteCard);
-        }
+            return siteCard;
+        };
 
-        const loggedInUser = localStorage.getItem("naverLoggedInUser");
-        const currentAvatar = localStorage.getItem("naverBlogAvatar");
-        matchedPosts.forEach(post => {
-            const card = document.createElement("article");
-            card.className = "search-result-card";
+        // Helper: External Portal Quick Search Card
+        const createExternalSearchCard = () => {
+            const card = document.createElement("div");
+            card.className = "external-search-card";
+            const encoded = encodeURIComponent(activeQuery);
+            card.innerHTML = `
+                <h4><i class="fa-solid fa-arrow-up-right-from-square"></i> '${activeQuery}' 다른 검색엔진에서 더보기</h4>
+                <div class="external-portal-buttons">
+                    <a href="https://search.naver.com/search.naver?query=${encoded}" target="_blank" rel="noopener noreferrer" class="external-portal-btn">
+                        <span class="portal-icon-naver">N</span> 네이버 검색
+                    </a>
+                    <a href="https://www.google.com/search?q=${encoded}" target="_blank" rel="noopener noreferrer" class="external-portal-btn">
+                        <i class="fa-brands fa-google portal-icon-google"></i> 구글 검색
+                    </a>
+                    <a href="https://www.youtube.com/results?search_query=${encoded}" target="_blank" rel="noopener noreferrer" class="external-portal-btn">
+                        <i class="fa-brands fa-youtube portal-icon-youtube"></i> 유튜브 영상
+                    </a>
+                    <a href="https://search.daum.net/search?q=${encoded}" target="_blank" rel="noopener noreferrer" class="external-portal-btn">
+                        <span class="portal-icon-daum">Daum</span> 다음 검색
+                    </a>
+                </div>
+            `;
+            return card;
+        };
 
-            const highlightedTitle = highlightKeyword(post.title, activeQuery);
-            // Plain text summary
-            let snippetText = post.summary || "";
-            if (!snippetText && post.fullContent) {
-                const tmp = document.createElement("div");
-                tmp.innerHTML = post.fullContent;
-                snippetText = tmp.innerText || tmp.textContent;
-            }
-            const highlightedSnippet = highlightKeyword(snippetText, activeQuery);
+        // Helper: Wikipedia Knowledge Card
+        const createWikiCard = (pages) => {
+            if (!pages || pages.length === 0) return null;
+            const topPage = pages[0];
+            const card = document.createElement("div");
+            card.className = "wiki-knowledge-card";
 
-            let authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`) || post.authorAvatar;
-            if (!authorAvatar) {
-                authorAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80';
+            const highlightedTitle = highlightKeyword(topPage.title, activeQuery);
+            const rawExtract = topPage.extract || "위키백과 오픈 백과사전 표제어 문서입니다.";
+            const highlightedExtract = highlightKeyword(rawExtract, activeQuery);
+            const wikiUrl = topPage.fullurl || `https://ko.wikipedia.org/wiki/${encodeURIComponent(topPage.title)}`;
+
+            // Sub items for pages 1, 2, 3
+            let subItemsHtml = "";
+            if (pages.length > 1) {
+                const subPages = pages.slice(1, 4);
+                subItemsHtml = `
+                    <div class="wiki-sub-items">
+                        ${subPages.map(sub => {
+                            const subUrl = sub.fullurl || `https://ko.wikipedia.org/wiki/${encodeURIComponent(sub.title)}`;
+                            const subDesc = sub.extract ? sub.extract.replace(/\n/g, ' ') : '';
+                            return `
+                                <div class="wiki-sub-item">
+                                    <span class="wiki-sub-label">관련 백과</span>
+                                    <a href="${subUrl}" target="_blank" rel="noopener noreferrer" class="wiki-sub-link">${sub.title}</a>
+                                    <span class="wiki-sub-desc">${subDesc}</span>
+                                </div>
+                            `;
+                        }).join("")}
+                    </div>
+                `;
             }
 
             card.innerHTML = `
-                <div class="result-source-row">
-                    <div class="result-source-info">
-                        <img src="${authorAvatar}" class="result-author-avatar" alt="${post.author}">
-                        <span class="result-source-name">${post.author}</span>
-                        <span class="result-source-time">· ${post.time || '방금 전'}</span>
+                <div class="wiki-header-row">
+                    <div class="wiki-badge-group">
+                        <span class="wiki-badge"><i class="fa-solid fa-book-bookmark"></i> 지식백과</span>
+                        <span class="wiki-source-sub">위키백과 (Wikipedia)</span>
                     </div>
-                    <span class="result-type-badge">${post.category || '블로그'}</span>
+                    <span style="font-size: 12px; color: #888;">실시간 백과 사전</span>
                 </div>
-                <div class="result-main-group">
-                    <div class="result-text-content">
-                        <h4 class="result-title" onclick="location.href='my-blog.html?post=${post.id}'">${highlightedTitle}</h4>
-                        <p class="result-snippet">${highlightedSnippet}</p>
+                <div class="wiki-main-content">
+                    <div class="wiki-text-col">
+                        <h3 class="wiki-title">
+                            <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer">${highlightedTitle}</a>
+                        </h3>
+                        <p class="wiki-extract">${highlightedExtract}</p>
                     </div>
-                    ${post.thumbnail ? `
-                        <div class="result-thumb-wrapper" onclick="location.href='my-blog.html?post=${post.id}'">
-                            <img src="${post.thumbnail}" alt="Thumbnail" class="result-thumb-img">
+                    ${topPage.thumbnail ? `
+                        <div class="wiki-thumb-col">
+                            <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer">
+                                <img src="${topPage.thumbnail.source}" alt="${topPage.title}" class="wiki-thumb-img">
+                            </a>
                         </div>
                     ` : ''}
                 </div>
-                <div class="result-sub-replies">
-                    <div class="sub-reply-item">
-                        <span class="sub-reply-tag">RE</span>
-                        <span>${post.category || '지식공유'} 추천 글 및 상세 스펙 가이드</span>
-                    </div>
-                    <div class="sub-reply-item" style="color:#03c75a; font-weight:600; cursor:pointer;" onclick="location.href='my-blog.html?post=${post.id}'">
-                        <span>원문 보기 <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
-                    </div>
+                ${subItemsHtml}
+                <div class="wiki-footer">
+                    <span>출처: 한국어 위키백과 (CC BY-SA 4.0)</span>
+                    <a href="${wikiUrl}" target="_blank" rel="noopener noreferrer">
+                        위키백과 전문 보기 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
+                    </a>
                 </div>
             `;
-            searchItemsFeed.appendChild(card);
-        });
+            return card;
+        };
+
+        const hasWiki = wikiPages && wikiPages.length > 0;
+        const totalResultsCount = (matchedOfficialSite ? 1 : 0) + matchedPosts.length + matchedCafePosts.length + (hasWiki ? wikiPages.length : 0);
+
+        if (searchTotalCount) {
+            searchTotalCount.textContent = `총 ${totalResultsCount}건`;
+        }
+
+        // Empty state check
+        if (!matchedOfficialSite && !hasWiki && matchedPosts.length === 0 && matchedCafePosts.length === 0) {
+            searchItemsFeed.innerHTML = `
+                <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 50px 20px; text-align: center; color: #888;">
+                    <i class="fa-solid fa-circle-exclamation" style="font-size: 38px; color: #ced4da; margin-bottom: 14px;"></i>
+                    <h4 style="font-size: 16px; color: #333; margin-bottom: 6px;">'${activeQuery}'에 대한 내부 검색 결과가 없습니다.</h4>
+                    <p style="font-size: 13px; margin-bottom: 16px;">단어의 철자가 정확한지 확인해 보거나, 아래 포털 바로가기를 통해 검색해 보세요.</p>
+                </div>
+            `;
+            searchItemsFeed.appendChild(createExternalSearchCard());
+            return;
+        }
+
+        searchItemsFeed.innerHTML = "";
+
+        // ----------------------------------------------------
+        // Render TAB: ALL (통합검색 - 사이트 자료 우선, 위키백과 최후)
+        // ----------------------------------------------------
+        if (currentSearchTab === "all") {
+            // [1순위] 공식 사이트 / 바로가기 (Official Brand Site)
+            if (matchedOfficialSite) {
+                searchItemsFeed.appendChild(createOfficialSiteCard(matchedOfficialSite));
+            }
+
+            // [2순위] 에듀버 블로그 검색 결과 먼저 표시!
+            matchedPosts.forEach(post => {
+                const card = renderPostSearchCard(post, activeQuery);
+                searchItemsFeed.appendChild(card);
+            });
+
+            // [3순위] 에듀버 카페 게시글 검색 결과 먼저 표시!
+            matchedCafePosts.forEach(cp => {
+                const card = renderCafeSearchCard(cp, activeQuery);
+                searchItemsFeed.appendChild(card);
+            });
+
+            // [4순위] 위키백과 지식백과 (가장 나중에 노출!)
+            if (hasWiki) {
+                const wikiCard = createWikiCard(wikiPages);
+                if (wikiCard) searchItemsFeed.appendChild(wikiCard);
+            }
+
+            // [5순위] 외부 포털 검색 바로가기
+            searchItemsFeed.appendChild(createExternalSearchCard());
+        } 
+        // ----------------------------------------------------
+        // Render TAB: BLOG (블로그 탭)
+        // ----------------------------------------------------
+        else if (currentSearchTab === "blog") {
+            if (matchedPosts.length > 0) {
+                matchedPosts.forEach(post => {
+                    const card = renderPostSearchCard(post, activeQuery);
+                    searchItemsFeed.appendChild(card);
+                });
+            } else if (hasWiki) {
+                // If no user blog posts, show wiki articles as knowledge posts
+                wikiPages.forEach(p => {
+                    const wikiCard = createWikiCard([p]);
+                    if (wikiCard) searchItemsFeed.appendChild(wikiCard);
+                });
+            } else {
+                searchItemsFeed.innerHTML = `
+                    <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
+                        <p>'${activeQuery}'에 대한 블로그 글이 없습니다.</p>
+                    </div>
+                `;
+            }
+            searchItemsFeed.appendChild(createExternalSearchCard());
+        }
+        // ----------------------------------------------------
+        // Render TAB: CAFE (카페 탭)
+        // ----------------------------------------------------
+        else if (currentSearchTab === "cafe") {
+            if (matchedCafePosts.length > 0) {
+                matchedCafePosts.forEach(cp => {
+                    const card = renderCafeSearchCard(cp, activeQuery);
+                    searchItemsFeed.appendChild(card);
+                });
+            } else {
+                searchItemsFeed.innerHTML = `
+                    <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
+                        <p>'${activeQuery}' 관련 카페 글이 없습니다.</p>
+                    </div>
+                `;
+            }
+            searchItemsFeed.appendChild(createExternalSearchCard());
+        }
+        // ----------------------------------------------------
+        // Render TAB: IMAGE (이미지 탭)
+        // ----------------------------------------------------
+        else if (currentSearchTab === "image") {
+            const imageItems = [];
+            // 1. Blog Images First
+            matchedPosts.forEach(p => {
+                if (p.thumbnail) imageItems.push({ title: p.title, img: p.thumbnail, url: `my-blog.html?post=${p.id}`, source: `블로그 · ${p.author}` });
+            });
+            // 2. Cafe Images Next
+            matchedCafePosts.forEach(cp => {
+                if (cp.thumbnail) imageItems.push({ title: cp.title, img: cp.thumbnail, url: `cafe-detail.html?id=${cp.cafeId}&postId=${cp.id}`, source: `카페 · ${cp.cafeName}` });
+            });
+            // 3. Wikipedia Images Last
+            if (hasWiki) {
+                wikiPages.forEach(p => {
+                    if (p.thumbnail) {
+                        imageItems.push({
+                            title: p.title,
+                            img: p.thumbnail.source,
+                            url: p.fullurl || `https://ko.wikipedia.org/wiki/${encodeURIComponent(p.title)}`,
+                            source: "지식백과 · 위키백과"
+                        });
+                    }
+                });
+            }
+
+            if (imageItems.length > 0) {
+                const imgGrid = document.createElement("div");
+                imgGrid.style.cssText = "display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px;";
+                imageItems.forEach(item => {
+                    const imgCard = document.createElement("a");
+                    imgCard.href = item.url;
+                    imgCard.target = "_blank";
+                    imgCard.style.cssText = "display: block; background: #fff; border-radius: 8px; overflow: hidden; border: 1px solid #e5e8eb; text-decoration: none; color: #333; transition: transform 0.15s ease, box-shadow 0.15s ease;";
+                    imgCard.innerHTML = `
+                        <div style="width: 100%; height: 130px; background: #f1f3f5; overflow: hidden;">
+                            <img src="${item.img}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div style="padding: 8px 10px;">
+                            <div style="font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</div>
+                            <div style="font-size: 11px; color: #888; margin-top: 2px;">${item.source}</div>
+                        </div>
+                    `;
+                    imgGrid.appendChild(imgCard);
+                });
+                searchItemsFeed.appendChild(imgGrid);
+            } else {
+                searchItemsFeed.innerHTML = `
+                    <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
+                        <p>'${activeQuery}'에 대한 이미지가 없습니다.</p>
+                    </div>
+                `;
+            }
+            searchItemsFeed.appendChild(createExternalSearchCard());
+        }
+        // ----------------------------------------------------
+        // Render TAB: NEWS (뉴스 탭)
+        // ----------------------------------------------------
+        else {
+            if (matchedPosts.length > 0) {
+                matchedPosts.forEach(post => {
+                    const card = renderPostSearchCard(post, activeQuery);
+                    searchItemsFeed.appendChild(card);
+                });
+            } else if (hasWiki) {
+                const wikiCard = createWikiCard(wikiPages);
+                if (wikiCard) searchItemsFeed.appendChild(wikiCard);
+            } else {
+                searchItemsFeed.innerHTML = `
+                    <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
+                        <p>'${activeQuery}' 관련 게시물이 없습니다.</p>
+                    </div>
+                `;
+            }
+            searchItemsFeed.appendChild(createExternalSearchCard());
+        }
+    }
+
+    // Helper: Render individual cafe card
+    function renderCafeSearchCard(post, activeQuery) {
+        const card = document.createElement("article");
+        card.className = "search-result-card cafe-result-card";
+
+        const highlightedTitle = highlightKeyword(post.title, activeQuery);
+        let snippetText = post.summary || "";
+        if (!snippetText && post.content) {
+            const tmp = document.createElement("div");
+            tmp.innerHTML = post.content;
+            snippetText = tmp.innerText || tmp.textContent;
+        }
+        const highlightedSnippet = highlightKeyword(snippetText, activeQuery);
+        const cafeUrl = `cafe-detail.html?id=${post.cafeId}&postId=${post.id}`;
+
+        card.innerHTML = `
+            <div class="result-source-row">
+                <div class="result-source-info">
+                    <img src="${post.cafeIcon}" class="result-author-avatar" alt="${post.cafeName}" onerror="this.src='default-avatar.svg'">
+                    <span class="result-source-name"><strong>${post.cafeName}</strong> · ${post.author}</span>
+                    <span class="result-source-time">· ${post.time || '방금 전'}</span>
+                </div>
+                <span class="result-type-badge cafe-badge"><i class="fa-solid fa-mug-hot" style="font-size:10px; margin-right:3px;"></i>카페</span>
+            </div>
+            <div class="result-main-group">
+                <div class="result-text-content">
+                    <h4 class="result-title" onclick="location.href='${cafeUrl}'">${highlightedTitle}</h4>
+                    <p class="result-snippet">${highlightedSnippet}</p>
+                </div>
+                ${post.thumbnail ? `
+                    <div class="result-thumb-wrapper" onclick="location.href='${cafeUrl}'">
+                        <img src="${post.thumbnail}" alt="Thumbnail" class="result-thumb-img">
+                    </div>
+                ` : ''}
+            </div>
+            <div class="result-sub-replies">
+                <div class="sub-reply-item">
+                    <span class="sub-reply-tag">${post.boardName || '게시판'}</span>
+                    <span>조회 ${post.views || 0} · 댓글 ${post.comments || 0} · 좋아요 ${post.likes || 0}</span>
+                </div>
+                <div class="sub-reply-item" style="color:#03c75a; font-weight:600; cursor:pointer;" onclick="location.href='${cafeUrl}'">
+                    <span>카페 글 보기 <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
+                </div>
+            </div>
+        `;
+        return card;
+    }
+
+    // Helper: Render individual blog card
+    function renderPostSearchCard(post, activeQuery) {
+        const card = document.createElement("article");
+        card.className = "search-result-card";
+
+        const highlightedTitle = highlightKeyword(post.title, activeQuery);
+        let snippetText = post.summary || "";
+        if (!snippetText && post.fullContent) {
+            const tmp = document.createElement("div");
+            tmp.innerHTML = post.fullContent;
+            snippetText = tmp.innerText || tmp.textContent;
+        }
+        const highlightedSnippet = highlightKeyword(snippetText, activeQuery);
+
+        let authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`) || post.authorAvatar;
+        if (!authorAvatar) {
+            authorAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80';
+        }
+
+        card.innerHTML = `
+            <div class="result-source-row">
+                <div class="result-source-info">
+                    <img src="${authorAvatar}" class="result-author-avatar" alt="${post.author}">
+                    <span class="result-source-name">${post.author}</span>
+                    <span class="result-source-time">· ${post.time || '방금 전'}</span>
+                </div>
+                <span class="result-type-badge">${post.category || '블로그'}</span>
+            </div>
+            <div class="result-main-group">
+                <div class="result-text-content">
+                    <h4 class="result-title" onclick="location.href='my-blog.html?post=${post.id}'">${highlightedTitle}</h4>
+                    <p class="result-snippet">${highlightedSnippet}</p>
+                </div>
+                ${post.thumbnail ? `
+                    <div class="result-thumb-wrapper" onclick="location.href='my-blog.html?post=${post.id}'">
+                        <img src="${post.thumbnail}" alt="Thumbnail" class="result-thumb-img">
+                    </div>
+                ` : ''}
+            </div>
+            <div class="result-sub-replies">
+                <div class="sub-reply-item">
+                    <span class="sub-reply-tag">RE</span>
+                    <span>${post.category || '지식공유'} 추천 글 및 상세 스펙 가이드</span>
+                </div>
+                <div class="sub-reply-item" style="color:#03c75a; font-weight:600; cursor:pointer;" onclick="location.href='my-blog.html?post=${post.id}'">
+                    <span>원문 보기 <i class="fa-solid fa-chevron-right" style="font-size:10px;"></i></span>
+                </div>
+            </div>
+        `;
+        return card;
     }
 
     if (searchForm) {

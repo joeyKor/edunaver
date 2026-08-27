@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EDUVER 캘린더 : 스마트 학사 & 개인 일정 관리 (에듀버)</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome 6.4.0 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="calendar.css">
+</head>
+<body>
+    <div class="cal-app-container">
+        
+        <!-- Header -->
+        <header class="cal-header">
+            <div class="header-left">
+                <a href="index.html" class="logo-link" title="EDUVER 메인으로 이동">
+                    <span class="logo-edu">EDU</span><span class="logo-cal">캘린더</span>
+                </a>
+                <!-- Quick Service Shortcuts -->
+                <div class="quick-icons">
+                    <button class="q-btn" title="메일" onclick="location.href='mail.html'"><i class="fa-solid fa-envelope"></i></button>
+                    <button class="q-btn active" title="캘린더" onclick="location.href='calendar.html'"><i class="fa-regular fa-calendar-days"></i></button>
+                    <button class="q-btn" title="카페" onclick="location.href='cafe.html'"><i class="fa-solid fa-users"></i></button>
+                    <button class="q-btn" title="블로그" onclick="location.href='blog.html'"><i class="fa-solid fa-pen-nib"></i></button>
+                    <button class="q-btn" title="홈" onclick="location.href='index.html'"><i class="fa-solid fa-house"></i></button>
+                </div>
+            </div>
+            
+            <div class="header-center">
+                <!-- Search Box -->
+                <div class="cal-search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="cal-search-input" placeholder="일정, 과제, 시험 검색..." autocomplete="off">
+                    <button class="cal-search-clear-btn" id="cal-search-clear" style="display: none;"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            
+            <div class="header-right">
+                <div class="user-profile" id="cal-user-profile-badge">
+                    <div class="profile-avatar">
+                        <img src="default-avatar.svg" id="cal-header-avatar" alt="Avatar">
+                    </div>
+                    <span class="profile-name" id="cal-header-username">사용자</span>
+                    <i class="fa-solid fa-caret-down dropdown-arrow"></i>
+                </div>
+                <button class="header-icon-btn" id="btn-quick-notification" title="오늘의 알림">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="noti-badge" id="cal-noti-badge">2</span>
+                </button>
+                <button class="header-icon-btn" title="새로고침" id="btn-refresh-cal">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body Layout -->
+        <div class="cal-layout-body">
+            
+            <!-- Left Sidebar -->
+            <aside class="cal-sidebar">
+                
+                <!-- Primary Action: 새 일정 쓰기 -->
+                <div class="sidebar-action-box">
+                    <button class="btn-create-event" id="btn-open-create-modal">
+                        <i class="fa-solid fa-plus"></i> 새 일정 쓰기
+                    </button>
+                </div>
+
+                <!-- Mini Month Datepicker Calendar -->
+                <div class="mini-cal-card">
+                    <div class="mini-cal-header">
+                        <span class="mini-cal-title" id="mini-cal-title">2026. 08</span>
+                        <div class="mini-cal-nav">
+                            <button class="mini-nav-btn" id="btn-mini-prev" title="이전달"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="mini-nav-btn" id="btn-mini-today" title="오늘">오늘</button>
+                            <button class="mini-nav-btn" id="btn-mini-next" title="다음달"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                    </div>
+                    <div class="mini-cal-grid-header">
+                        <span class="sun">일</span>
+                        <span>월</span>
+                        <span>화</span>
+                        <span>수</span>
+                        <span>목</span>
+                        <span>금</span>
+                        <span class="sat">토</span>
+                    </div>
+                    <div class="mini-cal-grid-body" id="mini-cal-days">
+                        <!-- Dynamically filled by JS -->
+                    </div>
+                </div>
+
+                <!-- Category Filters (내 캘린더 목록) -->
+                <div class="sidebar-section">
+                    <div class="section-title-row">
+                        <span class="section-title">내 캘린더</span>
+                        <button class="section-more-btn" id="btn-toggle-all-categories" title="전체 선택/해제">
+                            <i class="fa-solid fa-check-double"></i>
+                        </button>
+                    </div>
+                    <ul class="cal-category-list">
+                        <li class="category-item">
+                            <label class="category-label">
+                                <input type="checkbox" class="cat-filter-check" data-category="school" checked>
+                                <span class="cat-color-dot" style="background: #03c75a;"></span>
+                                <span class="cat-name">🎓 학교 & 학사 일정</span>
+                            </label>
+                            <span class="cat-count" id="count-school">0</span>
+                        </li>
+                        <li class="category-item">
+                            <label class="category-label">
+                                <input type="checkbox" class="cat-filter-check" data-category="exam" checked>
+                                <span class="cat-color-dot" style="background: #ff7a00;"></span>
+                                <span class="cat-name">📝 시험 & 과제 D-Day</span>
+                            </label>
+                            <span class="cat-count" id="count-exam">0</span>
+                        </li>
+                        <li class="category-item">
+                            <label class="category-label">
+                                <input type="checkbox" class="cat-filter-check" data-category="personal" checked>
+                                <span class="cat-color-dot" style="background: #1f6feb;"></span>
+                                <span class="cat-name">💼 개인 & 스터디</span>
+                            </label>
+                            <span class="cat-count" id="count-personal">0</span>
+                        </li>
+                        <li class="category-item">
+                            <label class="category-label">
+                                <input type="checkbox" class="cat-filter-check" data-category="important" checked>
+                                <span class="cat-color-dot" style="background: #e53935;"></span>
+                                <span class="cat-name">⭐ 중요 일정</span>
+                            </label>
+                            <span class="cat-count" id="count-important">0</span>
+                        </li>
+                        <li class="category-item">
+                            <label class="category-label">
+                                <input type="checkbox" class="cat-filter-check" data-category="holiday" checked>
+                                <span class="cat-color-dot" style="background: #8e24aa;"></span>
+                                <span class="cat-name">🎉 공휴일 & 기념일</span>
+                            </label>
+                            <span class="cat-count" id="count-holiday">0</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- D-Day Counter Widget -->
+                <div class="sidebar-section dday-section">
+                    <div class="section-title-row">
+                        <span class="section-title"><i class="fa-solid fa-stopwatch" style="color: #ff7a00; margin-right: 4px;"></i> D-Day 디데이</span>
+                        <button class="section-add-btn" id="btn-quick-dday" title="D-Day 추가"><i class="fa-solid fa-plus"></i></button>
+                    </div>
+                    <div class="dday-list" id="dday-list-container">
+                        <!-- Dynamically filled by JS -->
+                    </div>
+                </div>
+
+            </aside>
+
+            <!-- Main Calendar Workspace -->
+            <main class="cal-main-workspace">
+                
+                <!-- Main Calendar Top Control Toolbar -->
+                <div class="cal-main-toolbar">
+                    <div class="toolbar-left">
+                        <button class="btn-today" id="btn-cal-today">오늘</button>
+                        <div class="nav-arrow-group">
+                            <button class="btn-nav-arrow" id="btn-cal-prev" title="이전"><i class="fa-solid fa-chevron-left"></i></button>
+                            <button class="btn-nav-arrow" id="btn-cal-next" title="다음"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <h2 class="current-period-title" id="current-period-display">2026년 8월</h2>
+                        <span class="today-sub-indicator" id="today-sub-indicator"></span>
+                    </div>
+
+                    <div class="toolbar-right">
+                        <!-- View Mode Switcher -->
+                        <div class="view-switch-group">
+                            <button class="btn-view-mode active" data-view="month">월간</button>
+                            <button class="btn-view-mode" data-view="week">주간</button>
+                            <button class="btn-view-mode" data-view="day">일간</button>
+                            <button class="btn-view-mode" data-view="list">목록</button>
+                        </div>
+                        <!-- Quick Add -->
+                        <button class="btn-toolbar-add" id="btn-toolbar-quick-add">
+                            <i class="fa-solid fa-plus"></i> 일정 추가
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Calendar Views Container -->
+                <div class="cal-views-viewport">
+                    
+                    <!-- 1. Month View (월간 뷰) -->
+                    <div class="view-panel active" id="view-month">
+                        <div class="month-grid-header">
+                            <div class="day-col-header sun">일</div>
+                            <div class="day-col-header">월</div>
+                            <div class="day-col-header">화</div>
+                            <div class="day-col-header">수</div>
+                            <div class="day-col-header">목</div>
+                            <div class="day-col-header">금</div>
+                            <div class="day-col-header sat">토</div>
+                        </div>
+                        <div class="month-grid-body" id="month-grid-cells">
+                            <!-- Dynamic 35~42 day cells -->
+                        </div>
+                    </div>
+
+                    <!-- 2. Week View (주간 뷰) -->
+                    <div class="view-panel" id="view-week" style="display: none;">
+                        <div class="week-all-day-rack">
+                            <div class="time-gutter-label">종일</div>
+                            <div class="week-all-day-cells" id="week-allday-cells"></div>
+                        </div>
+                        <div class="week-time-grid-wrapper">
+                            <div class="time-col-gutter" id="week-time-gutter"></div>
+                            <div class="week-columns-container" id="week-columns-container"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Day View (일간 뷰) -->
+                    <div class="view-panel" id="view-day" style="display: none;">
+                        <div class="day-view-header" id="day-view-header-title">2026년 8월 26일 (수)</div>
+                        <div class="day-view-allday-rack" id="day-view-allday-rack"></div>
+                        <div class="day-view-grid-wrapper">
+                            <div class="time-col-gutter" id="day-time-gutter"></div>
+                            <div class="day-view-column" id="day-view-column"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. List / Agenda View (목록 뷰) -->
+                    <div class="view-panel" id="view-list" style="display: none;">
+                        <div class="list-view-container" id="list-view-container">
+                            <!-- Dynamic agenda list -->
+                        </div>
+                    </div>
+
+                </div>
+
+            </main>
+
+        </div>
+
+    </div>
+
+    <!-- ==================================================== -->
+    <!-- Modal 1: Create / Edit Event Modal (새 일정 쓰기 / 수정) -->
+    <!-- ==================================================== -->
+    <div class="cal-modal-overlay" id="modal-event-editor" style="display: none;">
+        <div class="cal-modal-box">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-editor-title"><i class="fa-regular fa-calendar-plus" style="color: #03c75a;"></i> 새 일정 등록</h3>
+                <button class="modal-close-btn" id="btn-close-editor-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                
+                <!-- Title -->
+                <div class="form-group">
+                    <label class="form-label">일정 제목 <span class="required">*</span></label>
+                    <input type="text" class="form-input title-input" id="event-input-title" placeholder="일정 제목을 입력하세요 (예: 2학기 개학식, 컴퓨터공학 과제 제출)" required>
+                </div>
+
+                <!-- Category -->
+                <div class="form-group">
+                    <label class="form-label">캘린더 분류</label>
+                    <div class="category-radio-group">
+                        <label class="cat-radio-btn active" data-cat="school">
+                            <input type="radio" name="event-cat" value="school" checked>
+                            <span class="cat-pill school"><i class="fa-solid fa-graduation-cap"></i> 학사/학교</span>
+                        </label>
+                        <label class="cat-radio-btn" data-cat="exam">
+                            <input type="radio" name="event-cat" value="exam">
+                            <span class="cat-pill exam"><i class="fa-solid fa-pen-to-square"></i> 시험/과제</span>
+                        </label>
+                        <label class="cat-radio-btn" data-cat="personal">
+                            <input type="radio" name="event-cat" value="personal">
+                            <span class="cat-pill personal"><i class="fa-solid fa-user"></i> 개인/스터디</span>
+                        </label>
+                        <label class="cat-radio-btn" data-cat="important">
+                            <input type="radio" name="event-cat" value="important">
+                            <span class="cat-pill important"><i class="fa-solid fa-star"></i> 중요</span>
+                        </label>
+                        <label class="cat-radio-btn" data-cat="holiday">
+                            <input type="radio" name="event-cat" value="holiday">
+                            <span class="cat-pill holiday"><i class="fa-solid fa-cake-candles"></i> 기념일</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Date & Time Range -->
+                <div class="form-group">
+                    <div class="label-with-allday">
+                        <label class="form-label">일시</label>
+                        <label class="allday-check-label">
+                            <input type="checkbox" id="event-check-allday" checked>
+                            <span>종일</span>
+                        </label>
+                    </div>
+                    <div class="datetime-picker-row">
+                        <div class="date-time-item">
+                            <span class="dt-sublabel">시작</span>
+                            <input type="date" class="form-input date-input" id="event-start-date">
+                            <input type="time" class="form-input time-input" id="event-start-time" value="09:00" style="display: none;">
+                        </div>
+                        <span class="dt-separator">~</span>
+                        <div class="date-time-item">
+                            <span class="dt-sublabel">종료</span>
+                            <input type="date" class="form-input date-input" id="event-end-date">
+                            <input type="time" class="form-input time-input" id="event-end-time" value="18:00" style="display: none;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="form-group">
+                    <label class="form-label">장소 / 위치</label>
+                    <div class="input-with-icon">
+                        <i class="fa-solid fa-location-dot input-icon"></i>
+                        <input type="text" class="form-input" id="event-input-location" placeholder="강의실, 학교 강당, 스터디룸, 온라인(Zoom) 등">
+                    </div>
+                </div>
+
+                <!-- Reminder -->
+                <div class="form-group">
+                    <label class="form-label">알림 설정</label>
+                    <div class="input-with-icon">
+                        <i class="fa-regular fa-bell input-icon"></i>
+                        <select class="form-select" id="event-select-reminder">
+                            <option value="none">알림 없음</option>
+                            <option value="10min">10분 전</option>
+                            <option value="30min">30분 전</option>
+                            <option value="1hour">1시간 전</option>
+                            <option value="1day" selected>1일 전 (오전 9시)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Memo -->
+                <div class="form-group">
+                    <label class="form-label">메모 / 세부 내용</label>
+                    <textarea class="form-textarea" id="event-input-memo" rows="3" placeholder="준비물, 과제 범위, 제출 링크 등 세부 사항을 메모하세요."></textarea>
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-modal-cancel" id="btn-cancel-editor">취소</button>
+                <button type="button" class="btn-modal-submit" id="btn-save-event">저장</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================== -->
+    <!-- Modal 2: Event Detail Popover (일정 상세 조회) -->
+    <!-- ==================================================== -->
+    <div class="cal-modal-overlay" id="modal-event-detail" style="display: none;">
+        <div class="cal-modal-box detail-box">
+            <div class="modal-header">
+                <span class="detail-cat-badge" id="detail-badge-cat">🎓 학사/학교</span>
+                <div class="detail-top-actions">
+                    <button class="icon-action-btn" id="btn-detail-edit" title="수정"><i class="fa-solid fa-pen"></i></button>
+                    <button class="icon-action-btn delete" id="btn-detail-delete" title="삭제"><i class="fa-solid fa-trash-can"></i></button>
+                    <button class="modal-close-btn" id="btn-close-detail-modal"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div class="modal-body">
+                <h3 class="detail-event-title" id="detail-title">2학기 개학식</h3>
+                
+                <div class="detail-info-item">
+                    <i class="fa-regular fa-clock info-icon"></i>
+                    <span id="detail-datetime">2026.08.26.(수) 종일</span>
+                </div>
+
+                <div class="detail-info-item" id="detail-location-row">
+                    <i class="fa-solid fa-location-dot info-icon"></i>
+                    <span id="detail-location">순천선혜학교 본관 대강당</span>
+                </div>
+
+                <div class="detail-info-item" id="detail-reminder-row">
+                    <i class="fa-regular fa-bell info-icon"></i>
+                    <span id="detail-reminder">1일 전 알림</span>
+                </div>
+
+                <div class="detail-memo-box" id="detail-memo-box">
+                    <p id="detail-memo">새 학기 준비물 점검 및 개학식 진행.</p>
+                </div>
+            </div>
+            <div class="modal-footer detail-footer">
+                <button class="btn-toggle-complete" id="btn-toggle-event-done">
+                    <i class="fa-regular fa-circle-check"></i> 완료 표시
+                </button>
+                <button class="btn-modal-cancel" id="btn-close-detail-bottom">닫기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================================================== -->
+    <!-- Popover: Day More Events List (날짜별 +n개 더보기 팝오버) -->
+    <!-- ==================================================== -->
+    <div class="day-more-popover" id="popover-more-events" style="display: none;">
+        <div class="more-popover-header">
+            <span class="more-date-title" id="more-popover-date-title">8월 26일 (수)</span>
+            <button class="more-close-btn" id="btn-close-more-popover"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="more-events-list" id="more-popover-events-list">
+            <!-- Filled dynamically -->
+        </div>
+        <div class="more-popover-footer">
+            <button class="btn-popover-add-on-date" id="btn-more-popover-add"><i class="fa-solid fa-plus"></i> 이 날짜에 일정 쓰기</button>
+        </div>
+    </div>
+
+    <script src="calendar.js"></script>
+</body>
+</html>

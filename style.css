@@ -467,14 +467,47 @@ input {
     transition: transform 0.2s;
 }
 
-.service-item:hover .icon-circle {
-    transform: scale(1.05);
+.service-icon-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.service-noti-badge {
+    position: absolute;
+    top: -3px;
+    right: -3px;
+    background: #e53935;
+    color: #ffffff;
+    font-size: 10px;
+    font-weight: 800;
+    min-width: 17px;
+    height: 17px;
+    line-height: 15px;
+    text-align: center;
+    border-radius: 10px;
+    padding: 0 4px;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.service-noti-badge.green-badge {
+    background: #03c75a;
+}
+
+.service-item:hover .service-noti-badge {
+    transform: scale(1.1);
 }
 
 /* Circle Gradient colors */
 .icon-circle.mail { background: linear-gradient(135deg, #2db400, #3fd00c); }
 .icon-circle.cafe { background: linear-gradient(135deg, #03c75a, #20dc77); }
 .icon-circle.blog { background: linear-gradient(135deg, #00c73c, #1deb5f); }
+.icon-circle.calendar { background: linear-gradient(135deg, #3a88fd, #20c997); }
 .icon-circle.library { background: linear-gradient(135deg, #4facfe, #00f2fe); }
 .icon-circle.science { background: linear-gradient(135deg, #fa709a, #fee140); }
 .icon-circle.coding { background: linear-gradient(135deg, #f093fb, #f5576c); }

@@ -47,15 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 2. Cafe Data Initialization (Pure real data only - no fake mock cafes)
+    // 2. Cafe Data Initialization
     const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
 
-    let cafes = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+    const DEFAULT_CAFES = [];
 
-    // Remove legacy fake mock cafes if they were previously cached
-    const fakeIds = ["asamo", "jjandoli", "mistory"];
-    cafes = cafes.filter(c => !fakeIds.includes(c.id));
-    localStorage.setItem("naverCafesData", JSON.stringify(cafes));
+    let cafes = JSON.parse(localStorage.getItem("naverCafesData") || "null");
+    if (!cafes || !Array.isArray(cafes)) {
+        cafes = DEFAULT_CAFES;
+        localStorage.setItem("naverCafesData", JSON.stringify(cafes));
+    }
 
     // Load real cafes from PocketBase if available
     async function loadCafesFromPocketBase() {
@@ -96,12 +97,109 @@ document.addEventListener("DOMContentLoaded", () => {
     const cafeFeedList = document.getElementById("cafe-feed-list");
     const allCafesList = document.getElementById("all-cafes-list");
     const allCafesTotalBadge = document.getElementById("all-cafes-total-badge");
-    const sidebarAllCafesCount = document.getElementById("sidebar-all-cafes-count");
+    const sidebarJoinedCafesCount = document.getElementById("sidebar-joined-cafes-count");
     let currentTab = "my-cafe"; // "my-cafe" | "fav-board"
     let currentSearchQuery = "";
 
+    // ----------------------------------------------------
+    // Cafe Personal Notifications (내소식 실시간 알림 시스템)
+    // ----------------------------------------------------
+    const DEFAULT_CAFE_NOTIFICATIONS = [];
+
+    let cafeNotifications = JSON.parse(localStorage.getItem("naverCafeNotifications") || "null");
+    if (!cafeNotifications || !Array.isArray(cafeNotifications)) {
+        cafeNotifications = DEFAULT_CAFE_NOTIFICATIONS;
+        localStorage.setItem("naverCafeNotifications", JSON.stringify(cafeNotifications));
+    }
+
+    const cafeMyNewsBadge = document.getElementById("cafe-my-news-badge");
+    const navCafeMyNews = document.getElementById("nav-cafe-my-news");
+    const cafeNotiPopover = document.getElementById("cafe-noti-popover");
+    const cafeNotiList = document.getElementById("cafe-noti-list");
+    const notiUnreadCountTag = document.getElementById("noti-unread-count-tag");
+    const btnCafeNotiReadAll = document.getElementById("btn-cafe-noti-read-all");
+    const btnCloseCafeNoti = document.getElementById("btn-close-cafe-noti");
+
+    function updateNotificationBadges() {
+        const unreadCount = cafeNotifications.filter(n => n.unread).length;
+        if (cafeMyNewsBadge) {
+            cafeMyNewsBadge.textContent = unreadCount;
+            cafeMyNewsBadge.style.display = unreadCount > 0 ? "inline-flex" : "none";
+        }
+        if (notiUnreadCountTag) {
+            notiUnreadCountTag.textContent = `${unreadCount}개 안읽음`;
+        }
+        if (sidebarJoinedCafesCount) {
+            sidebarJoinedCafesCount.textContent = Math.max(1, cafes.length);
+        }
+    }
+
+    function renderNotificationsList() {
+        if (!cafeNotiList) return;
+        cafeNotiList.innerHTML = "";
+
+        if (cafeNotifications.length === 0) {
+            cafeNotiList.innerHTML = `
+                <div style="text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 13px;">
+                    <i class="fa-regular fa-bell-slash" style="font-size: 24px; margin-bottom: 8px; color: #cbd5e1;"></i>
+                    <p>도착한 알림이 없습니다.</p>
+                </div>
+            `;
+            return;
+        }
+
+        cafeNotifications.forEach(noti => {
+            const card = document.createElement("div");
+            card.className = `noti-item-card ${noti.unread ? 'unread' : ''}`;
+            card.innerHTML = `
+                <div class="noti-icon-badge ${noti.iconType}">
+                    <i class="${noti.iconClass}"></i>
+                </div>
+                <div class="noti-text-area">
+                    <div class="noti-msg">${noti.message}</div>
+                    <div class="noti-time">${noti.time}</div>
+                </div>
+            `;
+            card.addEventListener("click", () => {
+                noti.unread = false;
+                localStorage.setItem("naverCafeNotifications", JSON.stringify(cafeNotifications));
+                updateNotificationBadges();
+                renderNotificationsList();
+            });
+            cafeNotiList.appendChild(card);
+        });
+    }
+
+    if (navCafeMyNews) {
+        navCafeMyNews.addEventListener("click", (e) => {
+            e.preventDefault();
+            const isOpen = cafeNotiPopover && cafeNotiPopover.style.display === "block";
+            if (isOpen) {
+                cafeNotiPopover.style.display = "none";
+            } else if (cafeNotiPopover) {
+                renderNotificationsList();
+                cafeNotiPopover.style.display = "block";
+            }
+        });
+    }
+
+    if (btnCloseCafeNoti) {
+        btnCloseCafeNoti.addEventListener("click", () => {
+            if (cafeNotiPopover) cafeNotiPopover.style.display = "none";
+        });
+    }
+
+    if (btnCafeNotiReadAll) {
+        btnCafeNotiReadAll.addEventListener("click", () => {
+            cafeNotifications.forEach(n => n.unread = false);
+            localStorage.setItem("naverCafeNotifications", JSON.stringify(cafeNotifications));
+            updateNotificationBadges();
+            renderNotificationsList();
+        });
+    }
+
     function renderAllCafesGrid() {
-        if (sidebarAllCafesCount) sidebarAllCafesCount.textContent = cafes.length;
+        if (sidebarJoinedCafesCount) sidebarJoinedCafesCount.textContent = Math.max(1, cafes.length);
         if (allCafesTotalBadge) allCafesTotalBadge.textContent = `${cafes.length}개`;
         if (!allCafesList) return;
 
@@ -318,8 +416,13 @@ document.addEventListener("DOMContentLoaded", () => {
         window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
+    const navMyJoinedCafes = document.getElementById("nav-my-joined-cafes");
+    const navCafeHotPosts = document.getElementById("nav-cafe-hot-posts");
+
     if (navCafeHome) navCafeHome.addEventListener("click", (e) => { e.preventDefault(); showHomeView(); });
     if (navAllCafes) navAllCafes.addEventListener("click", (e) => { e.preventDefault(); showAllCafesView(); });
+    if (navMyJoinedCafes) navMyJoinedCafes.addEventListener("click", (e) => { e.preventDefault(); showHomeView(); });
+    if (navCafeHotPosts) navCafeHotPosts.addEventListener("click", (e) => { e.preventDefault(); showHomeView(); });
     if (catAllCafesLink) catAllCafesLink.addEventListener("click", (e) => { e.preventDefault(); showAllCafesView(); });
     if (btnCreateCafe) btnCreateCafe.addEventListener("click", showCreateView);
 

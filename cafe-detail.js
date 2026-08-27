@@ -306,6 +306,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const welcomeHeroCard = document.getElementById("welcome-hero-card");
     const btnBackToList = document.getElementById("btn-back-to-list");
     let currentViewingPostId = null;
+    let currentEditingPostId = null;
 
     function showMemberListView() {
         if (typeof openCafeMembersViewDirect === 'function') {
@@ -390,6 +391,25 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         renderComments(post);
 
+        // Check if currently logged-in user is the author of this post
+        const activeUser = (localStorage.getItem("naverLoggedInUser") || loggedInUser || "").trim();
+        const activeUserId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
+        const postAuthor = (post.author || "").trim();
+
+        const isMyPost = Boolean(
+            activeUser && postAuthor && (
+                postAuthor === activeUser ||
+                postAuthor.includes(activeUser) ||
+                activeUser.includes(postAuthor) ||
+                (post.authorId && post.authorId === activeUserId)
+            )
+        );
+
+        const detailAuthorActions = document.getElementById("detail-author-actions");
+        if (detailAuthorActions) {
+            detailAuthorActions.style.display = isMyPost ? "flex" : "none";
+        }
+
         if (cafeLayoutGrid) cafeLayoutGrid.style.display = "grid";
         if (cafeWriteFullView) cafeWriteFullView.style.display = "none";
         if (cafeJoinView) cafeJoinView.style.display = "none";
@@ -458,6 +478,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        currentEditingPostId = null;
+
         if (cafeLayoutGrid) cafeLayoutGrid.style.display = "none";
         if (postDetailContainer) postDetailContainer.style.display = "none";
         if (cafeJoinView) cafeJoinView.style.display = "none";
@@ -467,18 +489,63 @@ document.addEventListener("DOMContentLoaded", () => {
             cafeWriteFullView.style.visibility = "visible";
         }
         
+        const writePageTitle = document.querySelector(".write-page-title");
+        if (writePageTitle) writePageTitle.textContent = "카페 글쓰기";
+        const btnFullSubmit = document.getElementById("btn-full-submit");
+        if (btnFullSubmit) btnFullSubmit.textContent = "등록";
+
         // Reset full write form
         const titleEl = document.getElementById("full-write-title");
         const contentEl = document.getElementById("full-write-content");
         const tagsEl = document.getElementById("full-write-tags");
+        const noticeEl = document.getElementById("check-write-notice");
         if (titleEl) { titleEl.value = ""; titleEl.focus(); }
         if (contentEl) contentEl.innerHTML = "";
         if (tagsEl) tagsEl.value = "";
+        if (noticeEl) noticeEl.checked = false;
         
         window.scrollTo({ top: 80, behavior: 'smooth' });
     }
 
+    function editCurrentPost() {
+        if (!currentViewingPostId) return;
+        const post = (currentCafe.posts || []).find(p => p.id === currentViewingPostId);
+        if (!post) return;
+
+        currentEditingPostId = post.id;
+
+        if (cafeLayoutGrid) cafeLayoutGrid.style.display = "none";
+        if (postDetailContainer) postDetailContainer.style.display = "none";
+        if (cafeJoinView) cafeJoinView.style.display = "none";
+        if (cafeMemberListView) cafeMemberListView.style.display = "none";
+        if (cafeWriteFullView) {
+            cafeWriteFullView.style.display = "block";
+            cafeWriteFullView.style.visibility = "visible";
+        }
+
+        const writePageTitle = document.querySelector(".write-page-title");
+        if (writePageTitle) writePageTitle.textContent = "카페 글 수정";
+        const btnFullSubmit = document.getElementById("btn-full-submit");
+        if (btnFullSubmit) btnFullSubmit.textContent = "수정 완료";
+
+        const titleEl = document.getElementById("full-write-title");
+        const contentEl = document.getElementById("full-write-content");
+        const boardEl = document.getElementById("full-write-board");
+        const noticeEl = document.getElementById("check-write-notice");
+
+        if (titleEl) {
+            titleEl.value = post.title || "";
+            titleEl.focus();
+        }
+        if (contentEl) contentEl.innerHTML = post.content || "";
+        if (boardEl && post.board) boardEl.value = post.board;
+        if (noticeEl) noticeEl.checked = Boolean(post.isNotice);
+
+        window.scrollTo({ top: 80, behavior: 'smooth' });
+    }
+
     window.openCafeWriteView = showWriteView;
+    window.editCurrentPost = editCurrentPost;
 
     function showJoinView() {
         const isAuthCheck = localStorage.getItem("naverIsLoggedIn") === "true";
@@ -788,12 +855,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Single Delete from Post Detail View
+    // Single Delete & Edit from Post Detail View
     const btnPostDelete = document.getElementById("btn-post-delete");
+    const btnDetailBottomEdit = document.getElementById("btn-detail-bottom-edit");
     const btnDetailBottomDelete = document.getElementById("btn-detail-bottom-delete");
     
     function deleteCurrentPost() {
-        if (confirm("이 게시글을 삭제하시겠습니까?")) {
+        if (confirm("이 게시글을 삭제하시겠습니까?\n삭제된 글은 복구할 수 없습니다.")) {
             if (currentViewingPostId) {
                 currentCafe.posts = (currentCafe.posts || []).filter(p => p.id !== currentViewingPostId);
                 saveCafeState();
@@ -804,14 +872,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (btnPostDelete) btnPostDelete.addEventListener("click", deleteCurrentPost);
+    if (btnDetailBottomEdit) btnDetailBottomEdit.addEventListener("click", editCurrentPost);
     if (btnDetailBottomDelete) btnDetailBottomDelete.addEventListener("click", deleteCurrentPost);
 
     // Detail Bottom Toolbar actions
-    const btnDetailBottomWrite = document.getElementById("btn-detail-bottom-write");
     const btnDetailBottomList = document.getElementById("btn-detail-bottom-list");
     const btnDetailBottomTop = document.getElementById("btn-detail-bottom-top");
 
-    if (btnDetailBottomWrite) btnDetailBottomWrite.addEventListener("click", showWriteView);
     if (btnDetailBottomList) btnDetailBottomList.addEventListener("click", showBoardList);
     if (btnDetailBottomTop) btnDetailBottomTop.addEventListener("click", () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
@@ -853,48 +920,65 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnOpenWriteModal = document.getElementById("btn-open-write-modal");
     const btnBoardWrite = document.getElementById("btn-board-write");
 
-    if (btnOpenWriteModal) btnOpenWriteModal.addEventListener("click", showWriteView);
-    if (btnBoardWrite) btnBoardWrite.addEventListener("click", showWriteView);
+    if (btnOpenWriteModal) btnOpenWriteModal.addEventListener("click", () => showWriteView());
+    if (btnBoardWrite) btnBoardWrite.addEventListener("click", () => showWriteView());
 
     // 13. Full Editor Formatting Controls (Bold, Italic, Underline, Photo, Link, etc.)
     const fmtBold = document.getElementById("fmt-bold");
     const fmtItalic = document.getElementById("fmt-italic");
     const fmtUnderline = document.getElementById("fmt-underline");
     const fmtStrike = document.getElementById("fmt-strike");
+    const fmtAlignLeft = document.getElementById("fmt-align-left");
+    const fmtAlignCenter = document.getElementById("fmt-align-center");
+    const fmtAlignRight = document.getElementById("fmt-align-right");
+    const fullWriteContent = document.getElementById("full-write-content");
     const btnToolPhoto = document.getElementById("btn-tool-photo");
-    const writePhotoUpload = document.getElementById("write-photo-upload");
+    const fullWritePhotoFile = document.getElementById("full-write-photo-file");
     const btnToolLink = document.getElementById("btn-tool-link");
     const btnToolQuote = document.getElementById("btn-tool-quote");
     const btnToolDivider = document.getElementById("btn-tool-divider");
-    const fullWriteContent = document.getElementById("full-write-content");
 
-    if (fmtBold) fmtBold.addEventListener("click", () => document.execCommand("bold", false, null));
-    if (fmtItalic) fmtItalic.addEventListener("click", () => document.execCommand("italic", false, null));
-    if (fmtUnderline) fmtUnderline.addEventListener("click", () => document.execCommand("underline", false, null));
-    if (fmtStrike) fmtStrike.addEventListener("click", () => document.execCommand("strikeThrough", false, null));
+    function execCmd(cmd, val = null) {
+        if (fullWriteContent) {
+            fullWriteContent.focus();
+            document.execCommand(cmd, false, val);
+        }
+    }
 
-    if (btnToolPhoto && writePhotoUpload && fullWriteContent) {
-        btnToolPhoto.addEventListener("click", () => writePhotoUpload.click());
-        writePhotoUpload.addEventListener("change", (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (evt) => {
-                    fullWriteContent.focus();
-                    document.execCommand("insertImage", false, evt.target.result);
-                };
-                reader.readAsDataURL(file);
+    if (fmtBold) fmtBold.addEventListener("click", () => execCmd("bold"));
+    if (fmtItalic) fmtItalic.addEventListener("click", () => execCmd("italic"));
+    if (fmtUnderline) fmtUnderline.addEventListener("click", () => execCmd("underline"));
+    if (fmtStrike) fmtStrike.addEventListener("click", () => execCmd("strikeThrough"));
+    if (fmtAlignLeft) fmtAlignLeft.addEventListener("click", () => execCmd("justifyLeft"));
+    if (fmtAlignCenter) fmtAlignCenter.addEventListener("click", () => execCmd("justifyCenter"));
+    if (fmtAlignRight) fmtAlignRight.addEventListener("click", () => execCmd("justifyRight"));
+
+    const photoFileInput = document.getElementById("write-photo-upload") || document.getElementById("full-write-photo-file");
+    if (btnToolPhoto && photoFileInput) {
+        btnToolPhoto.addEventListener("click", () => photoFileInput.click());
+        photoFileInput.addEventListener("change", (e) => {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                Array.from(files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = (re) => {
+                        if (fullWriteContent) {
+                            fullWriteContent.focus();
+                            const imgHtml = `<p><img src="${re.target.result}" alt="첨부 이미지" style="max-width: 100%; height: auto; border-radius: 8px; margin: 12px 0; display: block; box-shadow: 0 4px 12px rgba(0,0,0,0.08);"></p><p><br></p>`;
+                            document.execCommand("insertHTML", false, imgHtml);
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                });
+                photoFileInput.value = "";
             }
         });
     }
 
-    if (btnToolLink && fullWriteContent) {
+    if (btnToolLink) {
         btnToolLink.addEventListener("click", () => {
-            const url = prompt("연결할 링크 URL을 입력하세요:", "https://");
-            if (url) {
-                fullWriteContent.focus();
-                document.execCommand("createLink", false, url);
-            }
+            const url = prompt("삽입할 링크 주소를 입력하세요 (http/https):", "https://");
+            if (url) execCmd("createLink", url);
         });
     }
 
@@ -912,7 +996,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 14. Full Editor Submission Handler
+    // 14. Full Editor Submission Handler (Create & Edit Mode)
     async function handleFullSubmit() {
         const boardEl = document.getElementById("full-write-board");
         const prefixEl = document.getElementById("full-write-prefix");
@@ -934,6 +1018,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const title = prefix ? `[${prefix}] ${rawTitle}` : rawTitle;
         const curAuthor = (localStorage.getItem("naverLoggedInUser") || currentCafe.manager || loggedInUser || "연습용").trim();
+
+        // If in Edit Mode (수정 모드)
+        if (currentEditingPostId) {
+            const postIdx = (currentCafe.posts || []).findIndex(p => p.id === currentEditingPostId);
+            if (postIdx !== -1) {
+                currentCafe.posts[postIdx].title = title;
+                currentCafe.posts[postIdx].board = board;
+                currentCafe.posts[postIdx].content = contentHtml || `${title} 본문 내용입니다.`;
+                currentCafe.posts[postIdx].isNotice = isNotice;
+            }
+            if (window.currentCafeRecord) {
+                window.currentCafeRecord.posts = currentCafe.posts;
+            }
+            await saveCafeState();
+            const editedId = currentEditingPostId;
+            currentEditingPostId = null;
+            alert("게시글이 성공적으로 수정되었습니다!");
+            renderPostTable();
+            showPostDetail(editedId);
+            return;
+        }
 
         const now = new Date();
         const year = now.getFullYear();
