@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에듀버 뉴스 데스크 - 기사 작성 및 송고</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #03c75a;
+            --primary-dark: #029b46;
+            --border: #ced4da;
+        }
+
+        body {
+            background-color: #f5f6f8;
+            font-family: 'Noto Sans KR', sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .editor-top-bar {
+            background: #fff;
+            border-bottom: 1px solid #e1e4e8;
+            padding: 12px 28px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .editor-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .editor-badge {
+            background: var(--primary);
+            color: #fff;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 900;
+        }
+
+        .btn-top-back {
+            text-decoration: none;
+            color: #555;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: #f1f3f5;
+            border-radius: 4px;
+        }
+
+        .btn-top-back:hover {
+            background: #e9ecef;
+            color: #111;
+        }
+
+        .btn-publish-news {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: background 0.15s;
+        }
+
+        .btn-publish-news:hover {
+            background: var(--primary-dark);
+        }
+
+        .editor-workspace {
+            max-width: 880px;
+            margin: 28px auto 60px;
+            background: #fff;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 36px 40px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .form-row {
+            margin-bottom: 22px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 14px;
+            font-size: 14px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            outline: none;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        .input-headline-title {
+            font-size: 20px;
+            font-weight: 700;
+            padding: 12px 14px;
+        }
+
+        .meta-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        /* Toolbar */
+        .wysiwyg-toolbar {
+            display: flex;
+            gap: 4px;
+            padding: 8px;
+            background: #f8f9fa;
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 6px 6px 0 0;
+        }
+
+        .btn-tool {
+            background: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .btn-tool:hover {
+            background: #e9ecef;
+        }
+
+        .article-content-editor {
+            min-height: 340px;
+            border: 1px solid var(--border);
+            border-radius: 0 0 6px 6px;
+            padding: 18px;
+            font-size: 15px;
+            line-height: 1.8;
+            outline: none;
+        }
+
+        .article-content-editor:focus {
+            border-color: var(--primary);
+        }
+
+        .thumbnail-preview-box {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 8px;
+        }
+
+        .thumb-preview-img {
+            width: 140px;
+            height: 90px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background: #f1f3f5;
+        }
+
+        .btn-upload-thumb {
+            padding: 8px 16px;
+            background: #f1f3f5;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-upload-thumb:hover {
+            background: #e9ecef;
+        }
+
+        .checkbox-headline-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #495057;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <header class="editor-top-bar">
+        <div style="display: flex; align-items: center; gap: 14px;">
+            <a href="news.html" class="btn-top-back"><i class="fa-solid fa-arrow-left"></i> 뉴스 홈으로</a>
+            <div class="editor-brand">
+                <span class="editor-badge">기자 데스크</span>
+                <span>에듀버 뉴스 기사 작성기</span>
+            </div>
+        </div>
+        <div>
+            <button class="btn-publish-news" id="btn-submit-news" onclick="publishNewsArticle()">
+                <i class="fa-solid fa-paper-plane"></i> 기사 송고(발행)
+            </button>
+        </div>
+    </header>
+
+    <!-- Form Workspace -->
+    <main class="editor-workspace">
+        <!-- Category & Headline Flag -->
+        <div class="meta-grid-2 form-row">
+            <div>
+                <label>뉴스 분야 (카테고리)</label>
+                <select id="news-category" class="form-input">
+                    <option value="특수교육" selected>특수교육 현장</option>
+                    <option value="교육정책">교육정책·동향</option>
+                    <option value="에듀테크">에듀테크 & 보조공학</option>
+                    <option value="사람과 이야기">사람과 이야기</option>
+                </select>
+            </div>
+            <div>
+                <label>대표 노출 설정</label>
+                <label class="checkbox-headline-wrap">
+                    <input type="checkbox" id="news-is-headline" style="width: 16px; height: 16px;">
+                    <span>메인 헤드라인(특종)으로 지정</span>
+                </label>
+            </div>
+        </div>
+
+        <!-- Headline Title -->
+        <div class="form-row">
+            <label>기사 제목 (헤드라인) *</label>
+            <input type="text" id="news-title" class="form-input input-headline-title" placeholder="독자의 시선을 사로잡는 기사 제목을 입력하세요">
+        </div>
+
+        <!-- Subtitle -->
+        <div class="form-row">
+            <label>기사 부제목 (서브 타이틀)</label>
+            <input type="text" id="news-subtitle" class="form-input" placeholder="기사의 핵심 요점을 한 문장으로 요약해 주세요">
+        </div>
+
+        <!-- Author & Press -->
+        <div class="meta-grid-2 form-row">
+            <div>
+                <label>기자명 (작성자)</label>
+                <input type="text" id="news-author" class="form-input" placeholder="예: 조이 기자">
+            </div>
+            <div>
+                <label>소속 언론사 / 부서</label>
+                <input type="text" id="news-press" class="form-input" value="에듀버 교육보도국">
+            </div>
+        </div>
+
+        <!-- Thumbnail Image -->
+        <div class="form-row">
+            <label>대표 이미지 (썸네일)</label>
+            <div class="thumbnail-preview-box">
+                <img id="thumb-preview" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80" alt="Preview" class="thumb-preview-img">
+                <div>
+                    <input type="file" id="thumb-file-input" accept="image/*" style="display: none;" onchange="handleThumbFile(event)">
+                    <button type="button" class="btn-upload-thumb" onclick="document.getElementById('thumb-file-input').click()">
+                        <i class="fa-solid fa-camera"></i> 사진 선택
+                    </button>
+                    <div style="font-size: 11px; color: #888; margin-top: 6px;">기사와 어울리는 사진을 첨부하세요 (자동 최적화 압축)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content WYSIWYG -->
+        <div class="form-row">
+            <label>기사 본문 *</label>
+            <div class="wysiwyg-toolbar">
+                <button type="button" class="btn-tool" onclick="document.execCommand('bold')"><i class="fa-solid fa-bold"></i></button>
+                <button type="button" class="btn-tool" onclick="document.execCommand('italic')"><i class="fa-solid fa-italic"></i></button>
+                <button type="button" class="btn-tool" onclick="document.execCommand('underline')"><i class="fa-solid fa-underline"></i></button>
+                <button type="button" class="btn-tool" onclick="document.execCommand('formatBlock', false, '<blockquote>')"><i class="fa-solid fa-quote-left"></i></button>
+                <button type="button" class="btn-tool" onclick="document.execCommand('insertUnorderedList')"><i class="fa-solid fa-list-ul"></i></button>
+            </div>
+            <div class="article-content-editor" id="news-content-editor" contenteditable="true" placeholder="기사 내용을 품격 있게 작성해 주세요..."></div>
+        </div>
+    </main>
+
+    <script src="news.js"></script>
+    <script>
+        let currentThumbUrl = "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80";
+
+        // Auto fill author from logged-in user
+        document.addEventListener("DOMContentLoaded", () => {
+            const loggedInUser = localStorage.getItem("naverLoggedInUser") || "조이";
+            document.getElementById("news-author").value = `${loggedInUser} 기자`;
+        });
+
+        // Handle thumbnail file upload with canvas compression
+        function handleThumbFile(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement("canvas");
+                    const maxDim = 800;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > h && w > maxDim) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    } else if (h > maxDim) {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, w, h);
+                    currentThumbUrl = canvas.toDataURL("image/jpeg", 0.75);
+                    document.getElementById("thumb-preview").src = currentThumbUrl;
+                };
+                img.src = evt.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Publish News Article
+        async function publishNewsArticle() {
+            const title = document.getElementById("news-title").value.trim();
+            const subtitle = document.getElementById("news-subtitle").value.trim();
+            const category = document.getElementById("news-category").value;
+            const author = document.getElementById("news-author").value.trim() || "조이 기자";
+            const press = document.getElementById("news-press").value.trim() || "에듀버 교육보도국";
+            const isHeadline = document.getElementById("news-is-headline").checked;
+            const editorEl = document.getElementById("news-content-editor");
+            const contentHtml = editorEl.innerHTML.trim();
+            const plainText = editorEl.innerText.trim();
+
+            if (!title) {
+                alert("기사 제목(헤드라인)을 입력해주세요.");
+                document.getElementById("news-title").focus();
+                return;
+            }
+
+            if (!plainText && !contentHtml) {
+                alert("기사 본문 내용을 작성해주세요.");
+                editorEl.focus();
+                return;
+            }
+
+            const btnSubmit = document.getElementById("btn-submit-news");
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 송고 중...';
+
+            const summaryText = plainText.length > 140 ? plainText.substring(0, 140) + "..." : plainText;
+            const newId = "news_" + Date.now();
+            const now = new Date();
+
+            const loggedInUsername = localStorage.getItem("naverLoggedInUsername") || localStorage.getItem("naverLoggedInUserId") || "";
+
+            const newArticle = {
+                id: newId,
+                title: title,
+                subtitle: subtitle,
+                category: category,
+                author: author,
+                authorId: loggedInUsername,
+                press: press,
+                date: now.toLocaleDateString(),
+                time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                summary: summaryText,
+                content: contentHtml,
+                thumbnail: currentThumbUrl,
+                views: 1,
+                likedUsers: [],
+                likes: 0,
+                isHeadline: isHeadline
+            };
+
+            // Save to localStorage
+            const articles = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
+            if (isHeadline) {
+                articles.forEach(a => a.isHeadline = false);
+            }
+            articles.unshift(newArticle);
+            localStorage.setItem("naverNewsArticles", JSON.stringify(articles));
+
+            // Sync to PocketBase in background if available
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                await fetch(`${POCKETBASE_URL}/api/collections/news/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        subtitle: subtitle,
+                        category: category,
+                        author: author,
+                        authorId: loggedInUsername,
+                        press: press,
+                        summary: summaryText,
+                        content: contentHtml,
+                        thumbnail: currentThumbUrl,
+                        views: 1,
+                        likedUsers: [],
+                        isHeadline: isHeadline
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+            } catch (e) {
+                // Ignore failure, local is saved
+            }
+
+            alert("기사가 성공적으로 송고(발행)되었습니다!");
+            window.location.href = `news.html?id=${encodeURIComponent(newId)}`;
+        }
+    </script>
+</body>
+</html>

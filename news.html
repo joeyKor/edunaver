@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에듀버 뉴스 - 대한민국 교육 & 특수교육 전문 뉴스</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="news.css">
+</head>
+<body>
+
+    <!-- News Header -->
+    <header class="news-header">
+        <div class="news-top-bar">
+            <a href="news.html" class="news-logo-area">
+                <span class="news-logo-edu">EDU</span>
+                <span class="news-logo-text">뉴스</span>
+            </a>
+            <div class="news-header-right">
+                <a href="index.html" class="btn-portal-home">
+                    <i class="fa-solid fa-house"></i> 에듀버 홈
+                </a>
+                <a href="news-write.html" class="btn-write-article">
+                    <i class="fa-solid fa-pen-to-square"></i> 기사 작성
+                </a>
+            </div>
+        </div>
+
+        <!-- Category Nav -->
+        <nav class="news-nav">
+            <div class="news-nav-inner" id="news-cat-nav">
+                <button class="news-nav-item active" data-cat="전체">종합 홈</button>
+                <button class="news-nav-item" data-cat="특수교육">특수교육 현장</button>
+                <button class="news-nav-item" data-cat="교육정책">교육정책·동향</button>
+                <button class="news-nav-item" data-cat="에듀테크">에듀테크 & 보조공학</button>
+                <button class="news-nav-item" data-cat="사람과 이야기">사람과 이야기</button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="news-container">
+        <!-- Left: Main Articles -->
+        <section class="news-main-feed">
+            <!-- Headline Hero Area -->
+            <div id="headline-hero-box"></div>
+
+            <!-- Section Articles -->
+            <div>
+                <div class="section-title-row">
+                    <h2><i class="fa-solid fa-newspaper" style="color: #03c75a;"></i> <span id="section-cat-title">주요 뉴스</span></h2>
+                </div>
+                <div class="news-cards-list" id="news-cards-list"></div>
+            </div>
+        </section>
+
+        <!-- Right Sidebar -->
+        <aside class="news-sidebar">
+            <!-- Most Viewed Ranking -->
+            <div class="sidebar-box">
+                <h3 class="sidebar-box-title">
+                    <span>가장 많이 본 뉴스</span>
+                    <i class="fa-solid fa-fire" style="color: #f03e3e;"></i>
+                </h3>
+                <ol class="ranking-news-list" id="ranking-news-list"></ol>
+            </div>
+
+            <!-- Reporter Desk Banner -->
+            <div class="sidebar-box" style="background: linear-gradient(135deg, #03c75a, #028038); color: #fff;">
+                <h4 style="font-size: 15px; font-weight: 800; margin: 0 0 8px 0;"><i class="fa-solid fa-bullhorn"></i> 에듀버 기자 데스크</h4>
+                <p style="font-size: 12.5px; opacity: 0.9; line-height: 1.5; margin: 0 0 14px 0;">
+                    교실의 생생한 이야기, 특수교육의 변화를 이끄는 선생님의 시선을 기사로 공유해 주세요.
+                </p>
+                <a href="news-write.html" style="display: inline-block; background: #fff; color: #028038; font-size: 12px; font-weight: 800; padding: 7px 14px; border-radius: 4px; text-decoration: none;">
+                    새 기사 송고하기
+                </a>
+            </div>
+        </aside>
+    </main>
+
+    <script src="news.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            renderNewsHome();
+
+            // Category Tab Events
+            document.querySelectorAll(".news-nav-item").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    document.querySelectorAll(".news-nav-item").forEach(b => b.classList.remove("active"));
+                    btn.classList.add("active");
+                    currentNewsCategory = btn.getAttribute("data-cat");
+                    document.getElementById("section-cat-title").textContent = currentNewsCategory === "전체" ? "주요 뉴스" : `${currentNewsCategory} 뉴스`;
+                    renderNewsHome();
+                });
+            });
+
+            // If id param present, go directly to detail page
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get("id");
+            if (articleId) {
+                window.location.href = `news-detail.html?id=${encodeURIComponent(articleId)}`;
+            }
+        });
+    </script>
+</body>
+</html>

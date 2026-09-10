@@ -107,6 +107,17 @@
             background: #f1f3f5;
             border-color: #ced4da;
         }
+        .btn-post-edit-highlight {
+            background-color: #00c73c;
+            color: #ffffff;
+            border: 1px solid #00c73c;
+            font-weight: 600;
+        }
+        .btn-post-edit-highlight:hover {
+            background-color: #00b035;
+            color: #ffffff;
+            border-color: #00b035;
+        }
         .btn-post-more-dots {
             background: none;
             border: none;
@@ -130,37 +141,45 @@
         .post-like-container {
             margin-top: 28px;
             margin-bottom: 24px;
+            position: relative;
         }
         .post-like-box {
             display: inline-flex;
             align-items: center;
-            border: 1px solid #f6b5b5;
-            border-radius: 6px;
-            padding: 6px 14px;
+            border: 1px solid #d5d9de;
+            border-radius: 4px;
             background: #fff;
-            box-shadow: 0 1px 3px rgba(246, 131, 131, 0.08);
-            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+            height: 38px;
         }
         .post-like-box:hover {
-            border-color: #ff8e8e;
-            box-shadow: 0 2px 6px rgba(246, 131, 131, 0.15);
+            border-color: #bbc1c7;
         }
         .btn-like-main {
             background: none;
             border: none;
             cursor: pointer;
-            display: flex;
+            display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 14px;
-            font-weight: 700;
-            color: #ff5e78;
-            padding-right: 12px;
-            border-right: 1px solid #f5d4d4;
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            padding: 0 14px;
+            height: 100%;
+            border-right: 1px solid #ebedf0;
+            transition: all 0.15s;
+        }
+        .btn-like-main:hover {
+            background: #fbfbfc;
         }
         .btn-like-main i {
-            font-size: 16px;
+            font-size: 15px;
+            color: #ff5e78;
             transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .btn-like-main.is-liked {
+            color: #ff3b5c;
         }
         .btn-like-main.is-liked i {
             color: #ff3b5c;
@@ -170,12 +189,18 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: #f68383;
-            font-size: 13px;
-            padding-left: 10px;
-            display: flex;
+            color: #666;
+            font-size: 11px;
+            padding: 0 10px;
+            height: 100%;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
+            transition: background 0.15s;
+        }
+        .btn-like-toggle-panel:hover {
+            background: #fbfbfc;
+            color: #222;
         }
         .btn-like-toggle-panel i {
             transition: transform 0.2s ease;
@@ -187,10 +212,10 @@
             display: none;
             margin-top: 14px;
             background: #ffffff;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 20px 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+            border: 1px solid #e3e7ed;
+            border-radius: 8px;
+            padding: 22px 24px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
         }
         .liked-bloggers-panel.active {
             display: block;
@@ -203,74 +228,63 @@
         .liked-bloggers-title {
             font-size: 15px;
             font-weight: 700;
-            color: #333;
-            margin-bottom: 16px;
+            color: #111;
+            margin-bottom: 18px;
             padding-bottom: 12px;
             border-bottom: 1px solid #f1f3f5;
         }
         .liked-bloggers-title span {
-            color: #ff6b00;
+            color: #00c73c;
         }
-        .liked-bloggers-list {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-            max-height: 320px;
+        .liked-bloggers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 14px 18px;
+            max-height: 380px;
             overflow-y: auto;
+            padding-right: 4px;
         }
         .liked-blogger-item {
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 4px 0;
-        }
-        .blogger-left-info {
-            display: flex;
-            align-items: center;
             gap: 12px;
+            padding: 8px 10px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .liked-blogger-item:hover {
+            background: #f4f6f8;
         }
         .blogger-avatar-img {
-            width: 44px;
-            height: 44px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             object-fit: cover;
             border: 1px solid #eee;
+            flex-shrink: 0;
         }
         .blogger-text-col {
             display: flex;
             flex-direction: column;
             gap: 2px;
+            min-width: 0;
+            flex: 1;
         }
         .blogger-name {
-            font-size: 14px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #222;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .blogger-desc {
-            font-size: 12.5px;
-            color: #888;
-        }
-        .btn-add-neighbor-mini {
-            background: #ffffff;
-            border: 1px solid #d5d9df;
-            color: #555;
             font-size: 12px;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.15s ease;
-        }
-        .btn-add-neighbor-mini:hover {
-            border-color: #00c73c;
-            color: #00c73c;
-            background: #f4fbf6;
-        }
-        .btn-add-neighbor-mini.following {
-            background: #e8f9ed;
-            color: #00c73c;
-            border-color: #00c73c;
+            color: #888;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .post-action-dropdown-menu {
             position: absolute;
@@ -377,6 +391,12 @@
             font-weight: 700;
             font-size: 13px;
             border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .btn-comment-submit:hover {
+            background: #02b336;
         }
     </style>
 </head>
@@ -411,23 +431,27 @@
         <!-- Blog Cover -->
         <div class="myblog-cover">
             <div style="position: relative; display: inline-block; cursor: pointer;" onclick="openProfileModal()" title="프로필 사진 및 정보 변경">
-                <img src="default-avatar.svg" alt="Avatar" class="myblog-profile-img" id="myblog-avatar">
+                <img src="default-avatar.svg" alt="Avatar" class="myblog-profile-img" id="myblog-avatar" onerror="this.onerror=null; this.src='default-avatar.svg';">
                 <div style="position: absolute; bottom: 4px; right: 4px; background: #00c73c; color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2);">
                     <i class="fa-solid fa-camera"></i>
                 </div>
             </div>
-            <h1 class="myblog-title" id="myblog-title">조이의 일상 &amp; 지식 서재</h1>
+            <h1 class="myblog-title" id="myblog-title">블로그 서재</h1>
             <p class="myblog-intro" id="myblog-desc">배움과 소소한 일상을 기록하는 공간입니다.</p>
         </div>
 
         <!-- Sub Navbar -->
         <div class="myblog-nav-bar">
-            <div style="font-weight: 700; font-size: 14px; color: #333;">
+            <div style="font-weight: 700; font-size: 14px; color: #333; display: flex; align-items: center; gap: 10px;">
+                <a href="blog.html" style="color: #03c75a; text-decoration: none; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 5px;">
+                    <i class="fa-solid fa-house"></i> 블로그 홈
+                </a>
+                <span style="color: #ddd;">|</span>
                 <span id="view-mode-title">전체 포스트 목록</span>
             </div>
             <div style="display: flex; gap: 8px;">
                 <button class="tool-btn" id="btn-back-to-list" style="display: none;" onclick="showPostList()">
-                    <i class="fa-solid fa-list"></i> 목록으로
+                    <i class="fa-solid fa-list"></i> 포스트 목록
                 </button>
                 <a href="blog-write.html" class="tool-btn"><i class="fa-solid fa-plus"></i> 새 글 쓰기</a>
             </div>
@@ -462,6 +486,7 @@
                             <span id="detail-time">시간</span>
                         </div>
                         <div class="post-meta-actions-right">
+                            <button type="button" class="btn-post-action-text btn-post-edit-highlight" id="btn-detail-edit" onclick="editCurrentPost()"><i class="fa-solid fa-pencil"></i> 수정</button>
                             <button type="button" class="btn-post-action-text" onclick="copyCurrentPostUrl()"><i class="fa-regular fa-copy"></i> URL 복사</button>
                             <button type="button" class="btn-post-action-text"><i class="fa-solid fa-chart-simple"></i> 통계</button>
                             
@@ -537,7 +562,7 @@
             <div class="modal-form-group" style="text-align: center; margin-bottom: 20px;">
                 <label style="display: block; margin-bottom: 8px;">프로필 아바타 사진</label>
                 <div style="position: relative; display: inline-block; cursor: pointer;" onclick="document.getElementById('modal-avatar-input').click()">
-                    <img id="modal-avatar-preview" src="default-avatar.svg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #00c73c;">
+                    <img id="modal-avatar-preview" src="default-avatar.svg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #00c73c;" onerror="this.onerror=null; this.src='default-avatar.svg';">
                     <div style="position: absolute; bottom: 0; right: 0; background: #00c73c; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #fff;">
                         <i class="fa-solid fa-camera"></i>
                     </div>
@@ -574,55 +599,146 @@
         let currentViewingPostId = null;
         let blogOwner = null; // Target blog owner being viewed
 
-        document.addEventListener("DOMContentLoaded", () => {
+        async function syncMyBlogPostsWithPocketBase() {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 3000);
+
+                const response = await fetch("https://pb.joyfamkr.synology.me/api/collections/posts/records?sort=-created", {
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                if (response.ok) {
+                    const data = await response.json();
+                    if (data.items && Array.isArray(data.items) && data.items.length > 0) {
+                        const filteredItems = data.items.filter(item => item.title !== "Test Post" && item.summary !== "This is a test post.");
+                        const pbPosts = filteredItems.map(item => {
+                            let parsedComments = [];
+                            if (Array.isArray(item.comments)) parsedComments = item.comments;
+                            else if (typeof item.comments === "string") {
+                                try { parsedComments = JSON.parse(item.comments); } catch (e) {}
+                            }
+
+                            let parsedLikedUsers = [];
+                            if (Array.isArray(item.likedUsers)) parsedLikedUsers = item.likedUsers;
+                            else if (typeof item.likedUsers === "string" && item.likedUsers.trim()) {
+                                try { parsedLikedUsers = JSON.parse(item.likedUsers); } catch (e) { parsedLikedUsers = [item.likedUsers]; }
+                            }
+
+                            return {
+                                id: item.id,
+                                author: item.author || "블로거",
+                                time: item.created ? new Date(item.created).toLocaleDateString() : "방금 전",
+                                category: item.category || "일상·생각",
+                                title: item.title || "",
+                                summary: item.summary || "",
+                                fullContent: item.fullContent || item.summary || "",
+                                thumbnail: item.thumbnail || "",
+                                likes: parsedLikedUsers.length,
+                                likedUsers: parsedLikedUsers,
+                                commentList: parsedComments,
+                                comments: parsedComments.length,
+                                isNeighbor: false
+                            };
+                        });
+
+                        const localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+                        const merged = pbPosts.map(pbPost => {
+                            const existing = localPosts.find(lp => lp.id === pbPost.id);
+                            if (existing) {
+                                const serverComments = pbPost.commentList || [];
+                                const localComments = existing.commentList || [];
+                                const combinedComments = [...serverComments];
+                                localComments.forEach(lc => {
+                                    if (!combinedComments.find(sc => sc.id === lc.id || (sc.user === lc.user && sc.text === lc.text))) {
+                                        combinedComments.push(lc);
+                                    }
+                                });
+                                const serverLikedUsers = pbPost.likedUsers || [];
+                                const localLikedUsers = existing.likedUsers || [];
+                                const combinedLikedUsers = Array.from(new Set([...serverLikedUsers, ...localLikedUsers]));
+
+                                return {
+                                    ...pbPost,
+                                    commentList: combinedComments,
+                                    comments: combinedComments.length,
+                                    likedUsers: combinedLikedUsers,
+                                    likes: combinedLikedUsers.length,
+                                    isNeighbor: existing.isNeighbor || false
+                                };
+                            }
+                            return pbPost;
+                        });
+
+                        localPosts.forEach(lp => {
+                            if (!merged.find(mp => mp.id === lp.id)) {
+                                merged.push(lp);
+                            }
+                        });
+
+                        localStorage.setItem("naverBlogPosts", JSON.stringify(merged));
+                    }
+                }
+            } catch (err) {}
+        }
+
+        document.addEventListener("DOMContentLoaded", async () => {
             const urlParams = new URLSearchParams(window.location.search);
             const postId = urlParams.get('post') || urlParams.get('postId');
             const authorParam = urlParams.get('author');
-            const currentUser = localStorage.getItem("naverLoggedInUser");
+            const currentUser = localStorage.getItem("naverLoggedInUser") || localStorage.getItem("naverLoggedInUsername");
 
-            // 1. Determine blog owner
+            // Purge automated test post
+            let localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            localPosts = localPosts.filter(p => p.title !== "Test Post" && p.summary !== "This is a test post.");
+            localStorage.setItem("naverBlogPosts", JSON.stringify(localPosts));
+
+            // Sync from PocketBase to get newest posts
+            await syncMyBlogPostsWithPocketBase();
+
             if (postId) {
-                const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
-                const post = posts.find(p => p.id === postId);
-                if (post && post.author) {
-                    blogOwner = post.author;
-                }
+                await viewPostDetail(postId);
             } else if (authorParam) {
                 blogOwner = authorParam;
-            }
-
-            if (!blogOwner) {
-                blogOwner = currentUser || "조이";
-            }
-
-            // 2. Load Blog Cover & Info for the Blog Owner
-            loadBlogProfile(blogOwner);
-            
-            // 3. Render Post Detail or List
-            if (postId) {
-                viewPostDetail(postId);
-            } else {
+                loadBlogProfile(blogOwner);
                 showPostList();
+            } else if (currentUser) {
+                blogOwner = currentUser;
+                loadBlogProfile(blogOwner);
+                showPostList();
+            } else {
+                window.location.href = "blog.html";
             }
         });
 
-        // Default avatar
+        // Default avatar & Validation helper
+        function isValidAvatarUrl(url) {
+            return url && typeof url === "string" && url.trim() !== "" && url !== "undefined" && url !== "null" && url !== "[object Object]";
+        }
+
         function getDefaultAvatar(username) {
             return "default-avatar.svg";
         }
 
+        function cleanBlogDesc(rawDesc) {
+            if (!rawDesc || typeof rawDesc !== "string") return "배움과 소소한 일상을 기록하는 공간입니다.";
+            let cleaned = rawDesc.replace(/\[\s*VISITORS\s*:\s*\d+\s*\]/gi, "").trim();
+            cleaned = cleaned.replace(/^VISITORS:\d+\s*/i, "").trim();
+            return cleaned || "배움과 소소한 일상을 기록하는 공간입니다.";
+        }
+
         function parseVisitorsFromDesc(rawDesc) {
             if (!rawDesc) return { visitors: 0, desc: "배움과 소소한 일상을 기록하는 공간입니다." };
-            const match = String(rawDesc).match(/^\[VISITORS:(\d+)\]\s*(.*)/s);
+            const match = String(rawDesc).match(/^\[VISITORS:(\d+)\]\s*(.*)/is);
             if (match) {
-                return { visitors: parseInt(match[1]) || 0, desc: match[2] };
+                return { visitors: parseInt(match[1]) || 0, desc: cleanBlogDesc(match[2]) };
             }
-            return { visitors: 0, desc: rawDesc };
+            return { visitors: 0, desc: cleanBlogDesc(rawDesc) };
         }
 
         function formatDescWithVisitors(descText, visitorCount) {
-            const clean = (descText || "배움과 소소한 일상을 기록하는 공간입니다.").replace(/^\[VISITORS:\d+\]\s*/, "");
-            return `[VISITORS:${visitorCount}] ${clean}`;
+            return cleanBlogDesc(descText);
         }
 
         async function loadBlogProfile(owner) {
@@ -630,16 +746,28 @@
             const currentUser = localStorage.getItem("naverLoggedInUser");
             const isMyBlog = (currentUser && currentUser === targetOwner);
 
-            let blogTitle = localStorage.getItem(`naverMyBlogTitle_${targetOwner}`) || `${targetOwner}의 일상 & 지식 서재`;
-            let blogDesc = localStorage.getItem(`naverMyBlogDesc_${targetOwner}`) || "배움과 소소한 일상을 기록하는 공간입니다.";
-            let avatarUrl = localStorage.getItem(`naverBlogAvatar_${targetOwner}`) || getDefaultAvatar(targetOwner);
+            // Clean any legacy localStorage keys containing VISITORS
+            for (let i = 0; i < localStorage.length; i++) {
+                const k = localStorage.key(i);
+                if (k && (k.startsWith("naverMyBlogDesc") || k.startsWith("naverBlogDesc"))) {
+                    const val = localStorage.getItem(k);
+                    if (val && /VISITORS/i.test(val)) {
+                        localStorage.setItem(k, cleanBlogDesc(val));
+                    }
+                }
+            }
 
-            currentAvatarUrl = avatarUrl;
+            let blogTitle = `${targetOwner}의 일상 & 지식 서재`;
+            let blogDesc = "배움과 소소한 일상을 기록하는 공간입니다.";
+            let avatarUrl = getDefaultAvatar(targetOwner);
+
             document.getElementById("myblog-title").textContent = blogTitle;
             document.getElementById("myblog-desc").textContent = blogDesc;
-            document.getElementById("myblog-avatar").src = avatarUrl;
+            const mainAvatarEl = document.getElementById("myblog-avatar");
+            if (mainAvatarEl) mainAvatarEl.src = avatarUrl;
+            currentAvatarUrl = avatarUrl;
 
-            // Visitor count logic (increment count on every page view & sync to PocketBase)
+            // Visitor count logic
             let cachedVisitors = parseInt(localStorage.getItem(`naverBlogTotalVisitors_${targetOwner}`));
             if (isNaN(cachedVisitors)) {
                 cachedVisitors = 0;
@@ -652,48 +780,39 @@
                 visitorCountEl.textContent = cachedVisitors.toLocaleString();
             }
 
-            // Background fetch from PocketBase users collection to keep up-to-date across computers
+            // Fetch real profile directly from PocketBase users collection
             try {
                 const response = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(targetOwner)}'||username='${encodeURIComponent(targetOwner)}')`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.items && data.items.length > 0) {
                         const userRecord = data.items[0];
-                        if (userRecord.avatarUrl) {
+                        if (isValidAvatarUrl(userRecord.avatarUrl)) {
                             avatarUrl = userRecord.avatarUrl;
-                            localStorage.setItem(`naverBlogAvatar_${targetOwner}`, avatarUrl);
-                            document.getElementById("myblog-avatar").src = avatarUrl;
+                            if (mainAvatarEl) mainAvatarEl.src = avatarUrl;
                             currentAvatarUrl = avatarUrl;
                         }
                         if (userRecord.blogTitle) {
                             blogTitle = userRecord.blogTitle;
-                            localStorage.setItem(`naverMyBlogTitle_${targetOwner}`, blogTitle);
                             document.getElementById("myblog-title").textContent = blogTitle;
                         }
                         
                         let cleanDesc = blogDesc;
                         if (userRecord.blogDesc) {
                             const parsed = parseVisitorsFromDesc(userRecord.blogDesc);
-                            cleanDesc = parsed.desc;
+                            if (parsed.desc && parsed.desc.trim()) {
+                                cleanDesc = parsed.desc.trim();
+                                document.getElementById("myblog-desc").textContent = cleanDesc;
+                            }
                             if (parsed.visitors > cachedVisitors) {
                                 cachedVisitors = parsed.visitors;
                             }
-                            localStorage.setItem(`naverMyBlogDesc_${targetOwner}`, cleanDesc);
-                            document.getElementById("myblog-desc").textContent = cleanDesc;
                         }
 
                         localStorage.setItem(`naverBlogTotalVisitors_${targetOwner}`, cachedVisitors);
                         if (visitorCountEl) {
                             visitorCountEl.textContent = cachedVisitors.toLocaleString();
                         }
-
-                        // Patch updated visitors count to PocketBase user record
-                        const newDescPayload = formatDescWithVisitors(cleanDesc, cachedVisitors);
-                        fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userRecord.id}`, {
-                            method: "PATCH",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ blogDesc: newDescPayload })
-                        }).catch(e => console.warn("PocketBase totalVisitors patch notice:", e));
                     }
                 }
             } catch (err) {
@@ -723,6 +842,12 @@
         }
 
         function showPostList() {
+            // Restore cover banner and stats row in author list mode
+            const coverEl = document.querySelector(".myblog-cover");
+            if (coverEl) coverEl.style.display = "block";
+            const statsEl = document.querySelector(".myblog-stats-row");
+            if (statsEl) statsEl.style.display = "flex";
+
             document.getElementById("myblog-list-view").style.display = "block";
             document.getElementById("myblog-detail-view").style.display = "none";
             document.getElementById("btn-back-to-list").style.display = "none";
@@ -756,8 +881,9 @@
                         <h3 class="post-main-title" onclick="viewPostDetail('${post.id}')">${post.title}</h3>
                         <p class="post-summary-text" onclick="viewPostDetail('${post.id}')">${post.summary}</p>
                         <div class="post-meta-bottom">
-                            <span><i class="fa-regular fa-heart"></i> 공감 ${post.likes || 0}</span>
+                            <span><i class="fa-regular fa-heart"></i> 공감 ${Array.isArray(post.likedUsers) ? post.likedUsers.length : (post.likes || 0)}</span>
                             <span>댓글 ${post.comments || 0}</span>
+                            ${isMyBlog ? `<button type="button" class="btn-post-action-text" onclick="event.stopPropagation(); window.location.href='blog-write.html?editId=${encodeURIComponent(post.id)}';" style="margin-left: auto;"><i class="fa-solid fa-pencil"></i> 수정</button>` : ''}
                         </div>
                     </div>
                     ${post.thumbnail ? `
@@ -770,26 +896,70 @@
             });
         }
 
-        function viewPostDetail(postId) {
+        async function viewPostDetail(postId) {
             currentViewingPostId = postId;
-            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
-            const post = posts.find(p => p.id === postId);
+            let posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            let post = posts.find(p => p.id === postId);
 
             if (!post) {
-                showPostList();
+                // Fetch directly from PocketBase if not in local cache
+                try {
+                    const pbRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${postId}`);
+                    if (pbRes.ok) {
+                        const item = await pbRes.json();
+                        let parsedComments = [];
+                        if (Array.isArray(item.comments)) parsedComments = item.comments;
+                        else if (typeof item.comments === "string") {
+                            try { parsedComments = JSON.parse(item.comments); } catch (e) {}
+                        }
+                        let parsedLikedUsers = [];
+                        if (Array.isArray(item.likedUsers)) parsedLikedUsers = item.likedUsers;
+                        else if (typeof item.likedUsers === "string" && item.likedUsers.trim()) {
+                            try { parsedLikedUsers = JSON.parse(item.likedUsers); } catch (e) { parsedLikedUsers = [item.likedUsers]; }
+                        }
+                        post = {
+                            id: item.id,
+                            author: item.author || "블로거",
+                            time: item.created ? new Date(item.created).toLocaleDateString() : "방금 전",
+                            category: item.category || "일상·생각",
+                            title: item.title || "",
+                            summary: item.summary || "",
+                            fullContent: item.fullContent || item.summary || "",
+                            thumbnail: item.thumbnail || "",
+                            likes: parsedLikedUsers.length,
+                            likedUsers: parsedLikedUsers,
+                            commentList: parsedComments,
+                            comments: parsedComments.length,
+                            isNeighbor: false
+                        };
+                        posts.unshift(post);
+                        localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+                    }
+                } catch (e) {}
+            }
+
+            if (!post) {
+                alert("해당 포스트를 찾을 수 없거나 삭제되었습니다.");
+                window.location.href = "blog.html";
                 return;
             }
 
             // Sync blog owner with the post's author and reload cover
-            if (post.author && post.author !== blogOwner) {
-                blogOwner = post.author;
-                loadBlogProfile(blogOwner);
-            }
+            blogOwner = post.author;
+            loadBlogProfile(blogOwner);
+
+            // Hide cover banner and stats row in post reading mode so user sees the post directly
+            const coverEl = document.querySelector(".myblog-cover");
+            if (coverEl) coverEl.style.display = "none";
+            const statsEl = document.querySelector(".myblog-stats-row");
+            if (statsEl) statsEl.style.display = "none";
 
             document.getElementById("myblog-list-view").style.display = "none";
             document.getElementById("myblog-detail-view").style.display = "block";
             document.getElementById("btn-back-to-list").style.display = "inline-flex";
             document.getElementById("view-mode-title").textContent = post.title;
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             document.getElementById("detail-category").textContent = post.category || "일상·생각";
             document.getElementById("detail-title").textContent = post.title;
@@ -797,16 +967,38 @@
             document.getElementById("detail-time").textContent = post.time || "방금 전";
             document.getElementById("detail-body").innerHTML = post.fullContent || post.summary;
 
-            // Set author avatar in metadata header
-            const authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`) || getDefaultAvatar(post.author);
+            // Set author avatar in metadata header dynamically from users collection
             const detailAvatarEl = document.getElementById("detail-author-avatar");
             if (detailAvatarEl) {
-                detailAvatarEl.src = authorAvatar;
+                detailAvatarEl.src = "default-avatar.svg";
+                if (post.author) {
+                    fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(post.author)}'||username='${encodeURIComponent(post.author)}')`)
+                        .then(res => res.ok ? res.json() : null)
+                        .then(data => {
+                            if (data && data.items && data.items.length > 0 && isValidAvatarUrl(data.items[0].avatarUrl)) {
+                                detailAvatarEl.src = data.items[0].avatarUrl;
+                            }
+                        })
+                        .catch(() => {});
+                }
             }
 
-            // Check if current user is owner/author to show 3 dots menu
+            // Check if current user is owner/author to show edit button & 3 dots menu
             const currentUser = localStorage.getItem("naverLoggedInUser");
-            const isMyPost = (currentUser && (post.author === currentUser || blogOwner === currentUser));
+            const currentUserId = localStorage.getItem("naverLoggedInUserId");
+            const currentUserName = localStorage.getItem("naverLoggedInUsername");
+
+            const isMyPost = Boolean(currentUser && (
+                post.author === currentUser || 
+                (currentUserId && post.author === currentUserId) ||
+                (currentUserName && post.author === currentUserName) ||
+                (currentUser === "조이" && post.author === "조이네")
+            ));
+
+            const editBtn = document.getElementById("btn-detail-edit");
+            if (editBtn) {
+                editBtn.style.display = isMyPost ? "inline-flex" : "none";
+            }
             const moreContainer = document.getElementById("post-more-action-container");
             if (moreContainer) {
                 moreContainer.style.display = isMyPost ? "block" : "none";
@@ -817,10 +1009,69 @@
             renderPostLikeState(post);
         }
 
-        // --- Post Like ("공감") & Liked Bloggers Panel Functions ---
-        function toggleDetailLike() {
-            const currentUser = localStorage.getItem("naverLoggedInUser");
-            if (!currentUser) {
+        function getLoggedInUserId() {
+            let id = localStorage.getItem("naverLoggedInUsername");
+            if (!id || id.trim() === "") {
+                id = localStorage.getItem("naverLoggedInUserId");
+            }
+            if (!id || id.trim() === "") {
+                const email = localStorage.getItem("naverLoggedInEmail");
+                if (email) id = email.split("@")[0];
+            }
+            if (!id || id.trim() === "") {
+                id = localStorage.getItem("naverLoggedInUser") || "joy";
+            }
+            return id.trim();
+        }
+
+        function getUniqueUserId() {
+            return getLoggedInUserId();
+        }
+
+        function getLoggedInUserNickname() {
+            return localStorage.getItem("naverLoggedInUser") || 
+                   localStorage.getItem("naverLoggedInUsername") || 
+                   "조이";
+        }
+
+        function getBloggerInfo(userKey) {
+            const currentId = getLoggedInUserId();
+            const currentNick = getLoggedInUserNickname();
+            const currentUserId = localStorage.getItem("naverLoggedInUserId") || "";
+
+            let displayName = userKey;
+            let avatar = "default-avatar.svg";
+            let desc = "";
+
+            if (userKey === currentId || userKey === currentNick || userKey === currentUserId || (currentUserId && userKey === currentUserId)) {
+                displayName = currentNick;
+                avatar = currentAvatarUrl || "default-avatar.svg";
+                desc = document.getElementById("myblog-desc")?.textContent || `${currentNick}님의 블로그`;
+            } else {
+                displayName = userKey;
+                avatar = "default-avatar.svg";
+                desc = `${displayName}님의 블로그`;
+            }
+
+            if (!isValidAvatarUrl(avatar)) {
+                avatar = "default-avatar.svg";
+            }
+
+            return {
+                key: userKey,
+                displayName: displayName,
+                uniqueId: userKey,
+                avatar: avatar,
+                desc: desc
+            };
+        }
+
+        async function toggleDetailLike() {
+            const loginId = getLoggedInUserId();
+            const loginNick = getLoggedInUserNickname();
+            const legacyUserId = localStorage.getItem("naverLoggedInUserId") || "";
+
+            if (!loginId) {
                 alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
                 return;
             }
@@ -834,47 +1085,70 @@
                 post.likedUsers = [];
             }
 
-            const userIndex = post.likedUsers.indexOf(currentUser);
+            // Check if user already liked (match by account ID, nickname, or legacy PB ID)
+            const userIndex = post.likedUsers.findIndex(u => 
+                u === loginId || 
+                u === loginNick || 
+                (legacyUserId && u === legacyUserId)
+            );
+
             if (userIndex >= 0) {
-                // Unlike
+                // Unlike (공감 취소)
                 post.likedUsers.splice(userIndex, 1);
-                post.likes = Math.max(0, (post.likes || 1) - 1);
             } else {
-                // Like
-                post.likedUsers.push(currentUser);
-                post.likes = (post.likes || 0) + 1;
+                // Like (공감) - Register user's ID into likedUsers
+                post.likedUsers.push(loginId);
             }
+            // Count dynamically from likedUsers length
+            post.likes = post.likedUsers.length;
 
             // Save to localStorage
             localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
 
-            // Sync with PocketBase if available
-            try {
-                fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        likes: post.likes,
-                        likedUsers: post.likedUsers
-                    })
-                }).catch(e => console.warn("PocketBase post like patch skipped:", e));
-            } catch (err) {}
-
-            // Refresh UI
+            // Immediate UI update
             renderPostLikeState(post);
+
+            // Sync with PocketBase server in background
+            if (post.id && !post.id.startsWith("post_")) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2500);
+                    fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            likes: post.likedUsers.length,
+                            likedUsers: JSON.stringify(post.likedUsers)
+                        }),
+                        signal: controller.signal
+                    }).then(() => clearTimeout(timeoutId)).catch(() => {});
+                } catch (err) {}
+            }
         }
 
         function renderPostLikeState(post) {
-            const currentUser = localStorage.getItem("naverLoggedInUser");
+            if (!post) return;
+            const loginId = getLoggedInUserId();
+            const loginNick = getLoggedInUserNickname();
+            const legacyUserId = localStorage.getItem("naverLoggedInUserId") || "";
+
             const likedUsers = Array.isArray(post.likedUsers) ? post.likedUsers : [];
-            const isLikedByMe = currentUser && likedUsers.includes(currentUser);
+            const isLikedByMe = likedUsers.some(u => 
+                u === loginId || 
+                u === loginNick || 
+                (legacyUserId && u === legacyUserId)
+            );
+
+            // Dynamically calculate like count from likedUsers length
+            const likeCount = likedUsers.length;
+            post.likes = likeCount;
 
             const likeBtn = document.getElementById("btn-detail-like");
             const likeIcon = document.getElementById("detail-like-icon");
             const likeCountEl = document.getElementById("detail-like-count");
 
             if (likeCountEl) {
-                likeCountEl.textContent = post.likes || 0;
+                likeCountEl.textContent = likeCount;
             }
 
             if (likeBtn && likeIcon) {
@@ -901,41 +1175,33 @@
             }
         }
 
-        function renderLikedBloggersList(post) {
+        async function renderLikedBloggersList(post) {
             const listEl = document.getElementById("liked-bloggers-list");
             if (!listEl) return;
 
             const likedUsers = Array.isArray(post.likedUsers) ? post.likedUsers : [];
             if (likedUsers.length === 0) {
-                listEl.innerHTML = `<div style="text-align: center; color: #999; font-size: 13px; padding: 16px 0;">아직 공감한 블로거가 없습니다. 첫 공감을 남겨보세요!</div>`;
+                listEl.innerHTML = `<div style="text-align: center; color: #999; font-size: 13px; padding: 20px 0; grid-column: 1 / -1;">아직 공감한 블로거가 없습니다. 첫 공감을 남겨보세요!</div>`;
                 return;
             }
 
+            // Build blogger items by resolving IDs to blogger info
+            const bloggers = likedUsers.map(userKey => getBloggerInfo(userKey));
+
             listEl.innerHTML = "";
-            likedUsers.forEach(username => {
-                const avatar = localStorage.getItem(`naverBlogAvatar_${username}`) || getDefaultAvatar(username);
-                const desc = localStorage.getItem(`naverMyBlogDesc_${username}`) || `${username}님의 블로그`;
-
-                // Check neighbor status
-                const currentUser = localStorage.getItem("naverLoggedInUser");
-                const neighbors = JSON.parse(localStorage.getItem(`naverBlogNeighbors_${currentUser}`) || "[]");
-                const isNeighbor = neighbors.includes(username);
-
+            bloggers.forEach(b => {
                 const item = document.createElement("div");
                 item.className = "liked-blogger-item";
+                item.setAttribute("data-username", b.key);
+                item.onclick = () => {
+                    location.href = `my-blog.html?author=${encodeURIComponent(b.displayName || b.key)}`;
+                };
                 item.innerHTML = `
-                    <div class="blogger-left-info" onclick="location.href='my-blog.html?author=${encodeURIComponent(username)}'">
-                        <img src="${avatar}" class="blogger-avatar-img" alt="${username}">
-                        <div class="blogger-text-col">
-                            <span class="blogger-name">${username}</span>
-                            <span class="blogger-desc">${desc}</span>
-                        </div>
+                    <img src="${b.avatar}" class="blogger-avatar-img" alt="${b.displayName}" onerror="this.src='default-avatar.svg'">
+                    <div class="blogger-text-col">
+                        <span class="blogger-name">${b.displayName}</span>
+                        <span class="blogger-desc">${b.desc}</span>
                     </div>
-                    ${(currentUser && currentUser !== username) ? `
-                        <button type="button" class="btn-add-neighbor-mini ${isNeighbor ? 'following' : ''}" onclick="toggleBloggerNeighbor('${username}', this)">
-                            ${isNeighbor ? '<i class="fa-solid fa-check"></i> 이웃' : '+ 이웃추가'}
-                        </button>
-                    ` : ''}
                 `;
                 listEl.appendChild(item);
             });
@@ -987,21 +1253,43 @@
         // Edit current post
         function editCurrentPost() {
             closePostActionMenu();
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            if (!currentUser) {
+                alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
+                return;
+            }
             if (!currentViewingPostId) return;
+
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const targetPost = posts.find(p => p.id === currentViewingPostId);
+            if (targetPost && targetPost.author && targetPost.author !== currentUser && targetPost.author !== "조이네" && currentUser !== "조이") {
+                alert("본인이 작성한 글만 수정할 수 있습니다.");
+                return;
+            }
             window.location.href = `blog-write.html?editId=${encodeURIComponent(currentViewingPostId)}`;
         }
 
         // Delete current post
         async function deleteCurrentPost() {
             closePostActionMenu();
+            const currentUser = localStorage.getItem("naverLoggedInUser");
+            if (!currentUser) {
+                alert("로그인이 필요합니다. 로그인 후 이용해주세요.");
+                return;
+            }
             if (!currentViewingPostId) return;
+
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const targetPost = posts.find(p => p.id === currentViewingPostId);
+            if (targetPost && targetPost.author && targetPost.author !== currentUser && targetPost.author !== "조이네" && currentUser !== "조이") {
+                alert("본인이 작성한 글만 삭제할 수 있습니다.");
+                return;
+            }
 
             if (!confirm("이 블로그 글을 정말로 삭제하시겠습니까?\n삭제 후에는 복구할 수 없습니다.")) {
                 return;
             }
 
-            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
-            const targetPost = posts.find(p => p.id === currentViewingPostId);
             const updatedPosts = posts.filter(p => p.id !== currentViewingPostId);
             localStorage.setItem("naverBlogPosts", JSON.stringify(updatedPosts));
 
@@ -1013,8 +1301,8 @@
             } catch (e) {}
 
             // Record user activity
-            const currentUser = localStorage.getItem("naverLoggedInUser") || "조이네";
-            const actKey = `naverBlogActivities_${currentUser}`;
+            const actUser = currentUser || "조이";
+            const actKey = `naverBlogActivities_${actUser}`;
             const activities = JSON.parse(localStorage.getItem(actKey) || "[]");
             activities.unshift({
                 id: Date.now(),
@@ -1051,21 +1339,56 @@
                 return;
             }
 
+            const currentUserId = getUniqueUserId();
+            const currentUserName = localStorage.getItem("naverLoggedInUser") || currentUserId;
+
             commentsContainer.innerHTML = comments.map(c => {
-                const commentAvatar = localStorage.getItem(`naverBlogAvatar_${c.user}`) || getDefaultAvatar(c.user);
+                const commentAvatar = c.avatar || getDefaultAvatar(c.user);
+                const isMyComment = currentUserId && (c.user === currentUserName || c.user === currentUserId || c.userId === currentUserId);
                 return `
                     <div style="font-size: 13px; padding: 10px 0; border-bottom: 1px solid #edf0f2; display: flex; gap: 10px; align-items: flex-start;">
-                        <img src="${commentAvatar}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; margin-top: 2px;">
+                        <img src="${commentAvatar}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 2px;" alt="${c.user}">
                         <div style="flex: 1;">
-                            <div style="display: flex; align-items: center; gap: 6px;">
-                                <strong style="color: #222; font-size: 13px;">${c.user}</strong>
-                                <span style="font-size: 11px; color: #999;">${c.time || '방금 전'}</span>
+                            <div style="display: flex; align-items: center; justify-content: space-between;">
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <strong style="color: #222; font-size: 13px;">${c.user}</strong>
+                                    <span style="font-size: 11px; color: #999;">${c.time || '방금 전'}</span>
+                                </div>
+                                ${isMyComment ? `<button type="button" onclick="deleteComment(${c.id})" style="background:none; border:none; color:#999; font-size:11px; cursor:pointer; padding:2px 6px; border-radius:4px;" title="댓글 삭제"><i class="fa-solid fa-trash-can"></i> 삭제</button>` : ''}
                             </div>
-                            <div style="margin-top: 4px; color: #444; line-height: 1.4; word-break: break-all;">${c.text}</div>
+                            <div style="margin-top: 4px; color: #333; line-height: 1.5; word-break: break-all;">${c.text}</div>
                         </div>
                     </div>
                 `;
             }).join("");
+        }
+
+        async function deleteComment(commentId) {
+            if (!currentViewingPostId) return;
+            if (!confirm("댓글을 삭제하시겠습니까?")) return;
+
+            const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+            const post = posts.find(p => p.id === currentViewingPostId);
+            if (post && post.commentList) {
+                post.commentList = post.commentList.filter(c => c.id !== commentId);
+                post.comments = post.commentList.length;
+                localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+
+                renderComments(post);
+
+                if (post.id && !post.id.startsWith("post_")) {
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2500);
+                        fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ comments: post.commentList }),
+                            signal: controller.signal
+                        }).then(() => clearTimeout(timeoutId)).catch(() => {});
+                    } catch (e) {}
+                }
+            }
         }
 
         async function addComment() {
@@ -1073,17 +1396,21 @@
             const text = input.value.trim();
             if (!text || !currentViewingPostId) return;
 
+            const currentUserId = getUniqueUserId();
+            const currentUserName = localStorage.getItem("naverLoggedInUser") || currentUserId || "조이";
+
             const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
             const post = posts.find(p => p.id === currentViewingPostId);
             if (post) {
                 if (!post.commentList) post.commentList = [];
-                const userName = localStorage.getItem("naverLoggedInUser") || "방문자";
                 
                 const newComment = {
                     id: Date.now(),
-                    user: userName,
+                    user: currentUserName,
+                    userId: currentUserId,
+                    avatar: currentAvatarUrl || getDefaultAvatar(currentUserName),
                     text: text,
-                    time: new Date().toLocaleDateString()
+                    time: "방금 전"
                 };
 
                 post.commentList.push(newComment);
@@ -1095,13 +1422,16 @@
                 // If post has PocketBase id, send full comments array (JSON)
                 if (post.id && !post.id.startsWith("post_")) {
                     try {
-                        await fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2500);
+                        fetch(`https://pb.joyfamkr.synology.me/api/collections/posts/records/${post.id}`, {
                             method: 'PATCH',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ 
                                 comments: post.commentList
-                            })
-                        });
+                            }),
+                            signal: controller.signal
+                        }).then(() => clearTimeout(timeoutId)).catch(() => {});
                     } catch (e) {
                         console.warn("PocketBase comments JSON sync skipped:", e);
                     }
@@ -1119,11 +1449,13 @@
                 return;
             }
             
-            const userName = currentUser;
-            document.getElementById("modal-blog-title").value = localStorage.getItem(`naverMyBlogTitle_${userName}`) || `${userName}의 일상 & 지식 서재`;
-            document.getElementById("modal-blog-desc").value = localStorage.getItem(`naverMyBlogDesc_${userName}`) || "배움과 소소한 일상을 기록하는 공간입니다.";
+            const currentTitle = document.getElementById("myblog-title")?.textContent || `${currentUser}의 일상 & 지식 서재`;
+            const currentDesc = document.getElementById("myblog-desc")?.textContent || "배움과 소소한 일상을 기록하는 공간입니다.";
             
-            const avatarUrl = localStorage.getItem(`naverBlogAvatar_${userName}`) || getDefaultAvatar(userName);
+            document.getElementById("modal-blog-title").value = currentTitle;
+            document.getElementById("modal-blog-desc").value = currentDesc;
+            
+            const avatarUrl = currentAvatarUrl || document.getElementById("myblog-avatar")?.src || getDefaultAvatar(currentUser);
             currentAvatarUrl = avatarUrl;
             document.getElementById("modal-avatar-preview").src = avatarUrl;
 
@@ -1146,19 +1478,28 @@
 
             const reader = new FileReader();
             reader.onload = function(e) {
+                const rawResult = e.target.result;
+                currentAvatarUrl = rawResult;
+                const previewEl = document.getElementById("modal-avatar-preview");
+                if (previewEl) previewEl.src = rawResult;
+
                 const img = new Image();
                 img.onload = function() {
-                    const canvas = document.createElement("canvas");
-                    const size = 200;
-                    canvas.width = size;
-                    canvas.height = size;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, size, size);
-                    const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
-                    currentAvatarUrl = compressedUrl;
-                    document.getElementById("modal-avatar-preview").src = compressedUrl;
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const size = 200;
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, size, size);
+                        const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
+                        if (compressedUrl && compressedUrl.length > 50) {
+                            currentAvatarUrl = compressedUrl;
+                            if (previewEl) previewEl.src = compressedUrl;
+                        }
+                    } catch (err) {}
                 };
-                img.src = e.target.result;
+                img.src = rawResult;
             };
             reader.readAsDataURL(file);
         }
@@ -1169,54 +1510,81 @@
 
         async function saveBlogProfile() {
             const userName = localStorage.getItem("naverLoggedInUser") || "조이";
+            const userUsername = localStorage.getItem("naverLoggedInUsername") || userName;
             const newTitle = document.getElementById("modal-blog-title").value.trim();
             const newDesc = document.getElementById("modal-blog-desc").value.trim();
             
-            if (newTitle) {
-                localStorage.setItem(`naverMyBlogTitle_${userName}`, newTitle);
-            }
-            if (newDesc) {
-                localStorage.setItem(`naverMyBlogDesc_${userName}`, newDesc);
-            }
-            if (currentAvatarUrl) {
-                localStorage.setItem(`naverBlogAvatar_${userName}`, currentAvatarUrl);
+            const previewEl = document.getElementById("modal-avatar-preview");
+            if (previewEl && previewEl.src) {
+                currentAvatarUrl = previewEl.src;
             }
 
-            closeProfileModal();
-            loadBlogProfile(userName);
+            const saveBtn = document.querySelector("#profile-modal .btn-write-post");
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = "저장 중...";
+            }
 
-            // Sync update to PocketBase users collection
+            // Sync update directly to PocketBase users collection
             try {
-                let userId = localStorage.getItem("naverLoggedInUserId");
-                if (!userId) {
-                    // Find user id by name/username
-                    const searchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(userName)}'||username='${encodeURIComponent(userName)}')`);
-                    if (searchRes.ok) {
-                        const sData = await searchRes.json();
-                        if (sData.items && sData.items.length > 0) {
-                            userId = sData.items[0].id;
-                            localStorage.setItem("naverLoggedInUserId", userId);
+                const searchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(userName)}'||username='${encodeURIComponent(userName)}'||name='${encodeURIComponent(userUsername)}'||username='${encodeURIComponent(userUsername)}')`);
+                if (searchRes.ok) {
+                    const sData = await searchRes.json();
+                    if (sData.items && sData.items.length > 0) {
+                        const userRecord = sData.items[0];
+                        const userId = userRecord.id;
+
+                        const updatePayload = {};
+                        if (currentAvatarUrl) updatePayload.avatarUrl = currentAvatarUrl;
+                        if (newTitle) updatePayload.blogTitle = newTitle;
+                        if (newDesc !== undefined && newDesc !== "") {
+                            updatePayload.blogDesc = cleanBlogDesc(newDesc);
                         }
-                    }
-                }
 
-                if (userId) {
-                    const updatePayload = {};
-                    if (currentAvatarUrl) updatePayload.avatarUrl = currentAvatarUrl;
-                    if (newTitle) updatePayload.blogTitle = newTitle;
-                    if (newDesc) {
-                        const currentVisitors = parseInt(localStorage.getItem(`naverBlogTotalVisitors_${userName}`)) || 0;
-                        updatePayload.blogDesc = formatDescWithVisitors(newDesc, currentVisitors);
-                    }
+                        const patchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updatePayload)
+                        });
 
-                    await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(updatePayload)
-                    });
+                        if (patchRes.ok) {
+                            const updatedUser = await patchRes.json();
+                            // Update DOM directly from server response
+                            if (updatedUser.blogTitle) {
+                                const titleEl = document.getElementById("myblog-title");
+                                if (titleEl) titleEl.textContent = updatedUser.blogTitle;
+                            }
+                            if (updatedUser.blogDesc) {
+                                const descEl = document.getElementById("myblog-desc");
+                                if (descEl) descEl.textContent = cleanBlogDesc(updatedUser.blogDesc);
+                            }
+                            if (updatedUser.avatarUrl) {
+                                const mainAvatarEl = document.getElementById("myblog-avatar");
+                                if (mainAvatarEl) mainAvatarEl.src = updatedUser.avatarUrl;
+                                const detailAvatarEl = document.getElementById("detail-author-avatar");
+                                if (detailAvatarEl) detailAvatarEl.src = updatedUser.avatarUrl;
+                                currentAvatarUrl = updatedUser.avatarUrl;
+                            }
+                            alert("프로필이 서버에 성공적으로 저장되었습니다.");
+                            closeProfileModal();
+                        } else {
+                            const errBody = await patchRes.json().catch(() => ({}));
+                            alert(`서버 저장 실패: ${errBody.message || '서버 응답 오류'}`);
+                        }
+                    } else {
+                        alert("서버에서 사용자 정보를 찾을 수 없습니다.");
+                    }
+                } else {
+                    alert("서버 연결에 실패했습니다.");
                 }
             } catch (err) {
-                console.warn("PocketBase profile update failed:", err);
+                console.error("PocketBase profile update failed:", err);
+                alert("네트워크 오류로 서버에 저장하지 못했습니다.");
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = "저장";
+                }
             }
         }
     </script>

@@ -22,8 +22,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const btnSidebarJoinCafe = document.getElementById("btn-sidebar-join-cafe");
     const btnOpenWriteModal = document.getElementById("btn-open-write-modal");
 
-    const isAuth = localStorage.getItem("naverIsLoggedIn") === "true";
-    const loggedInUser = isAuth ? (localStorage.getItem("naverLoggedInUser") || "") : "";
+    const loggedInUser = localStorage.getItem("naverLoggedInUser") || 
+                         localStorage.getItem("naverLoggedInUsername") || 
+                         localStorage.getItem("naverLoggedInUserId") || "";
+    const isAuth = (localStorage.getItem("naverIsLoggedIn") === "true") || Boolean(loggedInUser);
     const headerUserName = document.getElementById("header-user-name");
     const headerUserCaret = document.getElementById("header-user-caret");
     if (headerUserName) {
@@ -267,12 +269,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateMembershipUI() {
         const isJoined = isUserMember();
+        const secedeCard = document.getElementById("sidebar-secede-card");
         if (isJoined) {
             if (btnSidebarJoinCafe) btnSidebarJoinCafe.style.display = "none";
             if (btnOpenWriteModal) btnOpenWriteModal.style.display = "block";
+            if (secedeCard) secedeCard.style.display = "block";
         } else {
             if (btnSidebarJoinCafe) btnSidebarJoinCafe.style.display = "block";
             if (btnOpenWriteModal) btnOpenWriteModal.style.display = "none";
+            if (secedeCard) secedeCard.style.display = "none";
         }
     }
 
@@ -613,6 +618,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (joinCaptchaCode) joinCaptchaCode.textContent = str;
         if (joinCaptchaInput) joinCaptchaInput.value = "";
     }
+    window.refreshJoinCaptcha = refreshJoinCaptcha;
 
     if (btnRefreshJoinCaptcha) {
         btnRefreshJoinCaptcha.addEventListener("click", refreshJoinCaptcha);
@@ -708,7 +714,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const item = document.createElement("div");
             item.className = "comment-item";
             const authorNick = c.author || "익명";
-            const avatarUrl = localStorage.getItem(`naverBlogAvatar_${authorNick}`) || "default-avatar.svg";
+            const avatarUrl = c.avatar || "default-avatar.svg";
             item.innerHTML = `
                 <div class="comment-avatar"><img src="${avatarUrl}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;"></div>
                 <div class="comment-body">

@@ -492,14 +492,12 @@
             <div class="category-select-wrapper">
                 <label for="post-category"><i class="fa-solid fa-folder-open" style="color: #666;"></i> 카테고리:</label>
                 <select class="select-category" id="post-category">
-                    <option value="요리·레시피">요리·레시피</option>
+                    <option value="일상·생각" selected>일상·생각</option>
                     <option value="비즈니스·경제">비즈니스·경제</option>
                     <option value="IT·컴퓨터">IT·컴퓨터</option>
-                    <option value="패션·미용">패션·미용</option>
-                    <option value="원예·재배">원예·재배</option>
                     <option value="어학·외국어">어학·외국어</option>
                     <option value="스포츠·건강">스포츠·건강</option>
-                    <option value="일상·생각">일상·생각</option>
+                    <option value="요리·레시피">요리·레시피</option>
                 </select>
             </div>
             <div id="draft-saved-msg" class="draft-notice">
@@ -600,7 +598,7 @@
         <!-- Footer Stats -->
         <div class="editor-footer-status">
             <div>
-                <span>작성자: <strong id="editor-author-name" style="color: #333;">조이네</strong></span>
+                <span>작성자: <strong id="editor-author-name" style="color: #333;">조이</strong></span>
             </div>
             <div>
                 <span>공백 포함 <strong id="char-count" style="color: var(--naver-green);">0</strong>자</span>
@@ -611,13 +609,23 @@
 
     <script>
         let firstInsertedImage = null; // Auto-detect thumbnail from content
-
         let selectedImageElement = null;
         let currentEditPostId = null;
 
+        function getLoggedInUser() {
+            return localStorage.getItem("naverLoggedInUser") || 
+                   localStorage.getItem("naverLoggedInUsername") || 
+                   localStorage.getItem("naverLoggedInUserId") || "";
+        }
+
         // Initialize editor state
         document.addEventListener("DOMContentLoaded", () => {
-            const userName = localStorage.getItem("naverLoggedInUser") || "조이네";
+            const userName = getLoggedInUser();
+            if (!userName) {
+                alert("로그인이 필요한 서비스입니다. 로그인 후 이용해주세요.");
+                window.location.href = "blog.html";
+                return;
+            }
             document.getElementById("editor-author-name").textContent = userName;
 
             // Check if editing existing post
@@ -759,14 +767,15 @@
                         ctx.imageSmoothingQuality = "high";
                         ctx.drawImage(img, 0, 0, width, height);
 
-                        // Export as lightweight WebP or standard JPEG (drastically reduces base64 size by ~90%)
-                        let compressedDataUrl = canvas.toDataURL("image/webp", quality);
-                        if (!compressedDataUrl.startsWith("data:image/webp")) {
-                            compressedDataUrl = canvas.toDataURL("image/jpeg", quality);
-                        }
+                        try {
+                            const webpUrl = canvas.toDataURL("image/webp", quality);
+                            if (webpUrl && webpUrl.startsWith("data:image/webp")) {
+                                resolve(webpUrl);
+                                return;
+                            }
+                        } catch (e) {}
 
-                        console.log(`Original: ${(file.size / 1024).toFixed(1)} KB ➡️ Compressed: ${(compressedDataUrl.length * 0.75 / 1024).toFixed(1)} KB`);
-                        resolve(compressedDataUrl);
+                        resolve(canvas.toDataURL("image/jpeg", quality));
                     };
                     img.onerror = reject;
                     img.src = e.target.result;
@@ -788,7 +797,7 @@
 
             try {
                 // Resize & Compress image down to web-optimized dimensions & weight
-                const compressedUrl = await resizeAndCompressImage(file, 900, 900, 0.75);
+                const compressedUrl = await resizeAndCompressImage(file, 800, 800, 0.68);
 
                 const editor = document.getElementById("post-editor");
                 editor.focus();
@@ -939,10 +948,17 @@
             const editId = urlParams.get("editId");
             if (!editId) return;
 
-            currentEditPostId = editId;
+            const currentUser = getLoggedInUser();
             const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
             const post = posts.find(p => p.id === editId);
             if (post) {
+                if (post.author && currentUser && post.author !== currentUser && post.author !== "조이네" && currentUser !== "조이") {
+                    alert("본인이 작성한 포스트만 수정할 수 있습니다.");
+                    window.location.href = `my-blog.html?postId=${encodeURIComponent(editId)}`;
+                    return;
+                }
+
+                currentEditPostId = editId;
                 document.getElementById("post-category").value = post.category || "일상·생각";
                 document.getElementById("post-title").value = post.title || "";
                 const editor = document.getElementById("post-editor");
@@ -963,6 +979,13 @@
 
         // Publish or Update Post
         async function publishPost() {
+            const userName = getLoggedInUser();
+            if (!userName) {
+                alert("로그인이 필요한 서비스입니다. 로그인 후 이용해 주세요.");
+                window.location.href = "blog.html";
+                return;
+            }
+
             const title = document.getElementById("post-title").value.trim();
             const editor = document.getElementById("post-editor");
             const contentHtml = editor.innerHTML.trim();
@@ -981,126 +1004,168 @@
                 return;
             }
 
-            // Extract first image from content for thumbnail if available
-            const tempDiv = document.createElement("div");
-            tempDiv.innerHTML = contentHtml;
-            const imgTag = tempDiv.querySelector("img");
-            const autoThumbnail = imgTag ? imgTag.src : "";
-
-            const userName = localStorage.getItem("naverLoggedInUser") || "조이네";
-            const userAvatar = localStorage.getItem(`naverBlogAvatar_${userName}`) || localStorage.getItem("naverBlogAvatar") || "default-avatar.svg";
-            const summaryText = plainText.length > 140 ? plainText.substring(0, 140) + "..." : plainText;
-
             const btnSubmit = document.getElementById("btn-submit-post");
-            if (btnSubmit) {
-                btnSubmit.disabled = true;
-                btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 저장 중...';
-            }
-
-            // If in Edit Mode: Update existing post
-            if (currentEditPostId) {
-                const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
-                const idx = posts.findIndex(p => p.id === currentEditPostId);
-                if (idx !== -1) {
-                    posts[idx].title = title;
-                    posts[idx].category = category;
-                    posts[idx].summary = summaryText;
-                    posts[idx].fullContent = contentHtml;
-                    if (autoThumbnail) posts[idx].thumbnail = autoThumbnail;
-                    localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
-                }
-
-                try {
-                    await fetch(`${POCKETBASE_URL}/api/collections/posts/records/${currentEditPostId}`, {
-                        method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: title,
-                            category: category,
-                            summary: summaryText,
-                            fullContent: contentHtml,
-                            thumbnail: autoThumbnail
-                        })
-                    });
-                } catch (e) {}
-
-                showNaverToast("포스트가 성공적으로 수정되었습니다!");
-                setTimeout(() => {
-                    window.location.href = `my-blog.html?postId=${encodeURIComponent(currentEditPostId)}`;
-                }, 600);
-                return;
-            }
-
-            // New Post Mode
-            const newPostId = "post_" + Date.now();
-            const newPost = {
-                id: newPostId,
-                author: userName,
-                authorAvatar: userAvatar,
-                time: "방금 전",
-                category: category,
-                title: title,
-                summary: summaryText,
-                fullContent: contentHtml,
-                thumbnail: autoThumbnail,
-                likes: 0,
-                comments: 0,
-                isNeighbor: false
-            };
-
-            // Always update local storage
-            const localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
-            localPosts.unshift(newPost);
-            localStorage.setItem("naverBlogPosts", JSON.stringify(localPosts));
+            const originalBtnText = btnSubmit ? btnSubmit.innerHTML : "";
 
             try {
-                const pbPayload = {
-                    title: title,
-                    category: category,
+                if (btnSubmit) {
+                    btnSubmit.disabled = true;
+                    btnSubmit.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 저장 중...';
+                }
+
+                // Extract first image from content for thumbnail if available
+                const tempDiv = document.createElement("div");
+                tempDiv.innerHTML = contentHtml;
+                const imgTag = tempDiv.querySelector("img");
+                const autoThumbnail = imgTag ? imgTag.src : "";
+                const summaryText = plainText.length > 140 ? plainText.substring(0, 140) + "..." : plainText;
+
+                // Safe helper to save posts into localStorage with quota protection
+                function safeSaveLocalPosts(postsArray) {
+                    try {
+                        localStorage.setItem("naverBlogPosts", JSON.stringify(postsArray));
+                    } catch (e) {
+                        console.warn("Storage quota exceeded! Cleaning up older post content...", e);
+                        // If quota exceeded, trim fullContent of older posts (> 5th post) to prevent failure
+                        const slimPosts = postsArray.map((p, i) => {
+                            if (i > 3 && p.fullContent && p.fullContent.length > 500) {
+                                return { ...p, fullContent: p.summary || p.fullContent.substring(0, 300) };
+                            }
+                            return p;
+                        });
+                        try {
+                            localStorage.setItem("naverBlogPosts", JSON.stringify(slimPosts));
+                        } catch (e2) {
+                            // If still failing, keep only latest 15 posts
+                            localStorage.setItem("naverBlogPosts", JSON.stringify(slimPosts.slice(0, 15)));
+                        }
+                    }
+                }
+
+                // If in Edit Mode: Update existing post
+                if (currentEditPostId) {
+                    const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+                    const idx = posts.findIndex(p => p.id === currentEditPostId);
+                    if (idx !== -1) {
+                        posts[idx].title = title;
+                        posts[idx].category = category;
+                        posts[idx].summary = summaryText;
+                        posts[idx].fullContent = contentHtml;
+                        if (autoThumbnail) posts[idx].thumbnail = autoThumbnail;
+                        safeSaveLocalPosts(posts);
+                    }
+
+                    try {
+                        const controller = new AbortController();
+                        const timeoutId = setTimeout(() => controller.abort(), 2500);
+                        await fetch(`${POCKETBASE_URL}/api/collections/posts/records/${currentEditPostId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                title: title,
+                                category: category,
+                                summary: summaryText,
+                                fullContent: contentHtml,
+                                thumbnail: autoThumbnail
+                            }),
+                            signal: controller.signal
+                        });
+                        clearTimeout(timeoutId);
+                    } catch (e) {
+                        console.log("PocketBase patch fallback", e);
+                    }
+
+                    showNaverToast("포스트가 성공적으로 수정되었습니다!");
+                    setTimeout(() => {
+                        window.location.href = `my-blog.html?postId=${encodeURIComponent(currentEditPostId)}`;
+                    }, 500);
+                    return;
+                }
+
+                // New Post Mode
+                const newPostId = "post_" + Date.now();
+                const newPost = {
+                    id: newPostId,
                     author: userName,
-                    authorAvatar: userAvatar,
+                    time: "방금 전",
+                    category: category,
+                    title: title,
                     summary: summaryText,
                     fullContent: contentHtml,
                     thumbnail: autoThumbnail,
                     likes: 0,
-                    comments: 0
+                    comments: 0,
+                    isNeighbor: false
                 };
 
-                const response = await fetch(`${POCKETBASE_URL}/api/collections/posts/records`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(pbPayload)
-                });
+                // Update local storage safely
+                const localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+                localPosts.unshift(newPost);
+                safeSaveLocalPosts(localPosts);
 
-                if (response.ok) {
-                    const record = await response.json();
-                    if (record && record.id) {
-                        newPost.id = record.id;
-                        localPosts[0] = newPost;
-                        localStorage.setItem("naverBlogPosts", JSON.stringify(localPosts));
+                try {
+                    const pbPayload = {
+                        title: title,
+                        category: category,
+                        author: userName,
+                        summary: summaryText,
+                        fullContent: contentHtml,
+                        thumbnail: autoThumbnail,
+                        likes: 0,
+                        comments: 0
+                    };
+
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 2500);
+
+                    const response = await fetch(`${POCKETBASE_URL}/api/collections/posts/records`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(pbPayload),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+
+                    if (response.ok) {
+                        const record = await response.json();
+                        if (record && record.id) {
+                            newPost.id = record.id;
+                            localPosts[0] = newPost;
+                            safeSaveLocalPosts(localPosts);
+                        }
                     }
+                } catch (pbErr) {
+                    console.log("PocketBase write fallback to local", pbErr);
                 }
-            } catch (pbErr) {
-                console.log("PocketBase write error, using local fallback", pbErr);
+
+                // Clear local draft upon successful publish
+                localStorage.removeItem("naverBlogDraft");
+
+                // Record user activity
+                try {
+                    const actKey = `naverBlogActivities_${userName}`;
+                    const activities = JSON.parse(localStorage.getItem(actKey) || "[]");
+                    activities.unshift({
+                        id: Date.now(),
+                        text: `'${title}' 글을 새로 발행했습니다.`,
+                        time: "방금 전"
+                    });
+                    localStorage.setItem(actKey, JSON.stringify(activities.slice(0, 30)));
+                } catch (e) {}
+
+                showNaverToast("새 글이 성공적으로 등록되었습니다!");
+                setTimeout(() => {
+                    window.location.href = `my-blog.html?postId=${encodeURIComponent(newPost.id)}`;
+                }, 500);
+
+            } catch (err) {
+                console.error("Publishing error:", err);
+                showNaverToast("글 저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", true);
+                if (btnSubmit) {
+                    btnSubmit.disabled = false;
+                    btnSubmit.innerHTML = originalBtnText || (currentEditPostId ? '<i class="fa-solid fa-check"></i> 수정 완료' : '<i class="fa-solid fa-arrow-up-from-bracket"></i> 발행');
+                }
             }
-
-            // Clear local draft upon successful publish
-            localStorage.removeItem("naverBlogDraft");
-
-            // Record user activity
-            const actKey = `naverBlogActivities_${userName}`;
-            const activities = JSON.parse(localStorage.getItem(actKey) || "[]");
-            activities.unshift({
-                id: Date.now(),
-                text: `'${title}' 글을 새로 발행했습니다.`,
-                time: "방금 전"
-            });
-            localStorage.setItem(actKey, JSON.stringify(activities));
-
-            showNaverToast("새 글이 성공적으로 등록되었습니다!");
-            setTimeout(() => {
-                window.location.href = `my-blog.html?postId=${encodeURIComponent(newPost.id)}`;
-            }, 600);
         }
     </script>
 </body>

@@ -338,6 +338,12 @@ button {
     gap: 24px;
 }
 
+.blog-container.article-reading-mode {
+    grid-template-columns: 1fr;
+    max-width: 980px;
+    margin: 20px auto 60px;
+}
+
 /* Left Main Area */
 .blog-main-content {
     min-width: 0;
@@ -1239,4 +1245,150 @@ button {
     .blog-gnb-left .blog-search-box {
         display: none;
     }
+}
+
+/* Post Like Box & Liked Bloggers Panel */
+.post-like-container {
+    margin-top: 28px;
+    margin-bottom: 24px;
+    position: relative;
+}
+.post-like-box {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #d5d9de;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+    height: 38px;
+}
+.post-like-box:hover {
+    border-color: #bbc1c7;
+}
+.btn-like-main {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    padding: 0 14px;
+    height: 100%;
+    border-right: 1px solid #ebedf0;
+    transition: all 0.15s;
+}
+.btn-like-main:hover {
+    background: #fbfbfc;
+}
+.btn-like-main i {
+    font-size: 15px;
+    color: #ff5e78;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.btn-like-main.is-liked {
+    color: #ff3b5c;
+}
+.btn-like-main.is-liked i {
+    color: #ff3b5c;
+    transform: scale(1.15);
+}
+.btn-like-toggle-panel {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    font-size: 11px;
+    padding: 0 10px;
+    height: 100%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+}
+.btn-like-toggle-panel:hover {
+    background: #fbfbfc;
+    color: #222;
+}
+.btn-like-toggle-panel i {
+    transition: transform 0.2s ease;
+}
+.btn-like-toggle-panel.active i {
+    transform: rotate(180deg);
+}
+.liked-bloggers-panel {
+    display: none;
+    margin-top: 14px;
+    background: #ffffff;
+    border: 1px solid #e3e7ed;
+    border-radius: 8px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.liked-bloggers-panel.active {
+    display: block;
+    animation: fadeInDown 0.2s ease-out;
+}
+.liked-bloggers-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #111;
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f3f5;
+}
+.liked-bloggers-title span {
+    color: #00c73c;
+}
+.liked-bloggers-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 14px 18px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+.liked-blogger-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+.liked-blogger-item:hover {
+    background: #f4f6f8;
+}
+.blogger-avatar-img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #eee;
+    flex-shrink: 0;
+}
+.blogger-text-col {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+    flex: 1;
+}
+.blogger-name {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #222;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.blogger-desc {
+    font-size: 12px;
+    color: #888;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }

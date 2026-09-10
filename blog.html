@@ -42,7 +42,7 @@
             <div class="blog-gnb-right">
                 <div class="user-profile-badge" onclick="location.href='my-blog.html'">
                     <div class="user-avatar-circle"><img src="default-avatar.svg" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" id="header-avatar-img"></div>
-                    <span id="header-user-name">조이네</span>
+                    <span id="header-user-name">조이</span>
                     <i class="fa-solid fa-caret-down" style="font-size: 10px; color: #888;"></i>
                 </div>
 
@@ -85,7 +85,7 @@
         <section class="blog-main-content">
 
             <!-- A. Hot Topic & Promotion Section -->
-            <div class="hottopic-section">
+            <div class="hottopic-section" id="hottopic-section">
                 <div class="hottopic-header">
                     <div class="hottopic-title">
                         <span class="hottopic-badge">핫토픽</span>
@@ -148,7 +148,7 @@
             </div>
 
             <!-- B. Central Feed Section -->
-            <div class="feed-section">
+            <div class="feed-section" id="feed-section">
 
                 <!-- Neighbor Notice Top Banner -->
                 <div class="neighbor-notice-card">
@@ -164,19 +164,109 @@
                 <!-- Feed Category Filter Bar -->
                 <div class="feed-category-bar">
                     <span class="category-filter-item active" data-category="전체">전체</span>
-                    <span class="category-filter-item" data-category="요리·레시피">요리·레시피</span>
+                    <span class="category-filter-item" data-category="일상·생각">일상·생각</span>
                     <span class="category-filter-item" data-category="비즈니스·경제">비즈니스·경제</span>
                     <span class="category-filter-item" data-category="IT·컴퓨터">IT·컴퓨터</span>
-                    <span class="category-filter-item" data-category="패션·미용">패션·미용</span>
-                    <span class="category-filter-item" data-category="원예·재배">원예·재배</span>
                     <span class="category-filter-item" data-category="어학·외국어">어학·외국어</span>
                     <span class="category-filter-item" data-category="스포츠·건강">스포츠·건강</span>
-                    <span class="category-filter-item" data-category="일상·생각">일상·생각</span>
+                    <span class="category-filter-item" data-category="요리·레시피">요리·레시피</span>
                 </div>
 
                 <!-- Post Cards Container -->
                 <div class="post-list-container" id="post-list-container">
                     <!-- Loaded dynamically via blog.js -->
+                </div>
+            </div>
+
+            <!-- C. In-Page Full-Screen Article Reader View -->
+            <div id="blog-article-fullview" style="display: none; background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 36px 40px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); margin-bottom: 24px;">
+                
+                <!-- Unified Breadcrumb Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 14px; border-bottom: 1px solid #edf0f2;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #666; font-weight: 500;">
+                        <a href="blog.html" onclick="event.preventDefault(); closeFullArticleView();" style="text-decoration: none; color: #00c73c; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-house"></i> 블로그 홈
+                        </a>
+                        <span style="color: #ccc;">|</span>
+                        <span id="fullview-breadcrumb-title" style="color: #222; font-weight: 700; max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">포스트 제목</span>
+                    </div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button type="button" onclick="closeFullArticleView()" style="background: #fff; border: 1px solid #d5d9de; border-radius: 4px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: #555; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fa-solid fa-list"></i> 포스트 목록
+                        </button>
+                        <a href="blog-write.html" style="background: #00c73c; color: #fff; text-decoration: none; border-radius: 4px; padding: 6px 14px; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fa-solid fa-plus"></i> 새 글 쓰기
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Post Detail Header -->
+                <div class="post-detail-header" style="margin-bottom: 24px;">
+                    <span id="fullview-category" style="font-size: 12px; color: #00c73c; font-weight: 700; display: inline-block; margin-bottom: 8px;">카테고리</span>
+                    <h2 id="fullview-title" style="font-size: 26px; font-weight: 800; color: #111; margin: 0 0 16px 0; line-height: 1.4; word-break: break-word;">포스트 제목</h2>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 20px; border-bottom: 1px solid #edf0f2;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <img id="fullview-avatar" src="default-avatar.svg" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid #eee;">
+                            <span id="fullview-author" style="font-weight: 700; font-size: 14px; color: #222;">작성자</span>
+                            <span style="color: #ccc;">·</span>
+                            <span id="fullview-time" style="color: #888; font-size: 13px;">방금 전</span>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <button type="button" class="btn-post-action-text btn-post-edit-highlight" id="fullview-edit-btn" style="display: none; background: #e8f9ed; color: #00c73c; border: 1px solid #00c73c; border-radius: 4px; padding: 5px 10px; font-size: 12px; font-weight: 700; cursor: pointer;" onclick="editFullViewPost()"><i class="fa-solid fa-pencil"></i> 수정</button>
+                            <button type="button" class="btn-post-action-text" style="background: #fff; color: #666; border: 1px solid #d5d9de; border-radius: 4px; padding: 5px 10px; font-size: 12px; font-weight: 500; cursor: pointer;" onclick="copyFullViewPostUrl()"><i class="fa-regular fa-copy"></i> URL 복사</button>
+                            <a id="fullview-author-link" href="#" style="background: #fff; color: #00c73c; border: 1px solid #00c73c; border-radius: 4px; padding: 5px 10px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-house-user"></i> 서재 가기
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post Body Content -->
+                <div id="fullview-body" style="font-size: 16px; line-height: 2; color: #2d3748; min-height: 200px; margin-bottom: 40px; word-break: break-word;">
+                    포스트 내용이 여기에 표시됩니다.
+                </div>
+
+                <!-- Bottom Like Bar -->
+                <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid #edf0f2; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <div class="post-like-box">
+                            <button type="button" class="btn-like-main" id="fullview-like-btn" onclick="toggleFullViewLike()">
+                                <i class="fa-regular fa-heart" id="fullview-like-icon"></i>
+                                <span id="fullview-like-text">공감 <strong id="fullview-like-count">0</strong></span>
+                            </button>
+                            <button type="button" class="btn-like-toggle-panel" id="btn-fullview-toggle-liked" onclick="toggleFullViewLikedPanel()" title="이 글에 공감한 블로거 보기">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </button>
+                        </div>
+                        <a href="#fullview-comments-container" style="text-decoration: none; color: #333; font-size: 13px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; padding: 0 14px; background: #fff; border: 1px solid #d5d9de; border-radius: 4px; height: 38px; box-sizing: border-box;">
+                            <i class="fa-regular fa-comment" style="color: #666; font-size: 14px;"></i> 댓글 <strong id="fullview-comment-count" style="color: #333;">0</strong>
+                        </a>
+                    </div>
+                    <button type="button" onclick="closeFullArticleView()" style="background: #f1f3f5; border: none; border-radius: 6px; padding: 9px 20px; font-size: 13px; font-weight: 700; color: #495057; cursor: pointer; transition: background 0.15s; height: 38px;">
+                        <i class="fa-solid fa-list"></i> 목록으로
+                    </button>
+                </div>
+
+                <!-- Fullview Liked Bloggers Dropdown Panel -->
+                <div class="liked-bloggers-panel" id="fullview-liked-bloggers-panel" style="margin-bottom: 24px;">
+                    <div class="liked-bloggers-title">
+                        이 글에 <span>공감한 블로거</span>
+                    </div>
+                    <div class="liked-bloggers-grid" id="fullview-liked-bloggers-list">
+                        <!-- Dynamic rendering -->
+                    </div>
+                </div>
+
+                <!-- Fullview Comments Section -->
+                <div id="fullview-comments-container" style="background: #f8f9fa; border-radius: 10px; padding: 24px; margin-top: 10px;">
+                    <h4 style="font-size: 15px; font-weight: 700; color: #222; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-regular fa-comments" style="color: #00c73c;"></i> 댓글 <span id="fullview-comments-total" style="color: #00c73c;">0</span>
+                    </h4>
+                    <div id="fullview-comments-list" style="margin-top: 12px;"></div>
+                    <div style="display: flex; gap: 10px; margin-top: 16px;">
+                        <input type="text" id="fullview-comment-input" placeholder="따뜻한 댓글을 남겨주세요..." onkeypress="if(event.key==='Enter') addFullViewComment()" style="flex: 1; padding: 11px 16px; border: 1px solid #d5d9de; border-radius: 8px; font-size: 13px; outline: none; background: #fff;">
+                        <button type="button" onclick="addFullViewComment()" style="background: #00c73c; color: #fff; border: none; padding: 11px 22px; font-weight: 700; font-size: 13px; border-radius: 8px; cursor: pointer; transition: background 0.15s;">등록</button>
+                    </div>
                 </div>
             </div>
 
@@ -207,7 +297,7 @@
                         <div class="user-profile-meta">
                             <div class="user-main-avatar"><i class="fa-regular fa-user"></i></div>
                             <div class="user-name-box">
-                                <h3 id="sidebar-user-name">조이네</h3>
+                                <h3 id="sidebar-user-name">조이</h3>
                                 <a href="my-blog.html" class="visitor-stat-link">
                                     오늘 <strong>0</strong>명 방문 <i class="fa-solid fa-chevron-right" style="font-size: 10px;"></i>
                                 </a>

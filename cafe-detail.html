@@ -48,7 +48,46 @@
         async function handleJoinSubmitDirect(e) {
             if (e) e.preventDefault();
 
-            var customNick = (document.getElementById("join-nickname-input") ? document.getElementById("join-nickname-input").value.trim() : "") || (localStorage.getItem("naverLoggedInUser") || "새회원");
+            // 1. Validate Nickname
+            var nickInput = document.getElementById("join-nickname-input");
+            var customNick = (nickInput ? nickInput.value.trim() : "") || (localStorage.getItem("naverLoggedInUser") || "새회원");
+            if (!customNick) {
+                alert("별명을 입력해주세요.");
+                if (nickInput) nickInput.focus();
+                return;
+            }
+
+            // 2. Strict Security Code (Captcha) Verification
+            var captchaInput = document.getElementById("join-captcha-input");
+            var captchaCodeEl = document.getElementById("join-captcha-code");
+            var inputVal = (captchaInput ? captchaInput.value.trim() : "").toUpperCase();
+            var expectedVal = (captchaCodeEl ? captchaCodeEl.textContent.trim() : "").toUpperCase();
+
+            if (!inputVal) {
+                alert("보안문자를 입력해주세요.");
+                if (captchaInput) captchaInput.focus();
+                return;
+            }
+
+            if (inputVal !== expectedVal) {
+                alert("보안문자가 일치하지 않습니다. 이미지를 확인 후 다시 입력해주세요.");
+                if (typeof window.refreshJoinCaptcha === "function") {
+                    window.refreshJoinCaptcha();
+                } else {
+                    var chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                    var str = "";
+                    for (var i = 0; i < 6; i++) {
+                        str += chars.charAt(Math.floor(Math.random() * chars.length));
+                    }
+                    if (captchaCodeEl) captchaCodeEl.textContent = str;
+                }
+                if (captchaInput) {
+                    captchaInput.value = "";
+                    captchaInput.focus();
+                }
+                return;
+            }
+
             var loggedInId = localStorage.getItem("naverLoggedInUserId") || "";
 
             // Save active session
@@ -421,7 +460,7 @@
                 var item = document.createElement("div");
                 item.className = "comment-item";
                 var authorNick = c.author || "익명";
-                var avatarUrl = localStorage.getItem("naverBlogAvatar_" + authorNick) || "default-avatar.svg";
+                var avatarUrl = c.avatar || "default-avatar.svg";
                 var authorIdMask = "";
                 if (typeof parseEduverMemberDirect === "function") {
                     var parsed = parseEduverMemberDirect(authorNick, authorNick === (window.currentCafeRecord && window.currentCafeRecord.manager), window.currentCafeRecord && window.currentCafeRecord.manager);
@@ -1030,7 +1069,262 @@
             }
         }
         window.renderCafeMembersList = renderCafeMembersListDirect;
+
+        // Cafe Secede (카페 탈퇴) Logic
+        function openCafeSecedeModal() {
+            var isAuth = localStorage.getItem("naverIsLoggedIn") === "true" || Boolean(localStorage.getItem("naverLoggedInUser"));
+            if (!isAuth) {
+                alert("로그인이 필요한 서비스입니다.");
+                return;
+            }
+
+            var cafe = window.currentCafeRecord || {};
+            var curUser = (localStorage.getItem("naverLoggedInUser") || "").trim();
+            var curId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
+            var curUsername = (localStorage.getItem("naverLoggedInUsername") || "").trim();
+
+            if (!isCurrentCafeMemberDirect()) {
+                alert("가입된 카페 회원이 아닙니다.");
+                return;
+            }
+
+            // Manager cannot secede without delegating
+            var mgr = (cafe.manager || "").trim();
+            if (mgr && (mgr === curUser || mgr === curId || mgr === curUsername || (mgr === "조이" && curUser === "조이네"))) {
+                alert("카페 매니저는 매니저 위임 전에는 카페를 탈퇴할 수 없습니다.");
+                return;
+            }
+
+            var nameEl = document.getElementById("secede-modal-cafe-name");
+            if (nameEl) {
+                nameEl.textContent = cafe.name || "카페";
+            }
+
+            var modal = document.getElementById("cafe-secede-modal");
+            if (modal) {
+                modal.classList.add("active");
+            }
+        }
+        window.openCafeSecedeModal = openCafeSecedeModal;
+
+        function closeCafeSecedeModal() {
+            var modal = document.getElementById("cafe-secede-modal");
+            if (modal) {
+                modal.classList.remove("active");
+            }
+        }
+        window.closeCafeSecedeModal = closeCafeSecedeModal;
+
+        async function confirmCafeSecede() {
+            var cafe = window.currentCafeRecord || {};
+            var curUser = (localStorage.getItem("naverLoggedInUser") || "").trim();
+            var curId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
+            var curUsername = (localStorage.getItem("naverLoggedInUsername") || "").trim();
+
+            // 1. Remove from joinedMembers
+            var members = cafe.joinedMembers || [];
+            if (typeof members === "string") {
+                try { members = JSON.parse(members); } catch(e) { members = [members]; }
+            }
+            if (!Array.isArray(members)) members = [];
+
+            var updatedMembers = members.filter(function(m) {
+                if (typeof m === 'string') {
+                    if (m === curUser) return false;
+                    if (curId && (m === curId || m.indexOf("(" + curId + ")") > -1)) return false;
+                    if (curUsername && (m === curUsername || m.indexOf("(" + curUsername + ")") > -1)) return false;
+                    if (m.startsWith(curUser + " ")) return false;
+                } else if (m && typeof m === 'object') {
+                    if (m.nickname === curUser) return false;
+                    if (curId && (m.id === curId || m.userId === curId)) return false;
+                    if (curUsername && (m.username === curUsername || m.idMask === curUsername)) return false;
+                }
+                return true;
+            });
+            cafe.joinedMembers = updatedMembers;
+
+            // 2. Decrement member count
+            var curCount = parseInt((cafe.members || "1").replace(/,/g, ""));
+            curCount = Math.max(1, isNaN(curCount) ? 1 : curCount - 1);
+            cafe.members = curCount.toLocaleString();
+            window.currentCafeRecord = cafe;
+
+            // 3. Sync localStorage
+            var cafeId = cafe.id || "vncvhnzfduln0p8";
+            try {
+                var cafesData = JSON.parse(localStorage.getItem("naverCafesData") || "[]");
+                var cIdx = cafesData.findIndex(function(c) { return String(c.id) === String(cafeId); });
+                if (cIdx !== -1) {
+                    cafesData[cIdx].members = cafe.members;
+                    cafesData[cIdx].joinedMembers = cafe.joinedMembers;
+                }
+                localStorage.setItem("naverCafesData", JSON.stringify(cafesData));
+            } catch(e) {}
+
+            // 4. Sync PocketBase PATCH
+            if (cafeId && !cafeId.startsWith("cafe_")) {
+                try {
+                    await fetch('https://pb.joyfamkr.synology.me/api/collections/cafes/records/' + cafeId, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            members: cafe.members,
+                            joinedMembers: cafe.joinedMembers
+                        })
+                    });
+                } catch(e) {}
+            }
+
+            // 5. Update UI
+            var memberEl = document.getElementById("cafe-member-count");
+            var btnJoin = document.getElementById("btn-sidebar-join-cafe");
+            var btnWrite = document.getElementById("btn-open-write-modal");
+            var secedeCard = document.getElementById("sidebar-secede-card");
+
+            if (memberEl) memberEl.textContent = cafe.members;
+            if (btnJoin) btnJoin.style.display = "block";
+            if (btnWrite) btnWrite.style.display = "none";
+            if (secedeCard) secedeCard.style.display = "none";
+
+            closeCafeSecedeModal();
+            alert("'" + (cafe.name || "카페") + "' 카페에서 성공적으로 탈퇴되었습니다.");
+
+            // Return to main board list
+            selectBoardDirect("all");
+        }
+        window.confirmCafeSecede = confirmCafeSecede;
     </script>
+    <style>
+        /* Cafe Secede Sidebar Box */
+        .sidebar-secede-card {
+            background: #fff;
+            border: 1px solid #e5e8eb;
+            border-radius: 4px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .btn-cafe-secede {
+            background: none;
+            border: none;
+            color: #777;
+            font-size: 12px;
+            cursor: pointer;
+            padding: 0;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .btn-cafe-secede:hover {
+            color: #222;
+            text-decoration: underline;
+        }
+
+        /* Cafe Secede Modal Window - Matching User Screenshot */
+        .cafe-secede-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 99999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .cafe-secede-modal-overlay.active {
+            display: flex;
+        }
+        .cafe-secede-modal-window {
+            width: 520px;
+            max-width: 92%;
+            background: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+            border: 1px solid #777;
+            border-radius: 2px;
+            animation: modalPopIn 0.2s ease-out;
+        }
+        @keyframes modalPopIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .secede-modal-header {
+            background: #777c85;
+            color: #fff;
+            padding: 9px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+        .secede-modal-body {
+            padding: 30px 28px 24px 28px;
+            background: #fff;
+        }
+        .secede-cafe-name-box {
+            background: #fff;
+            border: 1px solid #e2e5e8;
+            padding: 14px 20px;
+            text-align: center;
+            font-size: 14px;
+            color: #222;
+            margin-bottom: 26px;
+        }
+        .secede-warning-msg {
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .secede-sub-notice {
+            text-align: center;
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 24px;
+        }
+        .secede-modal-divider {
+            height: 1px;
+            background: #eceef0;
+            margin-bottom: 20px;
+        }
+        .secede-btn-row {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn-secede-confirm {
+            background: #fff;
+            border: 1px solid #b5b9be;
+            color: #333;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 6px 18px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .btn-secede-confirm:hover {
+            background: #f4f5f7;
+            border-color: #999;
+        }
+        .btn-secede-cancel {
+            background: #fff;
+            border: 1px solid #b5b9be;
+            color: #666;
+            font-size: 12px;
+            padding: 6px 18px;
+            cursor: pointer;
+            border-radius: 2px;
+        }
+        .btn-secede-cancel:hover {
+            background: #f4f5f7;
+            border-color: #999;
+        }
+    </style>
 </head>
 <body>
 
@@ -1054,9 +1348,26 @@
                 </nav>
 
                 <div class="header-user-menu" id="header-user-menu" onclick="location.href='index.html'">
-                    <span class="user-nickname" id="header-user-name">조이님</span>
+                    <span class="user-nickname" id="header-user-name"></span>
                     <i class="fa-solid fa-caret-down" id="header-user-caret"></i>
                 </div>
+                <script>
+                    (function() {
+                        var u = localStorage.getItem("naverLoggedInUser") || localStorage.getItem("naverLoggedInUsername") || "";
+                        var isA = localStorage.getItem("naverIsLoggedIn") === "true" || Boolean(u);
+                        var hName = document.getElementById("header-user-name");
+                        var hCaret = document.getElementById("header-user-caret");
+                        if (hName) {
+                            if (isA && u) {
+                                hName.textContent = u.endsWith("님") ? u : u + "님";
+                                if (hCaret) hCaret.style.display = "inline-block";
+                            } else {
+                                hName.innerHTML = '<a href="index.html" style="color: #555; text-decoration: none; font-weight: 700;">로그인</a>';
+                                if (hCaret) hCaret.style.display = "none";
+                            }
+                        }
+                    })();
+                </script>
 
                 <div class="header-icons">
                     <a href="mail.html" class="icon-link" title="메일함"><i class="fa-solid fa-envelope"></i></a>
@@ -1297,6 +1608,13 @@
                         <span class="bot-beta">beta</span> 궁금한게 있을 땐<br>
                         <strong>카페 스마트봇</strong>
                     </div>
+                </div>
+
+                <!-- Cafe Secede (탈퇴하기) Box (Matching User Screenshot) -->
+                <div class="sidebar-secede-card" id="sidebar-secede-card">
+                    <button type="button" class="btn-cafe-secede" onclick="openCafeSecedeModal()">
+                        <i class="fa-solid fa-arrow-right-from-bracket" style="font-size: 11px;"></i> 카페탈퇴하기
+                    </button>
                 </div>
             </aside>
 
@@ -1891,6 +2209,35 @@
                             <span>CCL 사용 <i class="fa-regular fa-circle-question help-icon"></i></span>
                         </label>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cafe Secede Modal (Matching User Screenshot) -->
+    <div class="cafe-secede-modal-overlay" id="cafe-secede-modal" onclick="if(event.target === this) closeCafeSecedeModal();">
+        <div class="cafe-secede-modal-window">
+            <div class="secede-modal-header">
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-caret-right" style="color: #4cd964; font-size: 12px;"></i>
+                    <span>카페탈퇴</span>
+                </div>
+                <button type="button" onclick="closeCafeSecedeModal()" style="background: none; border: none; color: #fff; font-size: 18px; cursor: pointer; line-height: 1;">&times;</button>
+            </div>
+            <div class="secede-modal-body">
+                <div class="secede-cafe-name-box">
+                    <span style="font-weight: 700;">카페명 : </span>
+                    <span id="secede-modal-cafe-name" style="font-weight: 700; color: #222;">통장모임</span>
+                </div>
+
+                <div class="secede-warning-msg">카페에서 탈퇴하시겠습니까?</div>
+                <div class="secede-sub-notice">※ 카페탈퇴시 작성된 게시글은 자동으로 삭제되지 않습니다.</div>
+
+                <div class="secede-modal-divider"></div>
+
+                <div class="secede-btn-row">
+                    <button type="button" class="btn-secede-confirm" onclick="confirmCafeSecede()">확인</button>
+                    <button type="button" class="btn-secede-cancel" onclick="closeCafeSecedeModal()">취소</button>
                 </div>
             </div>
         </div>

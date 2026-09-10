@@ -14,8 +14,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     const mailHeaderAvatar = document.getElementById("mail-header-avatar");
     if (mailHeaderAvatar) {
-        const savedAvatar = localStorage.getItem(`naverBlogAvatar_${userName}`) || "default-avatar.svg";
-        mailHeaderAvatar.src = savedAvatar;
+        mailHeaderAvatar.src = "default-avatar.svg";
+        const loggedUsername = localStorage.getItem("naverLoggedInUsername") || userName;
+        fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(userName)}'||username='${encodeURIComponent(userName)}'||name='${encodeURIComponent(loggedUsername)}'||username='${encodeURIComponent(loggedUsername)}')`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.items && data.items.length > 0 && data.items[0].avatarUrl) {
+                    mailHeaderAvatar.src = data.items[0].avatarUrl;
+                }
+            })
+            .catch(err => console.warn("Mail avatar sync failed:", err));
     }
 
     const currentUserEmail = userEmail;

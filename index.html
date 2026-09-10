@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=20260820_search">
+    <link rel="stylesheet" href="style.css?v=20260905_profile">
     <style>
         /* Embedded In-Place Search Results Styles */
         .search-results-section {
@@ -782,6 +782,10 @@
                 <div class="icon-circle blog"><i class="fa-solid fa-pen-nib"></i></div>
                 <span>지식 블로그</span>
             </a>
+            <a href="news.html" class="service-item" id="nav-news-btn">
+                <div class="icon-circle news"><i class="fa-regular fa-newspaper"></i></div>
+                <span>에듀 뉴스</span>
+            </a>
             <a href="calendar.html" class="service-item" id="nav-calendar-btn">
                 <div class="icon-circle calendar"><i class="fa-regular fa-calendar-days"></i></div>
                 <span>캘린더</span>
@@ -802,7 +806,7 @@
                 <div class="icon-circle encyclopedia"><i class="fa-solid fa-globe"></i></div>
                 <span>백과사전</span>
             </a>
-            <a href="#" class="service-item">
+            <a href="https://dict.naver.com/" target="_blank" rel="noopener noreferrer" class="service-item">
                 <div class="icon-circle dictionary"><i class="fa-solid fa-language"></i></div>
                 <span>어학사전</span>
             </a>
@@ -926,7 +930,7 @@
                             </ul>
                         </div>
                         <div class="ticker-nav">
-                            <a href="#" class="ticker-home">뉴스홈</a>
+                            <a href="news.html" class="ticker-home">뉴스홈</a>
                         </div>
                     </div>
 
@@ -1006,11 +1010,11 @@
                     <!-- Logged-in Mock State (Naver Style) -->
                     <div class="login-card-logged-in" id="login-logged-in" style="display: none;">
                         <div class="profile-main">
-                            <div class="profile-avatar-wrapper">
+                            <div class="profile-avatar-wrapper" style="cursor: pointer;" onclick="openPortalProfileModal()" title="프로필 사진 및 정보 변경">
                                 <div class="profile-avatar">
                                     <img src="default-avatar.svg" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
                                 </div>
-                                <button class="profile-settings-btn" title="설정"><i class="fa-solid fa-gear"></i></button>
+                                <button class="profile-settings-btn" title="프로필 설정" onclick="event.stopPropagation(); openPortalProfileModal()"><i class="fa-solid fa-gear"></i></button>
                             </div>
                             <div class="profile-details">
                                 <div class="profile-username-row">
@@ -1152,8 +1156,221 @@
         <p class="copyright">Copyright © EDUVER Corp. All Rights Reserved.</p>
     </footer>
 
+    <!-- Edit Profile / Blog Info Modal -->
+    <div class="blog-modal" id="profile-modal" style="display: none;">
+        <div class="modal-content-box">
+            <h3 class="modal-title">내 블로그 & 프로필 설정</h3>
+            
+            <!-- Avatar Upload & Presets -->
+            <div class="modal-form-group" style="text-align: center; margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px;">프로필 아바타 사진</label>
+                <div style="position: relative; display: inline-block; cursor: pointer;" onclick="document.getElementById('modal-avatar-input').click()">
+                    <img id="modal-avatar-preview" src="default-avatar.svg" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid #00c73c;" onerror="this.onerror=null; this.src='default-avatar.svg';">
+                    <div style="position: absolute; bottom: 0; right: 0; background: #00c73c; color: #fff; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; border: 2px solid #fff;">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                </div>
+                <input type="file" id="modal-avatar-input" accept="image/*" style="display: none;" onchange="handlePortalAvatarChange(event)">
+                <div style="font-size: 11px; color: #888; margin-top: 6px;">사진을 클릭하여 내 컴퓨터에서 이미지를 변경하세요</div>
+                
+                <!-- Quick Preset Avatars -->
+                <div style="display: flex; justify-content: center; gap: 8px; margin-top: 10px;">
+                    <img src="default-avatar.svg" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer; border: 1px solid #ddd;" onclick="setPortalPresetAvatar(this.src)" title="기본 아바타">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPortalPresetAvatar(this.src)" title="프로필 1">
+                    <img src="https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPortalPresetAvatar(this.src)" title="프로필 2">
+                    <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPortalPresetAvatar(this.src)" title="프로필 3">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&auto=format&fit=crop&q=80" style="width: 32px; height: 32px; border-radius: 50%; cursor: pointer;" onclick="setPortalPresetAvatar(this.src)" title="프로필 4">
+                </div>
+            </div>
 
+            <div class="modal-form-group">
+                <label>블로그 이름</label>
+                <input type="text" id="modal-blog-title" class="modal-input" placeholder="블로그 제목을 입력하세요">
+            </div>
+            <div class="modal-form-group">
+                <label>블로그 소개글</label>
+                <input type="text" id="modal-blog-desc" class="modal-input" placeholder="소개글을 입력하세요">
+            </div>
+            <div class="modal-actions">
+                <button class="modal-btn-cancel" onclick="closePortalProfileModal()">취소</button>
+                <button class="modal-btn-save" id="btn-save-portal-profile" onclick="savePortalProfile()">저장</button>
+            </div>
+        </div>
+    </div>
 
-    <script src="main.js"></script>
+    <script>
+        let portalCurrentAvatarUrl = "default-avatar.svg";
+
+        function openPortalProfileModal(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const modal = document.getElementById("profile-modal");
+            if (!modal) return;
+
+            const userName = localStorage.getItem("naverLoggedInUser") || "홍길동";
+            const userUsername = localStorage.getItem("naverLoggedInUsername") || userName;
+
+            const previewEl = document.getElementById("modal-avatar-preview");
+            const titleInput = document.getElementById("modal-blog-title");
+            const descInput = document.getElementById("modal-blog-desc");
+
+            const currentAvatarImg = document.querySelector(".profile-avatar img");
+            portalCurrentAvatarUrl = currentAvatarImg ? currentAvatarImg.src : "default-avatar.svg";
+            if (previewEl) previewEl.src = portalCurrentAvatarUrl;
+
+            if (titleInput) titleInput.value = `${userName}의 일상 & 지식 서재`;
+            if (descInput) descInput.value = "배움과 소소한 일상을 기록하는 공간입니다.";
+
+            // Direct style enforcement to show modal
+            modal.classList.add("active");
+            modal.style.cssText = "display: flex !important; opacity: 1 !important; pointer-events: auto !important; z-index: 999999 !important;";
+
+            // Async background fetch latest profile from PocketBase
+            const queryName = encodeURIComponent(userName);
+            const queryUser = encodeURIComponent(userUsername);
+            fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${queryName}'||username='${queryName}'||name='${queryUser}'||username='${queryUser}')`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data && data.items && data.items.length > 0) {
+                        const record = data.items[0];
+                        if (record.avatarUrl) {
+                            portalCurrentAvatarUrl = record.avatarUrl;
+                            if (previewEl) previewEl.src = record.avatarUrl;
+                        }
+                        if (record.blogTitle && titleInput) {
+                            titleInput.value = record.blogTitle;
+                        }
+                        if (record.blogDesc && descInput) {
+                            let clean = record.blogDesc.replace(/__VISITORS:\d+__/g, "").trim();
+                            descInput.value = clean;
+                        }
+                    }
+                })
+                .catch(err => console.warn("Fetch profile for modal failed:", err));
+        }
+
+        function closePortalProfileModal() {
+            const modal = document.getElementById("profile-modal");
+            if (modal) {
+                modal.classList.remove("active");
+                modal.style.cssText = "display: none !important;";
+            }
+        }
+
+        function setPortalPresetAvatar(src) {
+            portalCurrentAvatarUrl = src;
+            const previewEl = document.getElementById("modal-avatar-preview");
+            if (previewEl) previewEl.src = src;
+        }
+
+        function handlePortalAvatarChange(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > 5 * 1024 * 1024) {
+                alert("사진 용량은 5MB 이하로 업로드해주세요.");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const rawResult = e.target.result;
+                portalCurrentAvatarUrl = rawResult;
+                const previewEl = document.getElementById("modal-avatar-preview");
+                if (previewEl) previewEl.src = rawResult;
+
+                const img = new Image();
+                img.onload = function() {
+                    try {
+                        const canvas = document.createElement("canvas");
+                        const size = 200;
+                        canvas.width = size;
+                        canvas.height = size;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(img, 0, 0, size, size);
+                        const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
+                        if (compressedUrl && compressedUrl.length > 50) {
+                            portalCurrentAvatarUrl = compressedUrl;
+                            if (previewEl) previewEl.src = compressedUrl;
+                        }
+                    } catch (err) {}
+                };
+                img.src = rawResult;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function savePortalProfile() {
+            const userName = localStorage.getItem("naverLoggedInUser") || "홍길동";
+            const userUsername = localStorage.getItem("naverLoggedInUsername") || userName;
+            const newTitle = document.getElementById("modal-blog-title") ? document.getElementById("modal-blog-title").value.trim() : "";
+            const newDesc = document.getElementById("modal-blog-desc") ? document.getElementById("modal-blog-desc").value.trim() : "";
+
+            const previewEl = document.getElementById("modal-avatar-preview");
+            if (previewEl && previewEl.src) {
+                portalCurrentAvatarUrl = previewEl.src;
+            }
+
+            const saveBtn = document.getElementById("btn-save-portal-profile");
+            if (saveBtn) {
+                saveBtn.disabled = true;
+                saveBtn.textContent = "저장 중...";
+            }
+
+            try {
+                const queryName = encodeURIComponent(userName);
+                const queryUser = encodeURIComponent(userUsername);
+                const searchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${queryName}'||username='${queryName}'||name='${queryUser}'||username='${queryUser}')`);
+                if (searchRes.ok) {
+                    const sData = await searchRes.json();
+                    if (sData.items && sData.items.length > 0) {
+                        const userRecord = sData.items[0];
+                        const userId = userRecord.id;
+
+                        const updatePayload = {};
+                        if (portalCurrentAvatarUrl) updatePayload.avatarUrl = portalCurrentAvatarUrl;
+                        if (newTitle) updatePayload.blogTitle = newTitle;
+                        if (newDesc !== undefined && newDesc !== "") {
+                            updatePayload.blogDesc = newDesc.replace(/__VISITORS:\d+__/g, "").trim();
+                        }
+
+                        const patchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(updatePayload)
+                        });
+
+                        if (patchRes.ok) {
+                            const updatedUser = await patchRes.json();
+                            const avatarBox = document.querySelector(".profile-avatar");
+                            if (avatarBox && updatedUser.avatarUrl) {
+                                avatarBox.innerHTML = `<img src="${updatedUser.avatarUrl}" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.src='default-avatar.svg'">`;
+                            }
+                            alert("프로필이 서버에 성공적으로 저장되었습니다.");
+                            closePortalProfileModal();
+                        } else {
+                            const errBody = await patchRes.json().catch(() => ({}));
+                            alert(`서버 저장 실패: ${errBody.message || '서버 응답 오류'}`);
+                        }
+                    } else {
+                        alert("서버에서 사용자 정보를 찾을 수 없습니다.");
+                    }
+                } else {
+                    alert("서버 연결에 실패했습니다.");
+                }
+            } catch (err) {
+                console.error("Profile save error:", err);
+                alert("네트워크 오류로 서버에 저장하지 못했습니다.");
+            } finally {
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = "저장";
+                }
+            }
+        }
+    </script>
+    <script src="main.js?v=20260905_profile"></script>
 </body>
 </html>

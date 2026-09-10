@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>기사 상세 - 에듀버 뉴스</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="news.css">
+    <style>
+        .article-page-wrap {
+            max-width: 900px;
+            margin: 30px auto 80px;
+            background: #fff;
+            border: 1px solid var(--news-border);
+            border-radius: 12px;
+            padding: 44px 50px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        }
+
+        .article-nav-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #edf0f2;
+        }
+
+        .btn-news-back {
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #495057;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 4px;
+            background: #f1f3f5;
+            transition: 0.15s;
+        }
+
+        .btn-news-back:hover {
+            background: #e9ecef;
+            color: #111;
+        }
+
+        .article-headline-category {
+            font-size: 13px;
+            font-weight: 800;
+            color: var(--news-primary);
+            margin-bottom: 10px;
+        }
+
+        .article-headline-title {
+            font-size: 28px;
+            font-weight: 900;
+            color: #111;
+            line-height: 1.4;
+            margin: 0 0 14px 0;
+            word-break: keep-all;
+        }
+
+        .article-headline-subtitle {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.6;
+            margin: 0 0 24px 0;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #edf0f2;
+            word-break: keep-all;
+        }
+
+        .article-info-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13.5px;
+            color: #777;
+            margin-bottom: 30px;
+        }
+
+        .article-press-badge {
+            color: #222;
+            font-weight: 800;
+        }
+
+        .article-body-content {
+            font-size: 17px;
+            line-height: 1.9;
+            color: #2b2b2b;
+            word-break: keep-all;
+            margin-bottom: 40px;
+        }
+
+        .article-body-content img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 24px auto;
+            display: block;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .article-body-content p {
+            margin: 0 0 20px 0;
+        }
+
+        .article-bottom-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 0;
+            border-top: 1px solid #edf0f2;
+            border-bottom: 1px solid #edf0f2;
+            margin-bottom: 40px;
+        }
+
+        .btn-article-like {
+            background: #fff;
+            border: 1px solid #ced4da;
+            padding: 9px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+            color: #333;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.15s;
+        }
+
+        .btn-article-like:hover {
+            border-color: #f03e3e;
+            color: #f03e3e;
+        }
+
+        .btn-article-like.liked {
+            background: #fff5f5;
+            border-color: #f03e3e;
+            color: #f03e3e;
+        }
+
+        .btn-article-delete {
+            background: #fff;
+            border: 1px solid #ffc9c9;
+            color: #e03131;
+            font-size: 13.5px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-article-delete:hover {
+            background: #ffe3e3;
+            border-color: #fa5252;
+            color: #c92a2a;
+        }
+
+        .related-news-section h3 {
+            font-size: 18px;
+            font-weight: 800;
+            margin: 0 0 16px 0;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="news-header">
+        <div class="news-top-bar">
+            <a href="news.html" class="news-logo-area">
+                <span class="news-logo-edu">EDU</span>
+                <span class="news-logo-text">뉴스</span>
+            </a>
+            <div class="news-header-right">
+                <a href="index.html" class="btn-portal-home">
+                    <i class="fa-solid fa-house"></i> 에듀버 홈
+                </a>
+                <a href="news-write.html" class="btn-write-article">
+                    <i class="fa-solid fa-pen-to-square"></i> 기사 작성
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Article Container -->
+    <main class="article-page-wrap">
+        <div class="article-nav-top">
+            <a href="news.html" class="btn-news-back">
+                <i class="fa-solid fa-arrow-left"></i> 전체 뉴스 목록
+            </a>
+            <div class="detail-font-controls">
+                <button class="btn-font-size" onclick="changeDetailFontSize(1)">가+</button>
+                <button class="btn-font-size" onclick="changeDetailFontSize(-1)">가-</button>
+            </div>
+        </div>
+
+        <article>
+            <div class="article-headline-category" id="article-cat"></div>
+            <h1 class="article-headline-title" id="article-title"></h1>
+            <div class="article-headline-subtitle" id="article-subtitle"></div>
+
+            <div class="article-info-bar">
+                <div>
+                    <span class="article-press-badge" id="article-press"></span> · 
+                    <span id="article-author"></span> · 
+                    <span id="article-date"></span>
+                </div>
+                <div>
+                    <span id="article-views"></span>
+                </div>
+            </div>
+
+            <div class="article-body-content" id="article-content"></div>
+
+            <div class="article-bottom-actions">
+                <button class="btn-article-like" id="btn-like" onclick="toggleArticleLike()">
+                    <i class="fa-regular fa-heart"></i>
+                    <span>좋아요</span>
+                    <strong id="like-count">0</strong>
+                </button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-news-back" onclick="navigator.clipboard.writeText(window.location.href); alert('기사 주소가 복사되었습니다!');">
+                        <i class="fa-solid fa-share-nodes"></i> 기사 공유
+                    </button>
+                    <button class="btn-article-delete" id="btn-delete-article" style="display: none;" onclick="deleteCurrentArticle()">
+                        <i class="fa-regular fa-trash-can"></i> 기사 삭제
+                    </button>
+                </div>
+            </div>
+        </article>
+    </main>
+
+    <script src="news.js"></script>
+    <script>
+        let currentArticle = null;
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const articleId = urlParams.get("id");
+
+            const articles = await getNewsArticles();
+            currentArticle = articles.find(a => a.id === articleId) || articles[0];
+
+            if (currentArticle) {
+                // Ensure likedUsers is an array
+                if (!Array.isArray(currentArticle.likedUsers)) {
+                    currentArticle.likedUsers = [];
+                }
+
+                // 1. Session-based View Count Increment (Prevents F5 abuse)
+                const viewSessionKey = `viewed_news_${currentArticle.id}`;
+                if (!sessionStorage.getItem(viewSessionKey)) {
+                    sessionStorage.setItem(viewSessionKey, "true");
+                    currentArticle.views = (currentArticle.views || 0) + 1;
+                    localStorage.setItem("naverNewsArticles", JSON.stringify(articles));
+
+                    // Background sync views to PocketBase if real record
+                    if (currentArticle.id && !currentArticle.id.startsWith("news_")) {
+                        fetch(`${POCKETBASE_URL}/api/collections/news/records/${currentArticle.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ views: currentArticle.views })
+                        }).catch(() => {});
+                    }
+                }
+
+                document.title = `${currentArticle.title} - 에듀버 뉴스`;
+                document.getElementById("article-cat").textContent = `[${currentArticle.category}]`;
+                document.getElementById("article-title").textContent = currentArticle.title;
+                document.getElementById("article-subtitle").textContent = currentArticle.subtitle || "";
+                document.getElementById("article-press").textContent = currentArticle.press || "에듀버 뉴스";
+                document.getElementById("article-author").textContent = currentArticle.author;
+                document.getElementById("article-date").textContent = `${currentArticle.date} ${currentArticle.time || ''}`;
+                document.getElementById("article-views").textContent = `조회수 ${(currentArticle.views || 1).toLocaleString()}회`;
+
+                // 2. Initialize Like Button and Count from likedUsers
+                const loggedInUser = localStorage.getItem("naverLoggedInUsername") || localStorage.getItem("naverLoggedInUser") || "";
+                const isLikedByMe = Boolean(loggedInUser && currentArticle.likedUsers.includes(loggedInUser));
+
+                const likeBtn = document.getElementById("btn-like");
+                const countEl = document.getElementById("like-count");
+                countEl.textContent = currentArticle.likedUsers.length;
+
+                if (isLikedByMe) {
+                    likeBtn.classList.add("liked");
+                    likeBtn.querySelector("i").className = "fa-solid fa-heart";
+                } else {
+                    likeBtn.classList.remove("liked");
+                    likeBtn.querySelector("i").className = "fa-regular fa-heart";
+                }
+
+                // 3. Check Delete Permission (ID is 'teacher' OR article author)
+                const loggedInUsername = (localStorage.getItem("naverLoggedInUsername") || localStorage.getItem("naverLoggedInUserId") || "").toLowerCase();
+                const loggedInName = (localStorage.getItem("naverLoggedInUser") || "").toLowerCase();
+
+                const isTeacherAdmin = (loggedInUsername === "teacher");
+                const isAuthor = Boolean(
+                    (loggedInUsername && currentArticle.authorId && currentArticle.authorId.toLowerCase() === loggedInUsername) ||
+                    (loggedInUsername && currentArticle.author && currentArticle.author.toLowerCase().includes(loggedInUsername)) ||
+                    (loggedInName && currentArticle.author && currentArticle.author.toLowerCase().includes(loggedInName))
+                );
+
+                const deleteBtn = document.getElementById("btn-delete-article");
+                if (deleteBtn) {
+                    deleteBtn.style.display = (isTeacherAdmin || isAuthor) ? "inline-flex" : "none";
+                }
+
+                // Render content
+                let fullHtml = "";
+                if (currentArticle.thumbnail) {
+                    fullHtml += `<img src="${currentArticle.thumbnail}" alt="Thumbnail" style="width:100%; border-radius:8px; margin-bottom:24px;">`;
+                }
+                fullHtml += currentArticle.content || `<p>${currentArticle.summary}</p>`;
+                document.getElementById("article-content").innerHTML = fullHtml;
+            }
+        });
+
+        // Toggle Article Like (1 user = 1 vote via likedUsers array)
+        function toggleArticleLike() {
+            if (!currentArticle) return;
+            if (!Array.isArray(currentArticle.likedUsers)) {
+                currentArticle.likedUsers = [];
+            }
+
+            const loggedInUser = localStorage.getItem("naverLoggedInUsername") || localStorage.getItem("naverLoggedInUser");
+            if (!loggedInUser) {
+                alert("좋아요는 로그인 후 참여하실 수 있습니다.");
+                return;
+            }
+
+            const btn = document.getElementById("btn-like");
+            const countEl = document.getElementById("like-count");
+            const userIndex = currentArticle.likedUsers.indexOf(loggedInUser);
+
+            if (userIndex > -1) {
+                // Unlike
+                currentArticle.likedUsers.splice(userIndex, 1);
+                btn.classList.remove("liked");
+                btn.querySelector("i").className = "fa-regular fa-heart";
+            } else {
+                // Like
+                currentArticle.likedUsers.push(loggedInUser);
+                btn.classList.add("liked");
+                btn.querySelector("i").className = "fa-solid fa-heart";
+            }
+
+            // The like count is purely likedUsers.length!
+            countEl.textContent = currentArticle.likedUsers.length;
+
+            // Save to localStorage
+            const articles = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
+            const idx = articles.findIndex(a => a.id === currentArticle.id);
+            if (idx !== -1) {
+                articles[idx].likedUsers = currentArticle.likedUsers;
+                articles[idx].likes = currentArticle.likedUsers.length;
+                localStorage.setItem("naverNewsArticles", JSON.stringify(articles));
+            }
+
+            // Sync to PocketBase
+            if (currentArticle.id && !currentArticle.id.startsWith("news_")) {
+                fetch(`${POCKETBASE_URL}/api/collections/news/records/${currentArticle.id}`, {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        likedUsers: currentArticle.likedUsers
+                    })
+                }).catch(() => {});
+            }
+        }
+
+        // Delete Article (Allowed for 'teacher' ID or article author)
+        async function deleteCurrentArticle() {
+            if (!currentArticle) return;
+
+            if (!confirm("이 기사를 정말로 삭제하시겠습니까?\n삭제된 기사는 복구할 수 없습니다.")) {
+                return;
+            }
+
+            const deleteBtn = document.getElementById("btn-delete-article");
+            if (deleteBtn) {
+                deleteBtn.disabled = true;
+                deleteBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 삭제 중...';
+            }
+
+            // 1. Delete from PocketBase if real record
+            if (currentArticle.id && !currentArticle.id.startsWith("news_")) {
+                try {
+                    await fetch(`${POCKETBASE_URL}/api/collections/news/records/${currentArticle.id}`, {
+                        method: "DELETE"
+                    });
+                } catch (err) {
+                    console.error("PocketBase delete failed:", err);
+                }
+            }
+
+            // 2. Remove from localStorage
+            let articles = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
+            const wasHeadline = currentArticle.isHeadline;
+            articles = articles.filter(a => a.id !== currentArticle.id);
+
+            // Promote next article to headline if needed
+            if (wasHeadline && articles.length > 0) {
+                articles[0].isHeadline = true;
+            }
+
+            localStorage.setItem("naverNewsArticles", JSON.stringify(articles));
+
+            alert("기사가 성공적으로 삭제되었습니다.");
+            window.location.href = "news.html";
+        }
+    </script>
+</body>
+</html>

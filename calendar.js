@@ -16,7 +16,20 @@ document.addEventListener("DOMContentLoaded", () => {
     const headerUsernameEl = document.getElementById("cal-header-username");
     const headerAvatarEl = document.getElementById("cal-header-avatar");
     if (headerUsernameEl) headerUsernameEl.textContent = loggedInUser;
-    if (headerAvatarEl) headerAvatarEl.src = userAvatar;
+    if (headerAvatarEl) {
+        headerAvatarEl.src = "default-avatar.svg";
+        if (isAuth && loggedInUser) {
+            const loggedUsername = localStorage.getItem("naverLoggedInUsername") || loggedInUser;
+            fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(loggedInUser)}'||username='${encodeURIComponent(loggedInUser)}'||name='${encodeURIComponent(loggedUsername)}'||username='${encodeURIComponent(loggedUsername)}')`)
+                .then(res => res.ok ? res.json() : null)
+                .then(data => {
+                    if (data && data.items && data.items.length > 0 && data.items[0].avatarUrl) {
+                        headerAvatarEl.src = data.items[0].avatarUrl;
+                    }
+                })
+                .catch(err => console.warn("Calendar avatar sync failed:", err));
+        }
+    }
 
     // Calendar Navigation State
     let currentDate = new Date(2026, 7, 26); // Default 2026-08-26 (Month is 0-indexed: 7 = August)

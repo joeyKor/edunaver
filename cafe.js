@@ -4,10 +4,12 @@
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Initial State & Sync User Info (Strict check with naverIsLoggedIn)
-    const isAuth = localStorage.getItem("naverIsLoggedIn") === "true";
-    const loggedInUser = isAuth ? (localStorage.getItem("naverLoggedInUser") || "") : "";
-    const userAvatar = localStorage.getItem("naverBlogAvatar") || "default-avatar.svg";
+    // 1. Initial State & Sync User Info
+    const loggedInUser = localStorage.getItem("naverLoggedInUser") || 
+                         localStorage.getItem("naverLoggedInUsername") || 
+                         localStorage.getItem("naverLoggedInUserId") || "";
+    const isAuth = (localStorage.getItem("naverIsLoggedIn") === "true") || Boolean(loggedInUser);
+    let userAvatar = "default-avatar.svg";
 
     const cafeUserProfileBadge = document.getElementById("cafe-user-profile-badge");
     const cafeUsernameEl = document.getElementById("cafe-username");
@@ -18,13 +20,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const cafeLoggedOutBox = document.getElementById("cafe-logged-out-box");
 
     if (isAuth && loggedInUser) {
-        if (cafeUsernameEl) cafeUsernameEl.textContent = `${loggedInUser}님`;
-        if (cardUserNameEl) cardUserNameEl.textContent = `${loggedInUser}님`;
+        const formattedName = loggedInUser.endsWith("님") ? loggedInUser : `${loggedInUser}님`;
+        if (cafeUsernameEl) cafeUsernameEl.textContent = formattedName;
+        if (cardUserNameEl) cardUserNameEl.textContent = formattedName;
         if (cafeAvatarImg) cafeAvatarImg.src = userAvatar;
         if (cardAvatarImg) cardAvatarImg.src = userAvatar;
         if (cafeUserProfileBadge) cafeUserProfileBadge.style.display = "flex";
         if (cafeLoggedInBox) cafeLoggedInBox.style.display = "block";
         if (cafeLoggedOutBox) cafeLoggedOutBox.style.display = "none";
+
+        // Async fetch from PocketBase users collection
+        fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${encodeURIComponent(loggedInUser)}'||username='${encodeURIComponent(loggedInUser)}')`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.items && data.items.length > 0 && data.items[0].avatarUrl) {
+                    const realAvatar = data.items[0].avatarUrl;
+                    if (cafeAvatarImg) cafeAvatarImg.src = realAvatar;
+                    if (cardAvatarImg) cardAvatarImg.src = realAvatar;
+                }
+            })
+            .catch(err => console.warn("Cafe avatar sync failed:", err));
     } else {
         if (cafeUserProfileBadge) {
             cafeUserProfileBadge.innerHTML = `<a href="index.html" style="color: #333; font-size: 13px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 4px;"><i class="fa-regular fa-user"></i> 로그인</a>`;

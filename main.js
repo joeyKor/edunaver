@@ -217,11 +217,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // ----------------------------------------------------
     // 3. News Ticker Auto Scrolling (뉴스 롤링)
     // ----------------------------------------------------
-    if (tickerList && tickerItemsCount > 0) {
+    const syncNewsTicker = () => {
+        const storedNews = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
+        if (storedNews && storedNews.length > 0 && tickerList) {
+            tickerList.innerHTML = storedNews.slice(0, 6).map(art => `
+                <li><a href="news.html?id=${encodeURIComponent(art.id)}">[${art.category}] ${art.title}</a></li>
+            `).join("");
+        }
+    };
+    syncNewsTicker();
+
+    const actualTickerCount = tickerList ? tickerList.children.length : tickerItemsCount;
+    if (tickerList && actualTickerCount > 0) {
         setInterval(() => {
-            tickerIndex = (tickerIndex + 1) % tickerItemsCount;
-            // Move container up by 24px per item
-            tickerList.style.top = `-${tickerIndex * 24}px`;
+            const count = tickerList.children.length;
+            if (count > 0) {
+                tickerIndex = (tickerIndex + 1) % count;
+                tickerList.style.top = `-${tickerIndex * 24}px`;
+            }
         }, 3500);
     }
 
@@ -413,10 +426,10 @@ document.addEventListener("DOMContentLoaded", () => {
             if (pbRes.ok) {
                 const pbData = await pbRes.json();
                 if (pbData.items && pbData.items.length > 0) {
-                    const pbPosts = pbData.items.map(item => ({
+                    const filteredItems = pbData.items.filter(item => item.title !== "Test Post" && item.summary !== "This is a test post.");
+                    const pbPosts = filteredItems.map(item => ({
                         id: item.id,
                         author: item.author || "블로거",
-                        authorAvatar: item.authorAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80",
                         time: item.created ? new Date(item.created).toLocaleDateString() : "방금 전",
                         category: item.category || "일상·생각",
                         title: item.title || "",
@@ -475,33 +488,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         // Fetch stored blog posts
-        let allPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
-        
-        // If empty, supply default seed posts so user always gets rich results
-        if (allPosts.length === 0) {
-            allPosts = [
-                {
-                    id: "post_fold",
-                    author: "삼성스마트폰 공식 카페",
-                    authorAvatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80",
-                    time: "1주 전",
-                    category: "IT·컴퓨터",
-                    title: "역대급 완성도! 갤럭시 Z 폴드8 실사용 리뷰 (성능·카메라·AI 신기능 총정리)",
-                    summary: "구분 스펙 사양 실사용 체감 특징 후면 메인 5,000만 화소 카메라와 스냅드래곤 8 탑재! 야간이나 어두운 실내에서도 빛 번짐 없이 깔끔하고 선명한 사진 촬영이 가능했습니다. 폴드8 배터리 효율과 무게 혁신을 집중 분석해 드립니다.",
-                    thumbnail: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&auto=format&fit=crop&q=80"
-                },
-                {
-                    id: "post_tech",
-                    author: "테크인사이드",
-                    authorAvatar: "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=80&auto=format&fit=crop&q=80",
-                    time: "3일 전",
-                    category: "비즈니스·경제",
-                    title: "2026 차세대 AI 스마트폰과 폴더블 디스플레이 시장 전망",
-                    summary: "온디바이스 AI 시대가 본격화되면서 폴드형 폼팩터의 생산성과 멀티태스킹 가치가 재조명받고 있습니다. 새로운 힌지 구조와 방열 설계로 완성도를 높인 최신 디바이스 트렌드.",
-                    thumbnail: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&auto=format&fit=crop&q=80"
-                }
-            ];
-        }
+        const dummyIds = ["post_1", "post_2", "post_3", "post_4", "post_fold", "post_tech"];
+        let allPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]").filter(p => !dummyIds.includes(p.id));
 
         // Fetch stored cafe posts
         let allCafePosts = [];
@@ -1221,6 +1209,55 @@ document.addEventListener("DOMContentLoaded", () => {
         // ----------------------------------------------------
         // Render TAB: NEWS (뉴스 탭)
         // ----------------------------------------------------
+        else if (activeTab === "news") {
+            const allNews = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
+            const matchedNews = allNews.filter(a => 
+                (a.title && a.title.toLowerCase().includes(activeQuery.toLowerCase())) ||
+                (a.summary && a.summary.toLowerCase().includes(activeQuery.toLowerCase())) ||
+                (a.content && a.content.toLowerCase().includes(activeQuery.toLowerCase())) ||
+                (a.category && a.category.toLowerCase().includes(activeQuery.toLowerCase())) ||
+                (a.author && a.author.toLowerCase().includes(activeQuery.toLowerCase()))
+            );
+
+            if (matchedNews.length > 0) {
+                matchedNews.forEach(art => {
+                    const card = document.createElement("article");
+                    card.className = "search-result-card";
+                    const highlightedTitle = highlightKeyword(art.title, activeQuery);
+                    const highlightedSnippet = highlightKeyword(art.summary, activeQuery);
+
+                    card.innerHTML = `
+                        <div class="result-source-row">
+                            <div class="result-source-info">
+                                <span class="result-source-name" style="font-weight: 700; color: #03c75a;">${art.press}</span>
+                                <span class="result-source-time">· ${art.date} (${art.author})</span>
+                            </div>
+                            <span class="result-type-badge">${art.category}</span>
+                        </div>
+                        <div class="result-main-group">
+                            <div class="result-text-content">
+                                <h4 class="result-title" onclick="location.href='news.html?id=${encodeURIComponent(art.id)}'">${highlightedTitle}</h4>
+                                <p class="result-snippet">${highlightedSnippet}</p>
+                            </div>
+                            ${art.thumbnail ? `
+                                <div class="result-thumb-wrapper" onclick="location.href='news.html?id=${encodeURIComponent(art.id)}'">
+                                    <img src="${art.thumbnail}" class="result-thumb-img" alt="Thumbnail">
+                                </div>
+                            ` : ''}
+                        </div>
+                    `;
+                    searchItemsFeed.appendChild(card);
+                });
+            } else {
+                searchItemsFeed.innerHTML = `
+                    <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
+                        <p>'${activeQuery}' 관련 등록된 뉴스가 없습니다.</p>
+                        <a href="news.html" style="color: #03c75a; font-weight: 700; text-decoration: none; font-size: 13px; margin-top: 8px; display: inline-block;">에듀버 뉴스 홈 바로가기 →</a>
+                    </div>
+                `;
+            }
+            searchItemsFeed.appendChild(createExternalSearchCard());
+        }
         else {
             if (matchedPosts.length > 0) {
                 matchedPosts.forEach(post => {
@@ -1303,15 +1340,15 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         const highlightedSnippet = highlightKeyword(snippetText, activeQuery);
 
-        let authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`) || post.authorAvatar;
-        if (!authorAvatar) {
-            authorAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=80&auto=format&fit=crop&q=80';
+        let authorAvatar = localStorage.getItem(`naverBlogAvatar_${post.author}`);
+        if (!authorAvatar || !authorAvatar.startsWith("http") && !authorAvatar.startsWith("data:")) {
+            authorAvatar = 'default-avatar.svg';
         }
 
         card.innerHTML = `
             <div class="result-source-row">
                 <div class="result-source-info">
-                    <img src="${authorAvatar}" class="result-author-avatar" alt="${post.author}">
+                    <img src="${authorAvatar}" class="result-author-avatar" alt="${post.author}" onerror="this.onerror=null; this.src='default-avatar.svg';">
                     <span class="result-source-name">${post.author}</span>
                     <span class="result-source-time">· ${post.time || '방금 전'}</span>
                 </div>
@@ -1490,9 +1527,248 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    async function syncPortalProfileAvatar(savedName, savedUsername, directAvatarUrl) {
+        const avatarBox = document.querySelector(".profile-avatar");
+        if (!avatarBox) return;
+
+        if (directAvatarUrl) {
+            avatarBox.innerHTML = `<img src="${directAvatarUrl}" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.src='default-avatar.svg'">`;
+            return;
+        }
+
+        const name = savedName || localStorage.getItem("naverLoggedInUser") || "";
+        const username = savedUsername || localStorage.getItem("naverLoggedInUsername") || name;
+
+        if (!name && !username) {
+            avatarBox.innerHTML = `<img src="default-avatar.svg" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+            return;
+        }
+
+        try {
+            const queryName = encodeURIComponent(name);
+            const queryUser = encodeURIComponent(username);
+            const res = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${queryName}'||username='${queryName}'||name='${queryUser}'||username='${queryUser}')`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.items && data.items.length > 0 && data.items[0].avatarUrl) {
+                    avatarBox.innerHTML = `<img src="${data.items[0].avatarUrl}" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.src='default-avatar.svg'">`;
+                    return;
+                }
+            }
+        } catch (err) {
+            console.warn("Failed to fetch avatar from PocketBase:", err);
+        }
+
+        avatarBox.innerHTML = `<img src="default-avatar.svg" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+    }
+
+    let portalCurrentAvatarUrl = "default-avatar.svg";
+
+    window.openPortalProfileModal = function() {
+        const modal = document.getElementById("profile-modal");
+        if (!modal) {
+            console.error("profile-modal element not found!");
+            return;
+        }
+
+        const isAuth = (localStorage.getItem("naverIsLoggedIn") === "true") || Boolean(localStorage.getItem("naverLoggedInUser"));
+        if (!isAuth) {
+            const lOut = document.getElementById("login-logged-out");
+            const lForm = document.getElementById("login-form-container");
+            if (lOut && lForm) {
+                lOut.style.display = "none";
+                lForm.style.display = "block";
+            }
+            return;
+        }
+
+        const userName = localStorage.getItem("naverLoggedInUser") || "홍길동";
+        const userUsername = localStorage.getItem("naverLoggedInUsername") || userName;
+
+        const previewEl = document.getElementById("modal-avatar-preview");
+        const titleInput = document.getElementById("modal-blog-title");
+        const descInput = document.getElementById("modal-blog-desc");
+
+        const currentAvatarImg = document.querySelector(".profile-avatar img");
+        portalCurrentAvatarUrl = currentAvatarImg ? currentAvatarImg.src : "default-avatar.svg";
+        if (previewEl) previewEl.src = portalCurrentAvatarUrl;
+
+        if (titleInput) titleInput.value = `${userName}의 일상 & 지식 서재`;
+        if (descInput) descInput.value = "배움과 소소한 일상을 기록하는 공간입니다.";
+
+        // Direct style enforcement
+        modal.classList.add("active");
+        modal.style.setProperty("display", "flex", "important");
+        modal.style.setProperty("opacity", "1", "important");
+        modal.style.setProperty("pointer-events", "auto", "important");
+        modal.style.setProperty("z-index", "999999", "important");
+
+        // Async background fetch latest profile from PocketBase
+        const queryName = encodeURIComponent(userName);
+        const queryUser = encodeURIComponent(userUsername);
+        fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${queryName}'||username='${queryName}'||name='${queryUser}'||username='${queryUser}')`)
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data && data.items && data.items.length > 0) {
+                    const record = data.items[0];
+                    if (record.avatarUrl) {
+                        portalCurrentAvatarUrl = record.avatarUrl;
+                        if (previewEl) previewEl.src = record.avatarUrl;
+                    }
+                    if (record.blogTitle && titleInput) {
+                        titleInput.value = record.blogTitle;
+                    }
+                    if (record.blogDesc && descInput) {
+                        let clean = record.blogDesc.replace(/__VISITORS:\d+__/g, "").trim();
+                        descInput.value = clean;
+                    }
+                }
+            })
+            .catch(e => console.warn("Fetch profile for modal failed:", e));
+    };
+
+    window.closePortalProfileModal = function() {
+        const modal = document.getElementById("profile-modal");
+        if (modal) {
+            modal.classList.remove("active");
+            modal.style.setProperty("display", "none", "important");
+        }
+    };
+
+    window.setPortalPresetAvatar = function(src) {
+        portalCurrentAvatarUrl = src;
+        const previewEl = document.getElementById("modal-avatar-preview");
+        if (previewEl) previewEl.src = src;
+    };
+
+    window.handlePortalAvatarChange = function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("사진 용량은 5MB 이하로 업로드해주세요.");
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const rawResult = e.target.result;
+            portalCurrentAvatarUrl = rawResult;
+            const previewEl = document.getElementById("modal-avatar-preview");
+            if (previewEl) previewEl.src = rawResult;
+
+            const img = new Image();
+            img.onload = function() {
+                try {
+                    const canvas = document.createElement("canvas");
+                    const size = 200;
+                    canvas.width = size;
+                    canvas.height = size;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, size, size);
+                    const compressedUrl = canvas.toDataURL("image/jpeg", 0.85);
+                    if (compressedUrl && compressedUrl.length > 50) {
+                        portalCurrentAvatarUrl = compressedUrl;
+                        if (previewEl) previewEl.src = compressedUrl;
+                    }
+                } catch (err) {}
+            };
+            img.src = rawResult;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    window.savePortalProfile = async function() {
+        const userName = localStorage.getItem("naverLoggedInUser") || "홍길동";
+        const userUsername = localStorage.getItem("naverLoggedInUsername") || userName;
+        const newTitle = document.getElementById("modal-blog-title") ? document.getElementById("modal-blog-title").value.trim() : "";
+        const newDesc = document.getElementById("modal-blog-desc") ? document.getElementById("modal-blog-desc").value.trim() : "";
+
+        const previewEl = document.getElementById("modal-avatar-preview");
+        if (previewEl && previewEl.src) {
+            portalCurrentAvatarUrl = previewEl.src;
+        }
+
+        const saveBtn = document.getElementById("btn-save-portal-profile");
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.textContent = "저장 중...";
+        }
+
+        try {
+            const queryName = encodeURIComponent(userName);
+            const queryUser = encodeURIComponent(userUsername);
+            const searchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${queryName}'||username='${queryName}'||name='${queryUser}'||username='${queryUser}')`);
+            if (searchRes.ok) {
+                const sData = await searchRes.json();
+                if (sData.items && sData.items.length > 0) {
+                    const userRecord = sData.items[0];
+                    const userId = userRecord.id;
+
+                    const updatePayload = {};
+                    if (portalCurrentAvatarUrl) updatePayload.avatarUrl = portalCurrentAvatarUrl;
+                    if (newTitle) updatePayload.blogTitle = newTitle;
+                    if (newDesc !== undefined && newDesc !== "") {
+                        updatePayload.blogDesc = newDesc.replace(/__VISITORS:\d+__/g, "").trim();
+                    }
+
+                    const patchRes = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records/${userId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(updatePayload)
+                    });
+
+                    if (patchRes.ok) {
+                        const updatedUser = await patchRes.json();
+                        const avatarBox = document.querySelector(".profile-avatar");
+                        if (avatarBox && updatedUser.avatarUrl) {
+                            avatarBox.innerHTML = `<img src="${updatedUser.avatarUrl}" alt="프로필 아바타" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" onerror="this.src='default-avatar.svg'">`;
+                        }
+                        alert("프로필이 서버에 성공적으로 저장되었습니다.");
+                        closePortalProfileModal();
+                    } else {
+                        const errBody = await patchRes.json().catch(() => ({}));
+                        alert(`서버 저장 실패: ${errBody.message || '서버 응답 오류'}`);
+                    }
+                } else {
+                    alert("서버에서 사용자 정보를 찾을 수 없습니다.");
+                }
+            } else {
+                alert("서버 연결에 실패했습니다.");
+            }
+        } catch (err) {
+            console.error("Profile save error:", err);
+            alert("네트워크 오류로 서버에 저장하지 못했습니다.");
+        } finally {
+            if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = "저장";
+            }
+        }
+    };
+
+    // Event listeners for profile avatar and settings button
+    document.addEventListener("click", (e) => {
+        if (e.target.closest(".profile-settings-btn") || e.target.closest(".profile-avatar-wrapper")) {
+            e.preventDefault();
+            e.stopPropagation();
+            window.openPortalProfileModal();
+        }
+    });
+
+    const portalModalEl = document.getElementById("profile-modal");
+    if (portalModalEl) {
+        portalModalEl.addEventListener("click", (e) => {
+            if (e.target === portalModalEl) {
+                window.closePortalProfileModal();
+            }
+        });
+    }
+
     // Persist login state on load
     if (localStorage.getItem("naverIsLoggedIn") === "true") {
         const savedName = localStorage.getItem("naverLoggedInUser") || "홍길동";
+        const savedUsername = localStorage.getItem("naverLoggedInUsername") || savedName;
         let savedEmail = (localStorage.getItem("naverLoggedInEmail") || "gildong@eduver.com").replace(/@(edunaver|edunver|naver)\.com$/i, "@eduver.com");
         localStorage.setItem("naverLoggedInEmail", savedEmail);
         
@@ -1505,16 +1781,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 profileEmailEl.textContent = savedEmail;
             }
 
-            const savedAvatar = localStorage.getItem(`naverBlogAvatar_${savedName}`);
-            const avatarBox = document.querySelector(".profile-avatar");
-            if (avatarBox) {
-                if (savedAvatar) {
-                    avatarBox.innerHTML = `<img src="${savedAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-                } else {
-                    avatarBox.innerHTML = `<img src="default-avatar.svg" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-                }
-            }
-
+            syncPortalProfileAvatar(savedName, savedUsername);
             updateUnreadCounts();
         }
     }
@@ -1528,8 +1795,8 @@ document.addEventListener("DOMContentLoaded", () => {
             let finalName = "";
             let emailAddr = "";
             let loggedIn = false;
-
             let actualLoginId = "";
+            let avatarFromPb = "";
 
             // 1. Check local mock credentials first
             if ((idInput === "abc@eduver.com" || idInput === "abc@edunaver.com" || idInput === "abc@naver.com" || idInput === "abc") && pwInput === "abcd1234") {
@@ -1570,23 +1837,12 @@ document.addEventListener("DOMContentLoaded", () => {
                         actualLoginId = data.record.username || (data.record.email ? data.record.email.split("@")[0] : idInput.split("@")[0]);
                         emailAddr = (data.record.email || `${actualLoginId}@eduver.com`).replace(/@(edunaver|edunver|naver)\.com$/i, "@eduver.com");
                         loggedIn = true;
+                        avatarFromPb = data.record.avatarUrl || "";
 
                         // Save PocketBase user profile info
                         localStorage.setItem("naverLoggedInUsername", actualLoginId);
                         localStorage.setItem("naverLoggedInUserId", actualLoginId);
                         if (data.record.id) localStorage.setItem("naverPbRecordId", data.record.id);
-                        if (data.record.avatarUrl) {
-                            localStorage.setItem(`naverBlogAvatar_${finalName}`, data.record.avatarUrl);
-                            if (data.record.username) localStorage.setItem(`naverBlogAvatar_${data.record.username}`, data.record.avatarUrl);
-                        }
-                        if (data.record.blogTitle) {
-                            localStorage.setItem(`naverMyBlogTitle_${finalName}`, data.record.blogTitle);
-                            if (data.record.username) localStorage.setItem(`naverMyBlogTitle_${data.record.username}`, data.record.blogTitle);
-                        }
-                        if (data.record.blogDesc) {
-                            localStorage.setItem(`naverMyBlogDesc_${finalName}`, data.record.blogDesc);
-                            if (data.record.username) localStorage.setItem(`naverMyBlogDesc_${data.record.username}`, data.record.blogDesc);
-                        }
                     }
                 } catch (err) {
                     console.error("PocketBase auth connection failed:", err);
@@ -1609,15 +1865,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 profileEmailEl.textContent = emailAddr;
             }
 
-            const currentAvatar = localStorage.getItem(`naverBlogAvatar_${finalName}`);
-            const avatarBox = document.querySelector(".profile-avatar");
-            if (avatarBox) {
-                if (currentAvatar) {
-                    avatarBox.innerHTML = `<img src="${currentAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-                } else {
-                    avatarBox.innerHTML = `<img src="default-avatar.svg" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
-                }
-            }
+            syncPortalProfileAvatar(finalName, actualLoginId, avatarFromPb);
             
             // Set persistence
             localStorage.setItem("naverIsLoggedIn", "true");
@@ -1637,8 +1885,10 @@ document.addEventListener("DOMContentLoaded", () => {
             authForm.reset();
             localStorage.removeItem("naverIsLoggedIn");
             localStorage.removeItem("naverLoggedInUser");
+            localStorage.removeItem("naverLoggedInUsername");
             localStorage.removeItem("naverLoggedInUserId");
             localStorage.removeItem("naverLoggedInEmail");
+            localStorage.removeItem("naverPbRecordId");
         });
     }
 
