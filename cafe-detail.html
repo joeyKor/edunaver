@@ -1421,6 +1421,36 @@
                                     if (mgrEl) mgrEl.textContent = cafe.manager || '매니저';
                                     if (memberEl) memberEl.textContent = cafe.members || '1';
 
+                                    // Update Manager Profile Avatar
+                                    var avatarEl = document.getElementById('cafe-profile-avatar');
+                                    var rawMgr = (cafe.manager || '').trim();
+                                    var cleanMgr = rawMgr.replace(/님$/, '').trim();
+                                    if (avatarEl) {
+                                        var cachedAvatar = localStorage.getItem('naverUserAvatar_' + cleanMgr) || localStorage.getItem('naverBlogAvatar_' + cleanMgr);
+                                        if (cachedAvatar && cachedAvatar !== 'default-avatar.svg') {
+                                            avatarEl.src = cachedAvatar;
+                                        } else if (cafe.icon && cafe.icon !== 'default-avatar.svg') {
+                                            avatarEl.src = cafe.icon;
+                                        }
+                                        if (cleanMgr) {
+                                            fetch('https://pb.joyfamkr.synology.me/api/collections/users/records?filter=' + encodeURIComponent("(name='" + cleanMgr + "'||username='" + cleanMgr + "')"))
+                                                .then(function(r){ return r.json(); })
+                                                .then(function(uData){
+                                                    if (uData.items && uData.items.length > 0) {
+                                                        var uRec = uData.items[0];
+                                                        var aUrl = uRec.avatarUrl || uRec.avatar;
+                                                        if (aUrl) {
+                                                            if (!aUrl.startsWith('data:') && !aUrl.startsWith('http')) {
+                                                                aUrl = 'https://pb.joyfamkr.synology.me/api/files/' + uRec.collectionId + '/' + uRec.id + '/' + aUrl;
+                                                            }
+                                                            avatarEl.src = aUrl;
+                                                            localStorage.setItem('naverUserAvatar_' + cleanMgr, aUrl);
+                                                        }
+                                                    }
+                                                }).catch(function(){});
+                                        }
+                                    }
+
                                     // Check if logged in user is manager or member
                                     var curUser = (localStorage.getItem("naverLoggedInUser") || "").trim();
                                     var curId = (localStorage.getItem("naverLoggedInUserId") || "").trim();
@@ -1508,7 +1538,7 @@
                 <div class="cafe-profile-card">
                     <div class="profile-top-row">
                         <div class="profile-avatar-box">
-                            <img src="default-avatar.svg" id="cafe-profile-avatar" alt="카페 아바타">
+                            <img src="default-avatar.svg" id="cafe-profile-avatar" alt="카페 아바타" onerror="this.src='default-avatar.svg'">
                         </div>
                         <div class="profile-info-text">
                             <div class="manager-name-row">

@@ -784,6 +784,10 @@ input, textarea {
     background-color: #f8fafb;
 }
 
+.mail-row.selected {
+    background-color: #f0fbf5 !important;
+}
+
 .mail-row.unread {
     color: #111111;
 }
@@ -793,6 +797,19 @@ input, textarea {
     color: #b8bec5;
     flex-shrink: 0;
     font-size: 13px;
+    cursor: pointer;
+}
+
+.col-check i.fa-square-check {
+    color: var(--primary-color) !important;
+}
+
+.toolbar-checkbox {
+    cursor: pointer;
+}
+
+.toolbar-checkbox i.fa-square-check {
+    color: var(--primary-color) !important;
 }
 
 .col-star {
@@ -800,6 +817,7 @@ input, textarea {
     color: #b8bec5;
     flex-shrink: 0;
     font-size: 13px;
+    cursor: pointer;
 }
 
 .col-read-icon {
@@ -1696,3 +1714,50 @@ input, textarea {
     min-height: 250px;
     word-break: break-word;
 }
+
+/* Mail Row Selection & Checkbox Enhancement */
+.mail-row .col-check {
+    cursor: pointer;
+    user-select: none;
+}
+
+.mail-row .col-check i {
+    font-size: 14px;
+    transition: color 0.15s ease, transform 0.1s ease;
+}
+
+.mail-row .col-check:hover i {
+    color: var(--primary);
+}
+
+.mail-row.selected {
+    background-color: #f0fdf4 !important;
+}
+
+.mail-row.selected .col-subject .subj-text {
+    color: #1e293b;
+}
+
+.toolbar-checkbox {
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+}
+
+.toolbar-checkbox i {
+    font-size: 14px;
+    transition: color 0.15s ease;
+}
+
+.toolbar-checkbox:hover i {
+    color: var(--primary);
+}
+
+#detail-restore-btn {
+    display: none;
+    color: var(--primary);
+}
+

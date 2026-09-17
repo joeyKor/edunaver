@@ -65,11 +65,109 @@ document.addEventListener("DOMContentLoaded", () => {
     // 2. Cafe Data Initialization
     const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
 
-    const DEFAULT_CAFES = [];
+    const DEFAULT_CAFES = [
+        {
+            id: "cafe_chiikawa",
+            name: "먼작귀 치이카와 정보,거래 카페",
+            isOfficial: false,
+            ranking: "숲",
+            level: "숲",
+            members: "19,843",
+            newPostsToday: 42,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23fce2ea'/><circle cx='34' cy='56' r='18' fill='%23ffffff'/><circle cx='66' cy='56' r='18' fill='%23ffffff'/><circle cx='50' cy='40' r='16' fill='%23fff8e7'/><circle cx='28' cy='54' r='2' fill='%23222'/><circle cx='40' cy='54' r='2' fill='%23222'/><circle cx='60' cy='54' r='2' fill='%23222'/><circle cx='72' cy='54' r='2' fill='%23222'/><circle cx='45' cy='38' r='2' fill='%23222'/><circle cx='55' cy='38' r='2' fill='%23222'/><ellipse cx='34' cy='60' rx='4' ry='2' fill='%23f99'/><ellipse cx='66' cy='60' rx='4' ry='2' fill='%23f99'/><ellipse cx='50' cy='44' rx='4' ry='2' fill='%23f99'/><text x='50' y='88' font-family='sans-serif' font-size='9' font-weight='bold' fill='%23d85d76' text-anchor='middle'>ちいかわ</text></svg>",
+            isFavorite: true,
+            category: "만화/애니",
+            desc: "먼작귀 치이카와 관련해서 정보를 주고 받고 공구도 진행/ 주 목적은 거래를 자유롭게 할 ...",
+            manager: "치이카와마스터",
+            growthScore: "94,921",
+            posts: [
+                { id: "p1", title: "치이카와 신상 마스코트 인형 공구 및 현물 교환 게시판 오픈", author: "치이카와마스터", time: "10분 전", comments: 15 }
+            ]
+        },
+        {
+            id: "cafe_cbcm",
+            name: "ComicBooks Collect Mania",
+            isOfficial: true,
+            ranking: "나무2단계",
+            level: "나무2단계",
+            members: "34,577",
+            newPostsToday: 18,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23fff7b2'/><path d='M20,62 C35,60 48,68 50,72 C52,68 65,60 80,62 L80,32 C65,30 52,38 50,42 C48,38 35,30 20,32 Z' fill='%23ffffff' stroke='%23e59400' stroke-width='3'/><line x1='50' y1='42' x2='50' y2='72' stroke='%23e59400' stroke-width='2.5'/><text x='50' y='58' font-family='sans-serif' font-size='15' font-weight='900' fill='%23d9531e' text-anchor='middle'>CBCM</text></svg>",
+            isFavorite: true,
+            category: "도서/만화",
+            desc: "만화책을 좋아하시고, 구매혹은 수집하시는 분들이 모여있는 카페 입니다.",
+            manager: "북콜렉터",
+            growthScore: "23,139",
+            posts: [
+                { id: "p2", title: "이번 주 발매 만화 단행본 초판 띠지 인증 모음", author: "북콜렉터", time: "25분 전", comments: 8 }
+            ]
+        },
+        {
+            id: "cafe_busan",
+            name: "부산엔 [부산 부동산·학군·학원가 정보]",
+            isOfficial: false,
+            ranking: "씨앗3단계",
+            level: "씨앗3단계",
+            members: "478",
+            newPostsToday: 5,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%23f0f7ff'/><circle cx='50' cy='50' r='38' fill='%23ffffff' stroke='%233470cc' stroke-width='2'/><circle cx='40' cy='34' r='5' fill='%23ff6b4a'/><path d='M24,54 Q36,40 50,54 Q64,40 76,54' fill='none' stroke='%23193e78' stroke-width='3'/><line x1='36' y1='47' x2='36' y2='56' stroke='%23193e78' stroke-width='2'/><line x1='64' y1='47' x2='64' y2='56' stroke='%23193e78' stroke-width='2'/><path d='M22,60 Q50,54 78,60' fill='none' stroke='%234da3ff' stroke-width='2'/><text x='50' y='76' font-family='sans-serif' font-size='13' font-weight='900' fill='%23103264' text-anchor='middle'>부산엔</text></svg>",
+            isFavorite: false,
+            category: "부동산/지역",
+            desc: "부산 부동산·아파트·분양정보·청약·신축·재개발·재건축·학군·학원가·맛집·생활정보",
+            manager: "부산지기",
+            growthScore: "15,007",
+            posts: [
+                { id: "p3", title: "해운대·수영구 학군 및 신축 분양 청약 일정 안내", author: "부산지기", time: "1시간 전", comments: 3 }
+            ]
+        },
+        {
+            id: "cafe_vgtrade",
+            name: "VG trade (뱅가드 트레이드)",
+            isOfficial: false,
+            ranking: "열매3단계",
+            level: "열매3단계",
+            members: "5,643",
+            newPostsToday: 12,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%231e293b'/><circle cx='50' cy='50' r='36' fill='%230f172a' stroke='%23eab308' stroke-width='2'/><polygon points='50,22 62,42 56,42 66,66 50,56 34,66 44,42 38,42' fill='%23f59e0b'/><circle cx='50' cy='46' r='5' fill='%2338bdf8'/><text x='50' y='82' font-family='sans-serif' font-size='10' font-weight='900' fill='%23e2e8f0' text-anchor='middle'>VG TRADE</text></svg>",
+            isFavorite: false,
+            category: "게임/TCG",
+            desc: "부시로드 사의 카드파이트 뱅가드의 거래 카페입니다.",
+            manager: "뱅가드러너",
+            growthScore: "12,370",
+            posts: [
+                { id: "p4", title: "D시리즈 신규 부스터 덱 소스 판매 및 트레이드 구합니다", author: "뱅가드러너", time: "2시간 전", comments: 7 }
+            ]
+        },
+        {
+            id: "cafe_digimon",
+            name: "신 디지몬 카드게임 카페",
+            isOfficial: false,
+            ranking: "열매2단계",
+            level: "열매2단계",
+            members: "7,144",
+            newPostsToday: 9,
+            icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%232252a3'/><ellipse cx='50' cy='42' rx='42' ry='22' fill='%231d4588'/><text x='50' y='46' font-family='Impact, sans-serif' font-size='15' font-style='italic' fill='%23ffffff' text-anchor='middle' stroke='%230b2046' stroke-width='0.5'>DIGIMON</text><text x='50' y='58' font-family='sans-serif' font-size='7' font-weight='bold' fill='%2393c5fd' text-anchor='middle'>CARD GAME</text><text x='50' y='72' font-family='sans-serif' font-size='8' font-weight='bold' fill='%23ffffff' text-anchor='middle'>デジモンカード</text></svg>",
+            isFavorite: false,
+            category: "게임/TCG",
+            desc: "2020년 새로 나온 디지몬 카드 게임에 관한 카페입니다.",
+            manager: "테이머즈",
+            growthScore: "11,312",
+            posts: [
+                { id: "p5", title: "한글판 부스터 발매 기념 매장 공인 대회 덱 리스트 공유", author: "테이머즈", time: "3시간 전", comments: 11 }
+            ]
+        }
+    ];
 
     let cafes = JSON.parse(localStorage.getItem("naverCafesData") || "null");
-    if (!cafes || !Array.isArray(cafes)) {
+    if (!cafes || !Array.isArray(cafes) || cafes.length === 0) {
         cafes = DEFAULT_CAFES;
+        localStorage.setItem("naverCafesData", JSON.stringify(cafes));
+    } else {
+        DEFAULT_CAFES.forEach(df => {
+            if (!cafes.some(c => c.id === df.id || c.name === df.name)) {
+                cafes.push(df);
+            }
+        });
         localStorage.setItem("naverCafesData", JSON.stringify(cafes));
     }
 
@@ -213,6 +311,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    function getCafeIcon(name, customIcon) {
+        if (customIcon && customIcon.trim() !== "") {
+            return customIcon;
+        }
+        return "default-avatar.svg";
+    }
+
     function renderAllCafesGrid() {
         if (sidebarJoinedCafesCount) sidebarJoinedCafesCount.textContent = Math.max(1, cafes.length);
         if (allCafesTotalBadge) allCafesTotalBadge.textContent = `${cafes.length}개`;
@@ -239,12 +344,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const desc = c.desc || `${c.name} 카페에서 다양한 정보와 소식을 나누어 보세요.`;
             const members = c.members || "1";
             const level = c.level || "씨앗1단계";
-            const category = c.category || "자유";
-            const growthScore = Math.floor(Math.random() * 50000 + 10000).toLocaleString();
+            const membersFormatted = isNaN(String(members).replace(/,/g, "")) 
+                ? members 
+                : Number(String(members).replace(/,/g, "")).toLocaleString();
+            const score = c.growthScore || Math.floor(Math.random() * 50000 + 10000).toLocaleString();
 
             item.innerHTML = `
                 <div class="cafe-row-avatar">
-                    <img src="${c.icon || 'default-avatar.svg'}" alt="${c.name}">
+                    <img src="${getCafeIcon(c.name, c.icon)}" alt="${c.name}" onerror="this.src='default-avatar.svg'">
                 </div>
                 <div class="cafe-row-info">
                     <div class="cafe-row-title-line">
@@ -253,13 +360,11 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                     <div class="cafe-row-desc">${desc}</div>
                     <div class="cafe-row-meta-line">
-                        <span>${category}</span>
-                        <span class="sep">·</span>
-                        <span><i class="fa-regular fa-user cafe-meta-icon"></i> ${members}</span>
+                        <span><i class="fa-solid fa-user cafe-meta-icon"></i> ${membersFormatted}</span>
                         <span class="sep">·</span>
                         <span>${level}</span>
                         <span class="sep">·</span>
-                        <span class="cafe-growth-stat"><i class="fa-solid fa-arrow-up"></i> ${growthScore}</span>
+                        <span class="cafe-growth-stat"><span class="growth-arrow-circle"><i class="fa-solid fa-arrow-up"></i></span> ${score}</span>
                     </div>
                 </div>
             `;
@@ -320,25 +425,29 @@ document.addEventListener("DOMContentLoaded", () => {
             `}).join("");
 
             card.innerHTML = `
-                <div class="cafe-group-header">
-                    <div class="cafe-group-info">
-                        <img src="${cafe.icon}" class="cafe-icon-thumb" alt="${cafe.name}" onclick="location.href='cafe-detail.html?id=${cafe.id}&name=${encodeURIComponent(cafe.name)}'" style="cursor:pointer;">
-                        <div class="cafe-group-text">
-                            <div class="cafe-name-row" onclick="location.href='cafe-detail.html?id=${cafe.id}&name=${encodeURIComponent(cafe.name)}'">
-                                <span>${cafe.name}</span>
-                                ${cafe.isOfficial ? `<span class="cafe-tag-green">대표</span>` : ''}
-                                ${cafe.ranking ? `<span class="cafe-members-count"><i class="fa-solid fa-users" style="font-size:9px;"></i> ${cafe.ranking}</span>` : ''}
-                            </div>
-                            <span class="cafe-new-posts-count">새 글 ${cafe.newPostsToday}</span>
-                        </div>
+                <div class="cafe-group-card-inner">
+                    <div class="cafe-card-icon-wrap">
+                        <img src="${getCafeIcon(cafe.name, cafe.icon)}" class="cafe-icon-thumb" alt="${cafe.name}" onclick="location.href='cafe-detail.html?id=${cafe.id}&name=${encodeURIComponent(cafe.name)}'" onerror="this.src='default-avatar.svg'">
                     </div>
-                    <button class="cafe-fav-star ${cafe.isFavorite ? 'active' : ''}" data-id="${cafe.id}" title="즐겨찾기">
-                        <i class="fa-${cafe.isFavorite ? 'solid' : 'regular'} fa-star"></i>
-                    </button>
+                    <div class="cafe-card-main-body">
+                        <div class="cafe-group-header">
+                            <div class="cafe-group-text">
+                                <div class="cafe-name-row" onclick="location.href='cafe-detail.html?id=${cafe.id}&name=${encodeURIComponent(cafe.name)}'">
+                                    <span>${cafe.name}</span>
+                                    ${cafe.isOfficial ? `<span class="cafe-tag-green">대표</span>` : ''}
+                                    ${cafe.ranking ? `<span class="cafe-members-count"><i class="fa-solid fa-users" style="font-size:9px;"></i> ${cafe.ranking}</span>` : ''}
+                                </div>
+                                <span class="cafe-new-posts-count">새 글 ${cafe.newPostsToday}</span>
+                            </div>
+                            <button class="cafe-fav-star ${cafe.isFavorite ? 'active' : ''}" data-id="${cafe.id}" title="즐겨찾기">
+                                <i class="fa-${cafe.isFavorite ? 'solid' : 'regular'} fa-star"></i>
+                            </button>
+                        </div>
+                        <ul class="cafe-post-items">
+                            ${postsHtml}
+                        </ul>
+                    </div>
                 </div>
-                <ul class="cafe-post-items">
-                    ${postsHtml}
-                </ul>
             `;
 
             cafeFeedList.appendChild(card);
@@ -368,6 +477,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tabMyCafe.addEventListener("click", () => {
             tabMyCafe.classList.add("active");
             tabFavBoard.classList.remove("active");
+            if (tabAllCafes) tabAllCafes.classList.remove("active");
             currentTab = "my-cafe";
             renderCafeFeeds();
         });
@@ -375,8 +485,22 @@ document.addEventListener("DOMContentLoaded", () => {
         tabFavBoard.addEventListener("click", () => {
             tabFavBoard.classList.add("active");
             tabMyCafe.classList.remove("active");
+            if (tabAllCafes) tabAllCafes.classList.remove("active");
             currentTab = "fav-board";
             renderCafeFeeds();
+        });
+    }
+
+    const tabAllCafes = document.getElementById("tab-all-cafes");
+    const btnFeedAllCafes = document.getElementById("btn-feed-all-cafes");
+    if (tabAllCafes) {
+        tabAllCafes.addEventListener("click", () => {
+            showAllCafesView();
+        });
+    }
+    if (btnFeedAllCafes) {
+        btnFeedAllCafes.addEventListener("click", () => {
+            showAllCafesView();
         });
     }
 
@@ -537,7 +661,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Icon file upload simulation
     const cafeIconPreviewBox = document.getElementById("cafe-icon-preview-box");
     const createCafeIconFile = document.getElementById("create-cafe-icon-file");
-    let uploadedCafeIcon = "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=80&auto=format&fit=crop&q=80";
+    let uploadedCafeIcon = "";
 
     if (cafeIconPreviewBox && createCafeIconFile) {
         cafeIconPreviewBox.addEventListener("click", () => {
@@ -551,7 +675,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 reader.onload = function(evt) {
                     uploadedCafeIcon = evt.target.result;
                     cafeIconPreviewBox.innerHTML = `
-                        <img src="${uploadedCafeIcon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 24px;">
+                        <img src="${uploadedCafeIcon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 22px;">
                         <div class="icon-camera-badge"><i class="fa-solid fa-camera"></i></div>
                     `;
                 };
@@ -639,6 +763,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     isOfficial: false,
                     isFavorite: true,
                     newPostsToday: 1,
+                    icon: uploadedCafeIcon || "default-avatar.svg",
                     posts: JSON.stringify([initialPost])
                 };
 
@@ -663,7 +788,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 ranking: "신규 카페",
                 members: "1",
                 newPostsToday: 1,
-                icon: uploadedCafeIcon,
+                icon: uploadedCafeIcon || "default-avatar.svg",
                 isFavorite: true,
                 category: catMain,
                 keywords: keywordList,
@@ -676,6 +801,13 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("naverCafesData", JSON.stringify(cafes));
 
             realCreateCafeForm.reset();
+            uploadedCafeIcon = "";
+            if (cafeIconPreviewBox) {
+                cafeIconPreviewBox.innerHTML = `
+                    <i class="fa-solid fa-mug-saucer default-icon"></i>
+                    <div class="icon-camera-badge"><i class="fa-solid fa-camera"></i></div>
+                `;
+            }
             keywordList = [];
             renderKeywordTags();
             refreshCaptcha();

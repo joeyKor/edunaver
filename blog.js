@@ -217,8 +217,11 @@ async function fetchUserProfile(username) {
                 userProfileCache[username] = rec;
                 if (rec.avatarUrl) {
                     localStorage.setItem(`naverBlogAvatar_${username}`, rec.avatarUrl);
-                    // Dynamically update any rendered post avatars for this author on the page
+                    // Dynamically update any rendered post avatars and comment avatars for this author on the page
                     document.querySelectorAll(`img.author-avatar[data-author="${username}"]`).forEach(img => {
+                        img.src = rec.avatarUrl;
+                    });
+                    document.querySelectorAll(`img.comment-avatar-img[data-user="${username}"]`).forEach(img => {
                         img.src = rec.avatarUrl;
                     });
                 }
@@ -841,11 +844,17 @@ function renderFullViewComments(post) {
     const currentUserName = localStorage.getItem("naverLoggedInUser") || currentUserId;
 
     listEl.innerHTML = comments.map(c => {
-        const avatar = getUserAvatar(c.user) || "default-avatar.svg";
+        let avatar = getUserAvatar(c.user) || "default-avatar.svg";
+        if (avatar === "default-avatar.svg" && c.avatar && c.avatar.startsWith("data:")) {
+            avatar = c.avatar;
+        }
+        if (typeof fetchUserProfile === "function") {
+            fetchUserProfile(c.user);
+        }
         const isMyComment = currentUserId && (c.user === currentUserName || c.user === currentUserId || c.userId === currentUserId);
         return `
             <div style="font-size: 13px; padding: 10px 0; border-bottom: 1px solid #edf0f2; display: flex; gap: 10px; align-items: flex-start;">
-                <img src="${avatar}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 2px;" alt="${c.user}">
+                <img src="${avatar}" class="comment-avatar-img" data-user="${c.user}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-top: 2px;" alt="${c.user}" onerror="this.onerror=null; this.src='default-avatar.svg';">
                 <div style="flex: 1;">
                     <div style="display: flex; align-items: center; justify-content: space-between;">
                         <div style="display: flex; align-items: center; gap: 6px;">

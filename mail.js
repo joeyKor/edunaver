@@ -148,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const inboxPanel = document.getElementById("inbox-panel");
     const sentPanel = document.getElementById("sent-panel");
     const receiptPanel = document.getElementById("receipt-panel");
+    const trashPanel = document.getElementById("trash-panel");
     const composePanel = document.getElementById("compose-panel");
     const detailPanel = document.getElementById("detail-panel");
 
@@ -157,6 +158,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const folderInboxBtn = document.getElementById("folder-inbox-btn");
     const folderSentBtn = document.getElementById("folder-sent-btn");
     const folderReceiptBtn = document.getElementById("folder-receipt-btn");
+    const folderTrashBtn = document.getElementById("folder-trash-btn");
 
     // Compose inputs & elements
     const inputTo = document.getElementById("input-to");
@@ -177,11 +179,85 @@ document.addEventListener("DOMContentLoaded", () => {
     const sentMailCountSidebar = document.getElementById("sent-mail-count");
     const receiptList = document.getElementById("receipt-list");
     const receiptMailboxCount = document.getElementById("receipt-mailbox-count");
+    const trashList = document.getElementById("trash-list");
+    const trashMailboxCount = document.getElementById("trash-mailbox-count");
+    const trashMailCountSidebar = document.getElementById("trash-mail-count");
 
     // Active Folders items collection for class resets
     const folderItems = document.querySelectorAll(".folder-item");
 
-    // (Pocketbase integration replaces sentEmails local array)
+    // ----------------------------------------------------
+    // Trash Management (휴지통 기능)
+    // ----------------------------------------------------
+    const getTrashStorageKey = () => `naverMailTrash_${(currentUserEmail || "").toLowerCase().trim()}`;
+
+    const getTrashMails = () => {
+        try {
+            return JSON.parse(localStorage.getItem(getTrashStorageKey()) || "[]");
+        } catch (e) {
+            return [];
+        }
+    };
+
+    const getTrashMailIds = () => {
+        return getTrashMails().map(m => String(m.id));
+    };
+
+    const updateTrashBadges = () => {
+        const trashMails = getTrashMails();
+        const trashCount = trashMails.length;
+        if (trashMailCountSidebar) trashMailCountSidebar.textContent = trashCount;
+        if (trashMailboxCount) trashMailboxCount.textContent = trashCount;
+    };
+
+    const saveTrashMails = (trashItems) => {
+        localStorage.setItem(getTrashStorageKey(), JSON.stringify(trashItems));
+        updateTrashBadges();
+    };
+
+    const moveToTrash = (emails, fromMailbox = "inbox") => {
+        if (!Array.isArray(emails) || emails.length === 0) return;
+        const currentTrash = getTrashMails();
+        emails.forEach(email => {
+            if (!currentTrash.some(m => String(m.id) === String(email.id))) {
+                currentTrash.unshift({
+                    ...email,
+                    from_mailbox: fromMailbox,
+                    trashed_at: new Date().toISOString()
+                });
+            }
+        });
+        saveTrashMails(currentTrash);
+        alert(`${emails.length}개의 메일을 휴지통으로 이동했습니다.`);
+    };
+
+    const restoreFromTrash = (mailIds) => {
+        if (!Array.isArray(mailIds) || mailIds.length === 0) return;
+        const currentTrash = getTrashMails();
+        const filtered = currentTrash.filter(m => !mailIds.includes(String(m.id)));
+        saveTrashMails(filtered);
+    };
+
+    const permanentlyDeleteFromTrash = async (mailIds) => {
+        if (!Array.isArray(mailIds) || mailIds.length === 0) return;
+        const currentTrash = getTrashMails();
+        const filtered = currentTrash.filter(m => !mailIds.includes(String(m.id)));
+        saveTrashMails(filtered);
+        for (const id of mailIds) {
+            try {
+                await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${id}`, {
+                    method: 'DELETE'
+                });
+            } catch (e) {
+                console.warn("Pocketbase delete ignored or failed:", id, e);
+            }
+        }
+    };
+
+    // Cached active emails
+    let currentInboxEmails = [];
+    let currentSentEmails = [];
+    const selectedMailIds = new Set();
 
     // Sub-tab & Filter elements
     const tabInboxMain = document.getElementById("tab-inbox-main");
@@ -209,10 +285,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const showPanel = (panelName, filterMode = null) => {
+        // Clear selection on view change
+        selectedMailIds.clear();
+
         // Hide all
         inboxPanel.style.display = "none";
         sentPanel.style.display = "none";
         if (receiptPanel) receiptPanel.style.display = "none";
+        if (trashPanel) trashPanel.style.display = "none";
         composePanel.style.display = "none";
         if (detailPanel) detailPanel.style.display = "none";
 
@@ -248,6 +328,11 @@ document.addEventListener("DOMContentLoaded", () => {
             if (receiptPanel) receiptPanel.style.display = "flex";
             if (folderReceiptBtn) folderReceiptBtn.classList.add("active");
             renderReceiptEmailsList();
+        } else if (panelName === "trash") {
+            currentPanel = "trash";
+            if (trashPanel) trashPanel.style.display = "flex";
+            if (folderTrashBtn) folderTrashBtn.classList.add("active");
+            renderTrashEmailsList();
         } else if (panelName === "compose") {
             currentPanel = "compose";
             composePanel.style.display = "flex";
@@ -285,6 +370,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (folderReceiptBtn) {
         folderReceiptBtn.addEventListener("click", () => showPanel("receipt"));
+    }
+    if (folderTrashBtn) {
+        folderTrashBtn.addEventListener("click", () => showPanel("trash"));
     }
 
     // Compose Toolbar Sub buttons
@@ -456,7 +544,108 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // ----------------------------------------------------
-    // 4. Render Inbox & Sent Mail Box from Pocketbase
+    // Selection Management (체크박스 및 전체선택)
+    // ----------------------------------------------------
+    const updateToolbarSelectAllUI = (toolbarCheckboxId, listContainerId) => {
+        const toolbarCb = document.getElementById(toolbarCheckboxId);
+        if (!toolbarCb) return;
+        const list = document.getElementById(listContainerId);
+        if (!list) return;
+        const rows = list.querySelectorAll(".mail-row");
+        if (rows.length === 0) {
+            toolbarCb.innerHTML = '<i class="fa-regular fa-square"></i>';
+            return;
+        }
+        const rowIds = Array.from(rows).map(r => r.getAttribute("data-id"));
+        const allSelected = rowIds.length > 0 && rowIds.every(id => selectedMailIds.has(id));
+        const someSelected = rowIds.some(id => selectedMailIds.has(id));
+
+        if (allSelected) {
+            toolbarCb.innerHTML = '<i class="fa-solid fa-square-check" style="color: #03c75a;"></i>';
+        } else if (someSelected) {
+            toolbarCb.innerHTML = '<i class="fa-regular fa-square-minus" style="color: #03c75a;"></i>';
+        } else {
+            toolbarCb.innerHTML = '<i class="fa-regular fa-square"></i>';
+        }
+    };
+
+    const setupListSelectionHandlers = (listId, toolbarCheckboxId) => {
+        const list = document.getElementById(listId);
+        const toolbarCb = document.getElementById(toolbarCheckboxId);
+
+        if (list) {
+            list.addEventListener("click", (e) => {
+                const checkCol = e.target.closest(".col-check");
+                const starCol = e.target.closest(".col-star");
+                const row = e.target.closest(".mail-row");
+                if (!row) return;
+
+                const mailId = row.getAttribute("data-id");
+
+                if (checkCol) {
+                    e.stopPropagation();
+                    if (selectedMailIds.has(mailId)) {
+                        selectedMailIds.delete(mailId);
+                        row.classList.remove("selected");
+                        checkCol.innerHTML = '<i class="fa-regular fa-square"></i>';
+                    } else {
+                        selectedMailIds.add(mailId);
+                        row.classList.add("selected");
+                        checkCol.innerHTML = '<i class="fa-solid fa-square-check" style="color: #03c75a;"></i>';
+                    }
+                    updateToolbarSelectAllUI(toolbarCheckboxId, listId);
+                    return;
+                }
+
+                if (starCol) {
+                    e.stopPropagation();
+                    const starIcon = starCol.querySelector("i");
+                    if (starIcon) {
+                        const isStarred = starIcon.classList.contains("fa-solid");
+                        if (isStarred) {
+                            starIcon.className = "fa-regular fa-star";
+                            starIcon.style.color = "";
+                        } else {
+                            starIcon.className = "fa-solid fa-star";
+                            starIcon.style.color = "#ffb000";
+                        }
+                    }
+                    return;
+                }
+            });
+        }
+
+        if (toolbarCb) {
+            toolbarCb.addEventListener("click", () => {
+                if (!list) return;
+                const rows = list.querySelectorAll(".mail-row");
+                if (rows.length === 0) return;
+
+                const rowIds = Array.from(rows).map(r => r.getAttribute("data-id"));
+                const allSelected = rowIds.length > 0 && rowIds.every(id => selectedMailIds.has(id));
+
+                if (allSelected) {
+                    rowIds.forEach(id => selectedMailIds.delete(id));
+                    rows.forEach(r => {
+                        r.classList.remove("selected");
+                        const ck = r.querySelector(".col-check");
+                        if (ck) ck.innerHTML = '<i class="fa-regular fa-square"></i>';
+                    });
+                } else {
+                    rowIds.forEach(id => selectedMailIds.add(id));
+                    rows.forEach(r => {
+                        r.classList.add("selected");
+                        const ck = r.querySelector(".col-check");
+                        if (ck) ck.innerHTML = '<i class="fa-solid fa-square-check" style="color: #03c75a;"></i>';
+                    });
+                }
+                updateToolbarSelectAllUI(toolbarCheckboxId, listId);
+            });
+        }
+    };
+
+    // ----------------------------------------------------
+    // 4. Render Inbox, Sent & Trash Mail Box
     // ----------------------------------------------------
     const renderInboxRows = (allEmails) => {
         const inboxList = document.getElementById("inbox-list");
@@ -497,14 +686,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     </div>
                 </li>
             `;
+            updateToolbarSelectAllUI("toolbar-select-all", "inbox-list");
             return;
         }
 
         inboxList.innerHTML = "";
         displayEmails.forEach((email) => {
             const isRead = email.is_read;
+            const isSelected = selectedMailIds.has(String(email.id));
             const li = document.createElement("li");
-            li.className = `mail-row${isRead ? "" : " unread"}`;
+            li.className = `mail-row${isRead ? "" : " unread"}${isSelected ? " selected" : ""}`;
             li.setAttribute("data-id", email.id);
 
             let timeStr = email.created;
@@ -520,9 +711,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 : '<i class="fa-solid fa-envelope icon-unread-mail"></i>';
 
             const senderInfo = getSenderInfo(email.sender);
+            const checkIcon = isSelected 
+                ? '<i class="fa-solid fa-square-check" style="color: #03c75a;"></i>' 
+                : '<i class="fa-regular fa-square"></i>';
 
             li.innerHTML = `
-                <div class="col-check"><i class="fa-regular fa-square"></i></div>
+                <div class="col-check">${checkIcon}</div>
                 <div class="col-star"><i class="fa-regular fa-star"></i></div>
                 <div class="col-read-icon">${readIcon}</div>
                 <div class="col-sender" title="${senderInfo.fullDisplay}"><strong>${senderInfo.name}</strong></div>
@@ -535,6 +729,7 @@ document.addEventListener("DOMContentLoaded", () => {
             `;
             inboxList.appendChild(li);
         });
+        updateToolbarSelectAllUI("toolbar-select-all", "inbox-list");
     };
 
     const renderInboxEmailsList = async () => {
@@ -546,7 +741,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=${filterParam}`);
             if (!response.ok) throw new Error("API error");
             const data = await response.json();
-            renderInboxRows(data.items || []);
+            const trashedIds = getTrashMailIds();
+            currentInboxEmails = (data.items || []).filter(m => !trashedIds.includes(String(m.id)));
+            renderInboxRows(currentInboxEmails);
+            updateTrashBadges();
         } catch (err) {
             console.error("Error fetching inbox emails:", err);
             inboxList.innerHTML = `
@@ -568,10 +766,13 @@ document.addEventListener("DOMContentLoaded", () => {
             const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records?sort=-created&filter=${filterParam}`);
             if (!response.ok) throw new Error("API error");
             const data = await response.json();
-            const emails = data.items || [];
+            const trashedIds = getTrashMailIds();
+            const emails = (data.items || []).filter(m => !trashedIds.includes(String(m.id)));
+            currentSentEmails = emails;
 
             if (sentMailboxCount) sentMailboxCount.textContent = emails.length;
             if (sentMailCountSidebar) sentMailCountSidebar.textContent = emails.length;
+            updateTrashBadges();
 
             if (emails.length === 0) {
                 sentList.innerHTML = `
@@ -582,13 +783,15 @@ document.addEventListener("DOMContentLoaded", () => {
                         </div>
                     </li>
                 `;
+                updateToolbarSelectAllUI("toolbar-select-all-sent", "sent-list");
                 return;
             }
 
             sentList.innerHTML = "";
             emails.forEach((email) => {
+                const isSelected = selectedMailIds.has(String(email.id));
                 const li = document.createElement("li");
-                li.className = "mail-row";
+                li.className = `mail-row${isSelected ? " selected" : ""}`;
                 li.setAttribute("data-id", email.id);
                 
                 let timeStr = email.created;
@@ -605,9 +808,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     : `<div class="col-receipt unread-receipt" title="상대방이 아직 읽지 않음">읽지않음</div>`;
 
                 const recipientInfo = getSenderInfo(email.recipient);
+                const checkIcon = isSelected 
+                    ? '<i class="fa-solid fa-square-check" style="color: #03c75a;"></i>' 
+                    : '<i class="fa-regular fa-square"></i>';
 
                 li.innerHTML = `
-                    <div class="col-check"><i class="fa-regular fa-square"></i></div>
+                    <div class="col-check">${checkIcon}</div>
                     <div class="col-star"><i class="fa-regular fa-star"></i></div>
                     <div class="col-read-icon"><i class="fa-regular fa-envelope-open icon-mail-open"></i></div>
                     <div class="col-sender" title="${recipientInfo.fullDisplay}">${recipientInfo.name}</div>
@@ -621,6 +827,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
                 sentList.appendChild(li);
             });
+            updateToolbarSelectAllUI("toolbar-select-all-sent", "sent-list");
         } catch (err) {
             console.error("Error fetching sent emails:", err);
             sentList.innerHTML = `
@@ -632,6 +839,61 @@ document.addEventListener("DOMContentLoaded", () => {
                 </li>
             `;
         }
+    };
+
+    const renderTrashEmailsList = () => {
+        const trashList = document.getElementById("trash-list");
+        if (!trashList) return;
+
+        const trashMails = getTrashMails();
+        updateTrashBadges();
+
+        if (trashMails.length === 0) {
+            trashList.innerHTML = `
+                <li class="empty-mailbox-li">
+                    <div class="empty-mailbox-msg">
+                        <i class="fa-regular fa-trash-can"></i>
+                        <p>휴지통이 비어 있습니다.</p>
+                    </div>
+                </li>
+            `;
+            updateToolbarSelectAllUI("toolbar-select-all-trash", "trash-list");
+            return;
+        }
+
+        trashList.innerHTML = "";
+        trashMails.forEach(email => {
+            const isSelected = selectedMailIds.has(String(email.id));
+            const li = document.createElement("li");
+            li.className = `mail-row${isSelected ? " selected" : ""}`;
+            li.setAttribute("data-id", email.id);
+
+            let timeStr = email.created || "";
+            try {
+                const dateObj = new Date(String(email.created).replace(" ", "T"));
+                if (!isNaN(dateObj.getTime())) {
+                    timeStr = dateObj.toLocaleDateString('ko-KR', { month: '2-digit', day: '2-digit' }) + " " + dateObj.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', hour12: false });
+                }
+            } catch (e) {}
+
+            const senderInfo = getSenderInfo(email.sender);
+            const checkIcon = isSelected 
+                ? '<i class="fa-solid fa-square-check" style="color: #03c75a;"></i>' 
+                : '<i class="fa-regular fa-square"></i>';
+
+            li.innerHTML = `
+                <div class="col-check">${checkIcon}</div>
+                <div class="col-star"><i class="fa-regular fa-star"></i></div>
+                <div class="col-read-icon"><i class="fa-regular fa-envelope-open icon-mail-open"></i></div>
+                <div class="col-sender" title="${senderInfo.fullDisplay}"><strong>${senderInfo.name}</strong></div>
+                <div class="col-subject">
+                    <span class="subj-text">${email.subject || '(제목 없음)'}</span>
+                </div>
+                <div class="col-time">${timeStr}</div>
+            `;
+            trashList.appendChild(li);
+        });
+        updateToolbarSelectAllUI("toolbar-select-all-trash", "trash-list");
     };
 
     const renderReceiptEmailsList = async () => {
@@ -882,9 +1144,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const openMailDetail = async (mailId) => {
         try {
-            const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${mailId}`);
-            if (!response.ok) throw new Error("Failed to load mail details");
-            const email = await response.json();
+            let email = getTrashMails().find(m => String(m.id) === String(mailId));
+            if (!email) {
+                const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${mailId}`);
+                if (!response.ok) throw new Error("Failed to load mail details");
+                email = await response.json();
+            }
             currentDetailEmail = email;
 
             // Set folder title dynamically (< 받은메일함, < 전체메일, < 보낸메일함 등)
@@ -896,6 +1161,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     detailFolderTitle.textContent = "수신확인";
                 } else if (currentPanel === "all") {
                     detailFolderTitle.textContent = "전체메일";
+                } else if (currentPanel === "trash") {
+                    detailFolderTitle.textContent = "휴지통";
                 } else {
                     detailFolderTitle.textContent = "받은메일함";
                 }
@@ -928,10 +1195,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 detailBody.innerHTML = email.body || "";
             }
 
-            // Save active detail mail ID on delete button
+            // Configure action buttons in detail view
             const deleteBtn = document.getElementById("detail-delete-btn");
             if (deleteBtn) {
                 deleteBtn.setAttribute("data-id", email.id);
+                deleteBtn.textContent = (currentPanel === "trash") ? "영구삭제" : "삭제";
+            }
+
+            const restoreBtn = document.getElementById("detail-restore-btn");
+            if (restoreBtn) {
+                restoreBtn.style.display = (currentPanel === "trash") ? "inline-flex" : "none";
             }
 
             // Reset star button state
@@ -1021,6 +1294,24 @@ document.addEventListener("DOMContentLoaded", () => {
     // Receipt confirmation list row click for detail view
     if (receiptList) {
         receiptList.addEventListener("click", async (e) => {
+            const row = e.target.closest(".mail-row");
+            if (!row) return;
+
+            // If user clicked check or star columns, do not open detail
+            if (e.target.closest(".col-check") || e.target.closest(".col-star")) {
+                return;
+            }
+
+            const mailId = row.getAttribute("data-id");
+            if (mailId) {
+                await openMailDetail(mailId);
+            }
+        });
+    }
+
+    // Trash list row click for detail view
+    if (trashList) {
+        trashList.addEventListener("click", async (e) => {
             const row = e.target.closest(".mail-row");
             if (!row) return;
 
@@ -1163,25 +1454,176 @@ document.addEventListener("DOMContentLoaded", () => {
     const detailDeleteBtn = document.getElementById("detail-delete-btn");
     if (detailDeleteBtn) {
         detailDeleteBtn.addEventListener("click", async () => {
-            const mailId = detailDeleteBtn.getAttribute("data-id");
-            if (mailId && confirm("이 메일을 삭제하시겠습니까?")) {
-                try {
-                    const response = await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${mailId}`, {
-                        method: 'DELETE'
-                    });
-                    if (!response.ok) throw new Error("Delete failed");
-                    
-                    alert("메일이 삭제되었습니다.");
+            if (!currentDetailEmail) return;
+            const mailId = String(currentDetailEmail.id);
+            if (currentPanel === "trash") {
+                if (confirm("휴지통에서 완전히 삭제하시겠습니까? 삭제된 메일은 복구할 수 없습니다.")) {
+                    await permanentlyDeleteFromTrash([mailId]);
+                    alert("메일이 영구 삭제되었습니다.");
+                    showPanel("trash");
+                }
+            } else {
+                if (confirm("이 메일을 휴지통으로 이동하시겠습니까?")) {
+                    moveToTrash([currentDetailEmail], currentPanel);
                     showPanel(currentPanel);
-                } catch (err) {
-                    console.error("Error deleting mail:", err);
-                    alert("메일 삭제에 실패했습니다.");
                 }
             }
         });
     }
 
-    // Initial fetch of directory, received emails & sent email counts on DOM load
+    const detailRestoreBtn = document.getElementById("detail-restore-btn");
+    if (detailRestoreBtn) {
+        detailRestoreBtn.addEventListener("click", () => {
+            if (!currentDetailEmail) return;
+            const mailId = String(currentDetailEmail.id);
+            restoreFromTrash([mailId]);
+            alert("메일을 복구했습니다.");
+            showPanel("trash");
+        });
+    }
+
+    // ----------------------------------------------------
+    // Toolbar Actions (삭제, 읽음, 복구, 비우기)
+    // ----------------------------------------------------
+    const btnToolbarDelete = document.getElementById("btn-toolbar-delete");
+    if (btnToolbarDelete) {
+        btnToolbarDelete.addEventListener("click", () => {
+            if (selectedMailIds.size === 0) {
+                alert("삭제할 메일을 선택해주세요.");
+                return;
+            }
+            const mailsToMove = currentInboxEmails.filter(m => selectedMailIds.has(String(m.id)));
+            if (mailsToMove.length === 0) {
+                alert("선택된 메일 정보가 없습니다.");
+                return;
+            }
+            if (confirm(`선택한 ${mailsToMove.length}개의 메일을 휴지통으로 이동하시겠습니까?`)) {
+                moveToTrash(mailsToMove, "inbox");
+                selectedMailIds.clear();
+                renderInboxEmailsList();
+            }
+        });
+    }
+
+    const btnToolbarRead = document.getElementById("btn-toolbar-read");
+    if (btnToolbarRead) {
+        btnToolbarRead.addEventListener("click", async () => {
+            if (selectedMailIds.size === 0) {
+                alert("읽음 처리할 메일을 선택해주세요.");
+                return;
+            }
+            const ids = Array.from(selectedMailIds);
+            for (const id of ids) {
+                try {
+                    await fetch(`${POCKETBASE_URL}/api/collections/mails/records/${id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ is_read: true })
+                    });
+                } catch (e) {
+                    console.error("Failed to mark as read:", id, e);
+                }
+            }
+            selectedMailIds.clear();
+            renderInboxEmailsList();
+        });
+    }
+
+    const deleteUnreadBtn = document.querySelector(".delete-unread-btn");
+    if (deleteUnreadBtn) {
+        deleteUnreadBtn.addEventListener("click", () => {
+            const unreadMails = currentInboxEmails.filter(m => !m.is_read);
+            if (unreadMails.length === 0) {
+                alert("안 읽은 메일이 없습니다.");
+                return;
+            }
+            if (confirm(`안 읽은 메일 ${unreadMails.length}개를 휴지통으로 이동하시겠습니까?`)) {
+                moveToTrash(unreadMails, "inbox");
+                selectedMailIds.clear();
+                renderInboxEmailsList();
+            }
+        });
+    }
+
+    const btnSentToolbarDelete = document.getElementById("btn-sent-toolbar-delete");
+    if (btnSentToolbarDelete) {
+        btnSentToolbarDelete.addEventListener("click", () => {
+            if (selectedMailIds.size === 0) {
+                alert("삭제할 메일을 선택해주세요.");
+                return;
+            }
+            const mailsToMove = currentSentEmails.filter(m => selectedMailIds.has(String(m.id)));
+            if (mailsToMove.length === 0) {
+                alert("선택된 메일 정보가 없습니다.");
+                return;
+            }
+            if (confirm(`선택한 ${mailsToMove.length}개의 메일을 휴지통으로 이동하시겠습니까?`)) {
+                moveToTrash(mailsToMove, "sent");
+                selectedMailIds.clear();
+                renderSentEmailsList();
+            }
+        });
+    }
+
+    const btnTrashRestore = document.getElementById("btn-trash-restore");
+    if (btnTrashRestore) {
+        btnTrashRestore.addEventListener("click", () => {
+            if (selectedMailIds.size === 0) {
+                alert("복구할 메일을 선택해주세요.");
+                return;
+            }
+            const ids = Array.from(selectedMailIds);
+            restoreFromTrash(ids);
+            selectedMailIds.clear();
+            alert(`${ids.length}개의 메일을 복구했습니다.`);
+            renderTrashEmailsList();
+            renderInboxEmailsList();
+            renderSentEmailsList();
+        });
+    }
+
+    const btnTrashDelete = document.getElementById("btn-trash-delete");
+    if (btnTrashDelete) {
+        btnTrashDelete.addEventListener("click", async () => {
+            if (selectedMailIds.size === 0) {
+                alert("영구 삭제할 메일을 선택해주세요.");
+                return;
+            }
+            const ids = Array.from(selectedMailIds);
+            if (confirm(`선택한 ${ids.length}개의 메일을 영구히 삭제하시겠습니까? 삭제된 메일은 복구할 수 없습니다.`)) {
+                await permanentlyDeleteFromTrash(ids);
+                selectedMailIds.clear();
+                alert("메일이 영구 삭제되었습니다.");
+                renderTrashEmailsList();
+            }
+        });
+    }
+
+    const btnTrashEmpty = document.getElementById("btn-trash-empty");
+    if (btnTrashEmpty) {
+        btnTrashEmpty.addEventListener("click", async () => {
+            const trashMails = getTrashMails();
+            if (trashMails.length === 0) {
+                alert("휴지통이 이미 비어 있습니다.");
+                return;
+            }
+            if (confirm(`휴지통의 모든 메일(${trashMails.length}개)을 비우시겠습니까? 삭제된 메일은 복구할 수 없습니다.`)) {
+                const ids = trashMails.map(m => String(m.id));
+                await permanentlyDeleteFromTrash(ids);
+                selectedMailIds.clear();
+                alert("휴지통을 비웠습니다.");
+                renderTrashEmailsList();
+            }
+        });
+    }
+
+    // Initialize list selection listeners
+    setupListSelectionHandlers("inbox-list", "toolbar-select-all");
+    setupListSelectionHandlers("sent-list", "toolbar-select-all-sent");
+    setupListSelectionHandlers("trash-list", "toolbar-select-all-trash");
+
+    // Initial fetch of directory, received emails, trash badge & sent email counts on DOM load
+    updateTrashBadges();
     showPanel("inbox", "all");
     renderSentEmailsList();
     loadUserDirectory().then(() => {

@@ -220,6 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 currentCafe.name = item.name || currentCafe.name;
                 currentCafe.desc = item.description || currentCafe.desc;
                 currentCafe.manager = item.manager || currentCafe.manager;
+                currentCafe.icon = item.icon || currentCafe.icon;
                 currentCafe.members = item.members || currentCafe.members || "1";
                 if (item.joinedMembers) {
                     if (Array.isArray(item.joinedMembers)) {
@@ -281,6 +282,68 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
+    async function syncManagerProfileAvatar(managerName) {
+        if (!cafeProfileAvatar) return;
+        const targetMgr = (managerName || "").trim();
+        if (!targetMgr) return;
+
+        // 1. Check if manager is currently logged-in user and has avatar in localStorage
+        const currentLoggedIn = localStorage.getItem("naverLoggedInUser") || 
+                                localStorage.getItem("naverLoggedInUsername") ||
+                                localStorage.getItem("naverLoggedInUserId") || "";
+        const cleanLoggedIn = currentLoggedIn.replace(/님$/, "").trim();
+        const cleanMgr = targetMgr.replace(/님$/, "").trim();
+
+        if (cleanLoggedIn && (cleanLoggedIn === cleanMgr || currentLoggedIn === targetMgr)) {
+            const localAvatar = localStorage.getItem("naverProfileAvatar") || 
+                                localStorage.getItem("naverLoggedInAvatar") ||
+                                localStorage.getItem("naverUserAvatar");
+            if (localAvatar && localAvatar !== "default-avatar.svg") {
+                cafeProfileAvatar.src = localAvatar;
+                return;
+            }
+        }
+
+        // 2. Check cached avatar in localStorage
+        const cachedAvatar = localStorage.getItem(`naverUserAvatar_${cleanMgr}`) || 
+                             localStorage.getItem(`naverBlogAvatar_${cleanMgr}`);
+        if (cachedAvatar && cachedAvatar !== "default-avatar.svg") {
+            cafeProfileAvatar.src = cachedAvatar;
+            return;
+        }
+
+        // 3. Query PocketBase users collection for manager's real avatarUrl
+        try {
+            const filterStr = encodeURIComponent(`name='${cleanMgr}'||username='${cleanMgr}'`);
+            const res = await fetch(`${POCKETBASE_URL}/api/collections/users/records?filter=(${filterStr})`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.items && data.items.length > 0) {
+                    const userRec = data.items[0];
+                    const avatar = userRec.avatarUrl || userRec.avatar;
+                    if (avatar) {
+                        let finalUrl = avatar;
+                        if (!avatar.startsWith("data:") && !avatar.startsWith("http")) {
+                            finalUrl = `${POCKETBASE_URL}/api/files/${userRec.collectionId}/${userRec.id}/${avatar}`;
+                        }
+                        cafeProfileAvatar.src = finalUrl;
+                        localStorage.setItem(`naverUserAvatar_${cleanMgr}`, finalUrl);
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            console.warn("Manager avatar fetch error:", e);
+        }
+
+        // 4. Fallback: if cafe icon exists, use it; otherwise default avatar
+        if (currentCafe && currentCafe.icon && currentCafe.icon !== "default-avatar.svg") {
+            cafeProfileAvatar.src = currentCafe.icon;
+        } else {
+            cafeProfileAvatar.src = "default-avatar.svg";
+        }
+    }
+
     function updateCafeHeaders() {
         if (cafeTitleMain) cafeTitleMain.textContent = currentCafe.name;
         document.title = `${currentCafe.name} : EDUVER 카페 (에듀버)`;
@@ -293,7 +356,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (cafeCreatedDate && currentCafe.createdDate) cafeCreatedDate.textContent = currentCafe.createdDate;
         if (cafeMemberCount) cafeMemberCount.textContent = currentCafe.members || "1";
-        if (cafeProfileAvatar && currentCafe.icon) cafeProfileAvatar.src = currentCafe.icon;
+        
+        // Fetch and display manager's profile picture
+        syncManagerProfileAvatar(mgr);
 
         updateMembershipUI();
     }
@@ -776,6 +841,9 @@ document.addEventListener("DOMContentLoaded", () => {
             if (detailTopCommentCount) detailTopCommentCount.textContent = post.comments.length;
 
             renderComments(post);
+        });
+    }
+
     if (hideNoticeCheck) {
         hideNoticeCheck.addEventListener("change", renderPostTable);
     }
@@ -923,7 +991,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // 12. Connect [카페 글쓰기] buttons to Full Editor View
-    const btnOpenWriteModal = document.getElementById("btn-open-write-modal");
     const btnBoardWrite = document.getElementById("btn-board-write");
 
     if (btnOpenWriteModal) btnOpenWriteModal.addEventListener("click", () => showWriteView());
