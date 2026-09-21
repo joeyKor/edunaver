@@ -202,8 +202,114 @@ function getUserAvatar(username) {
     return "default-avatar.svg";
 }
 
-// Global user profile cache from PocketBase
+// Global user profile cache and avatar cache
 const userProfileCache = {};
+const userAvatarCache = {};
+
+function isValidAvatarUrl(url) {
+    return url && typeof url === "string" && url.trim() !== "" && url !== "undefined" && url !== "null" && url !== "[object Object]";
+}
+
+function registerUserProfile(user) {
+    if (!user) return;
+    const username = (user.username || "").trim();
+    const name = (user.name || "").trim();
+    const id = (user.id || "").trim();
+    const avatar = isValidAvatarUrl(user.avatarUrl) ? user.avatarUrl : (isValidAvatarUrl(user.avatar) ? user.avatar : "");
+    const profile = {
+        id: id,
+        username: username,
+        name: name,
+        displayName: name || username,
+        avatarUrl: avatar,
+        blogDesc: user.blogDesc || "",
+        blogTitle: user.blogTitle || ""
+    };
+    if (username) {
+        userProfileCache[username] = profile;
+        if (avatar) {
+            userAvatarCache[username] = avatar;
+            localStorage.setItem(`naverBlogAvatar_${username}`, avatar);
+        }
+    }
+    if (name) {
+        userProfileCache[name] = profile;
+        if (avatar) {
+            userAvatarCache[name] = avatar;
+            localStorage.setItem(`naverBlogAvatar_${name}`, avatar);
+        }
+    }
+    if (id) {
+        userProfileCache[id] = profile;
+        if (avatar) userAvatarCache[id] = avatar;
+    }
+}
+
+// Preload user profiles immediately from localStorage
+try {
+    const rawCachedUsers = localStorage.getItem("pb_cached_users");
+    if (rawCachedUsers) {
+        const cachedList = JSON.parse(rawCachedUsers);
+        if (Array.isArray(cachedList)) {
+            cachedList.forEach(registerUserProfile);
+        }
+    }
+} catch (e) {}
+
+function registerUsersFromComments(post) {
+    if (!post || !Array.isArray(post.commentList)) return;
+    post.commentList.forEach(c => {
+        if (!c) return;
+        const name = (c.user || "").trim();
+        const username = (c.userId || "").trim();
+        const avatar = c.avatar;
+        if (name && username) {
+            const existing = userProfileCache[username] || userProfileCache[name] || {};
+            const profile = {
+                ...existing,
+                username: username,
+                name: name,
+                displayName: name,
+                avatarUrl: isValidAvatarUrl(avatar) ? avatar : (existing.avatarUrl || "")
+            };
+            userProfileCache[username] = profile;
+            userProfileCache[name] = profile;
+        }
+        if (isValidAvatarUrl(avatar)) {
+            if (name) userAvatarCache[name] = avatar;
+            if (username) userAvatarCache[username] = avatar;
+        }
+    });
+}
+
+let isFetchingAllUsers = false;
+async function fetchAllUserProfiles() {
+    if (isFetchingAllUsers) return;
+    isFetchingAllUsers = true;
+    try {
+        const res = await fetch(`${POCKETBASE_URL}/api/collections/users/records?perPage=200`);
+        if (res.ok) {
+            const data = await res.json();
+            if (data.items && Array.isArray(data.items)) {
+                data.items.forEach(registerUserProfile);
+                try {
+                    localStorage.setItem("pb_cached_users", JSON.stringify(data.items.map(u => ({
+                        id: u.id,
+                        username: u.username,
+                        name: u.name,
+                        avatarUrl: u.avatarUrl,
+                        blogDesc: u.blogDesc,
+                        blogTitle: u.blogTitle
+                    }))));
+                } catch (e) {}
+            }
+        }
+    } catch (err) {
+        console.warn("fetchAllUserProfiles error:", err);
+    } finally {
+        isFetchingAllUsers = false;
+    }
+}
 
 async function fetchUserProfile(username) {
     if (!username) return null;
@@ -214,9 +320,8 @@ async function fetchUserProfile(username) {
             const data = await response.json();
             if (data.items && data.items.length > 0) {
                 const rec = data.items[0];
-                userProfileCache[username] = rec;
+                registerUserProfile(rec);
                 if (rec.avatarUrl) {
-                    localStorage.setItem(`naverBlogAvatar_${username}`, rec.avatarUrl);
                     // Dynamically update any rendered post avatars and comment avatars for this author on the page
                     document.querySelectorAll(`img.author-avatar[data-author="${username}"]`).forEach(img => {
                         img.src = rec.avatarUrl;
@@ -273,6 +378,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Background sync
     initializeBlogStorage();
+    fetchAllUserProfiles();
 
     // Background sync current user profile
     const user = getLoggedInUser();
@@ -287,11 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // If post parameter is in URL, redirect directly to my-blog.html for unified reading
+    // If post parameter is in URL, open the post directly in blog.html full-view
     const urlParams = new URLSearchParams(window.location.search);
     const initialPostId = urlParams.get('post') || urlParams.get('postId');
     if (initialPostId) {
-        window.location.href = `my-blog.html?post=${encodeURIComponent(initialPostId)}`;
+        openFullArticleView(initialPostId);
     }
 });
 
@@ -568,26 +674,66 @@ function getLoggedInUserNickname() {
            "조이";
 }
 
-function getBloggerInfo(userKey) {
+function getBloggerInfo(userKey, post) {
     const currentId = getLoggedInUserId();
     const currentNick = getLoggedInUserNickname();
     const currentUserId = localStorage.getItem("naverLoggedInUserId") || "";
 
-    let displayName = userKey;
-    let avatar = "default-avatar.svg";
-    let desc = "";
-
+    // 1. Current logged-in user check
     if (userKey === currentId || userKey === currentNick || userKey === currentUserId || (currentUserId && userKey === currentUserId)) {
-        displayName = currentNick;
-        avatar = (userProfileCache[currentNick] && userProfileCache[currentNick].avatarUrl) ||
+        const myName = currentNick || currentId || "조이";
+        let myAvatar = (userProfileCache[currentNick] && userProfileCache[currentNick].avatarUrl) ||
                  (userProfileCache[currentId] && userProfileCache[currentId].avatarUrl) ||
+                 localStorage.getItem("naverBlogAvatar") ||
+                 localStorage.getItem("naverLoggedInAvatar") ||
                  "default-avatar.svg";
-        desc = (userProfileCache[currentNick] && userProfileCache[currentNick].blogDesc) || `${currentNick}님의 블로그`;
-    } else {
-        displayName = userKey;
-        avatar = (userProfileCache[userKey] && userProfileCache[userKey].avatarUrl) || "default-avatar.svg";
-        desc = `${displayName}님의 블로그`;
+        if (!isValidAvatarUrl(myAvatar)) myAvatar = "default-avatar.svg";
+        const myDesc = (userProfileCache[currentNick] && userProfileCache[currentNick].blogDesc) || `${myName}님의 블로그`;
+        return {
+            key: userKey,
+            displayName: myName,
+            uniqueId: currentId || userKey,
+            avatar: myAvatar,
+            desc: myDesc
+        };
     }
+
+    // 2. Check profile cache (indexed by username, name, and id)
+    const cached = userProfileCache[userKey];
+    let displayName = (cached && cached.name) ? cached.name : userKey;
+    let avatar = (cached && isValidAvatarUrl(cached.avatarUrl)) ? cached.avatarUrl : (userAvatarCache[userKey] || "default-avatar.svg");
+
+    // 3. Check post comments if name or avatar is unresolved
+    if (post && Array.isArray(post.commentList)) {
+        const commentMatch = post.commentList.find(c => c && (c.userId === userKey || c.user === userKey));
+        if (commentMatch) {
+            if (commentMatch.user && displayName === userKey) {
+                displayName = commentMatch.user;
+            }
+            if (isValidAvatarUrl(commentMatch.avatar) && avatar === "default-avatar.svg") {
+                avatar = commentMatch.avatar;
+            }
+        }
+    }
+
+    // 4. Check userAvatarCache using resolved displayName as well
+    if (avatar === "default-avatar.svg" && userAvatarCache[displayName] && userAvatarCache[displayName] !== "default-avatar.svg") {
+        avatar = userAvatarCache[displayName];
+    }
+
+    // 5. Check localStorage fallbacks
+    if (avatar === "default-avatar.svg") {
+        const localAv = localStorage.getItem(`naverBlogAvatar_${userKey}`) || localStorage.getItem(`naverBlogAvatar_${displayName}`);
+        if (isValidAvatarUrl(localAv)) {
+            avatar = localAv;
+        }
+    }
+
+    if (!isValidAvatarUrl(avatar)) {
+        avatar = "default-avatar.svg";
+    }
+
+    const desc = `${displayName}님의 블로그`;
 
     return {
         key: userKey,
@@ -656,7 +802,123 @@ let currentViewingFullPostId = null;
 
 function viewPostDetail(postId) {
     if (!postId) return;
-    window.location.href = `my-blog.html?post=${encodeURIComponent(postId)}`;
+    openFullArticleView(postId);
+}
+
+async function openFullArticleView(postId) {
+    if (!postId) return;
+    currentViewingFullPostId = postId;
+    let posts = getBlogPosts();
+    let post = posts.find(p => p.id === postId);
+
+    if (!post) {
+        try {
+            const res = await fetch(`${POCKETBASE_URL}/api/collections/posts/records/${postId}`);
+            if (res.ok) {
+                const item = await res.json();
+                let parsedComments = [];
+                if (Array.isArray(item.comments)) parsedComments = item.comments;
+                else if (typeof item.comments === "string") {
+                    try { parsedComments = JSON.parse(item.comments); } catch(e) {}
+                }
+                let parsedLikedUsers = [];
+                if (Array.isArray(item.likedUsers)) parsedLikedUsers = item.likedUsers;
+                else if (typeof item.likedUsers === "string" && item.likedUsers.trim()) {
+                    try { parsedLikedUsers = JSON.parse(item.likedUsers); } catch(e) { parsedLikedUsers = [item.likedUsers]; }
+                }
+                post = {
+                    id: item.id,
+                    author: item.author || "블로거",
+                    time: item.created ? new Date(item.created).toLocaleDateString() : "방금 전",
+                    category: item.category || "일상·생각",
+                    title: item.title || "",
+                    summary: item.summary || "",
+                    fullContent: item.fullContent || item.summary || "",
+                    thumbnail: item.thumbnail || "",
+                    likes: parsedLikedUsers.length,
+                    likedUsers: parsedLikedUsers,
+                    commentList: parsedComments,
+                    comments: parsedComments.length,
+                    isNeighbor: false
+                };
+                posts.unshift(post);
+                saveBlogPosts(posts);
+            }
+        } catch(e) {}
+    }
+
+    if (!post) {
+        alert("해당 포스트를 찾을 수 없습니다.");
+        return;
+    }
+
+    // Populate fullview elements
+    const breadcrumbTitle = document.getElementById("fullview-breadcrumb-title");
+    if (breadcrumbTitle) breadcrumbTitle.textContent = post.title;
+    
+    const categoryEl = document.getElementById("fullview-category");
+    if (categoryEl) categoryEl.textContent = post.category || "일상·생각";
+    
+    const titleEl = document.getElementById("fullview-title");
+    if (titleEl) titleEl.textContent = post.title;
+    
+    const authorEl = document.getElementById("fullview-author");
+    if (authorEl) authorEl.textContent = post.author;
+    
+    const timeEl = document.getElementById("fullview-time");
+    if (timeEl) timeEl.textContent = post.time || "방금 전";
+    
+    const bodyEl = document.getElementById("fullview-body");
+    if (bodyEl) bodyEl.innerHTML = post.fullContent || post.summary || "";
+
+    const authorLink = document.getElementById("fullview-author-link");
+    if (authorLink) {
+        authorLink.href = `my-blog.html?author=${encodeURIComponent(post.author)}`;
+    }
+
+    const editBtn = document.getElementById("fullview-edit-btn");
+    const currentUser = getLoggedInUser();
+    const isMyPost = Boolean(currentUser && (
+        post.author === currentUser.name || 
+        post.author === currentUser.username || 
+        (currentUser.name === "조이" && post.author === "조이네")
+    ));
+    if (editBtn) {
+        editBtn.style.display = isMyPost ? "inline-flex" : "none";
+    }
+
+    // Set author avatar
+    const avatarImg = document.getElementById("fullview-avatar");
+    if (avatarImg) {
+        let avatarSrc = getUserAvatar(post.author);
+        avatarImg.src = avatarSrc || "default-avatar.svg";
+        if (!avatarSrc || avatarSrc === "default-avatar.svg") {
+            fetchUserProfile(post.author).then(rec => {
+                if (rec && rec.avatarUrl) avatarImg.src = rec.avatarUrl;
+            });
+        }
+    }
+
+    // Show fullview section and hide feed & hottopic
+    const fullViewEl = document.getElementById("blog-article-fullview");
+    const hottopicEl = document.getElementById("hottopic-section");
+    const feedEl = document.getElementById("feed-section");
+    const containerEl = document.querySelector(".blog-container");
+
+    if (fullViewEl) fullViewEl.style.display = "block";
+    if (hottopicEl) hottopicEl.style.display = "none";
+    if (feedEl) feedEl.style.display = "none";
+    if (containerEl) containerEl.classList.add("article-reading-mode");
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    // Update URL query string without page reload
+    const newUrl = `${window.location.pathname}?post=${encodeURIComponent(postId)}`;
+    window.history.pushState({ postId: postId }, post.title, newUrl);
+
+    // Render Likes and Comments
+    renderFullViewLikeState(post);
+    renderFullViewComments(post);
 }
 
 function editFullViewPost() {
@@ -726,36 +988,52 @@ function toggleFullViewLikedPanel() {
     }
 }
 
-function renderFullViewLikedBloggersList(post) {
+async function renderFullViewLikedBloggersList(post) {
     const listEl = document.getElementById("fullview-liked-bloggers-list");
     if (!listEl) return;
 
-    const likedUsers = Array.isArray(post.likedUsers) ? post.likedUsers : [];
+    const likedUsers = Array.isArray(post?.likedUsers) ? post.likedUsers : [];
     if (likedUsers.length === 0) {
         listEl.innerHTML = `<div style="text-align: center; color: #999; font-size: 13px; padding: 24px 0; grid-column: 1 / -1;">아직 공감한 블로거가 없습니다. 첫 공감을 남겨보세요!</div>`;
         return;
     }
 
-    // Build blogger items by resolving IDs to blogger info
-    const bloggers = likedUsers.map(userKey => getBloggerInfo(userKey));
+    // Register any comment authors into user profile cache
+    registerUsersFromComments(post);
 
-    listEl.innerHTML = "";
-    bloggers.forEach(b => {
-        const item = document.createElement("div");
-        item.className = "liked-blogger-item";
-        item.setAttribute("data-username", b.key);
-        item.onclick = () => {
-            location.href = `my-blog.html?author=${encodeURIComponent(b.displayName || b.key)}`;
-        };
-        item.innerHTML = `
-            <img src="${b.avatar}" class="blogger-avatar-img" alt="${b.displayName}" onerror="this.src='default-avatar.svg'">
-            <div class="blogger-text-col">
-                <span class="blogger-name">${b.displayName}</span>
-                <span class="blogger-desc">${b.desc}</span>
-            </div>
-        `;
-        listEl.appendChild(item);
+    const renderItems = () => {
+        const bloggers = likedUsers.map(userKey => getBloggerInfo(userKey, post));
+        listEl.innerHTML = "";
+        bloggers.forEach(b => {
+            const item = document.createElement("div");
+            item.className = "liked-blogger-item";
+            item.setAttribute("data-username", b.key);
+            item.onclick = () => {
+                location.href = `my-blog.html?author=${encodeURIComponent(b.displayName || b.key)}`;
+            };
+            item.innerHTML = `
+                <img src="${b.avatar}" class="blogger-avatar-img" data-user-key="${b.key}" alt="${b.displayName}" onerror="this.onerror=null; this.src='default-avatar.svg';">
+                <div class="blogger-text-col">
+                    <span class="blogger-name" data-user-key="${b.key}">${b.displayName}</span>
+                    <span class="blogger-desc" data-user-key="${b.key}">${b.desc}</span>
+                </div>
+            `;
+            listEl.appendChild(item);
+        });
+    };
+
+    renderItems();
+
+    // Check if any user in likedUsers is missing resolved name or avatar
+    const needFetch = likedUsers.some(k => {
+        const info = getBloggerInfo(k, post);
+        return info.displayName === k || info.avatar === "default-avatar.svg";
     });
+
+    if (needFetch) {
+        await fetchAllUserProfiles();
+        renderItems();
+    }
 }
 
 function toggleFullViewLike() {

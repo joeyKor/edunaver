@@ -689,6 +689,9 @@
             const authorParam = urlParams.get('author');
             const currentUser = localStorage.getItem("naverLoggedInUser") || localStorage.getItem("naverLoggedInUsername");
 
+            // Prefetch all user profiles in background for instant name/avatar resolution
+            fetchAllUserProfiles();
+
             // Purge automated test post
             let localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
             localPosts = localPosts.filter(p => p.title !== "Test Post" && p.summary !== "This is a test post.");
@@ -712,16 +715,124 @@
             }
         });
 
-        // User Avatar Cache & Validation helper
+        // User Avatar Cache & User Profile Cache
         const userAvatarCache = {};
+        const userProfileCache = {};
 
         function isValidAvatarUrl(url) {
             return url && typeof url === "string" && url.trim() !== "" && url !== "undefined" && url !== "null" && url !== "[object Object]";
         }
 
+        function registerUserProfile(user) {
+            if (!user) return;
+            const username = (user.username || "").trim();
+            const name = (user.name || "").trim();
+            const id = (user.id || "").trim();
+            const avatar = isValidAvatarUrl(user.avatarUrl) ? user.avatarUrl : (isValidAvatarUrl(user.avatar) ? user.avatar : "");
+            const profile = {
+                id: id,
+                username: username,
+                name: name,
+                displayName: name || username,
+                avatarUrl: avatar,
+                blogDesc: user.blogDesc || "",
+                blogTitle: user.blogTitle || ""
+            };
+            if (username) {
+                userProfileCache[username] = profile;
+                if (avatar) {
+                    userAvatarCache[username] = avatar;
+                    localStorage.setItem(`naverBlogAvatar_${username}`, avatar);
+                }
+            }
+            if (name) {
+                userProfileCache[name] = profile;
+                if (avatar) {
+                    userAvatarCache[name] = avatar;
+                    localStorage.setItem(`naverBlogAvatar_${name}`, avatar);
+                }
+            }
+            if (id) {
+                userProfileCache[id] = profile;
+                if (avatar) userAvatarCache[id] = avatar;
+            }
+        }
+
+        // Initialize user cache immediately from localStorage
+        try {
+            const rawCachedUsers = localStorage.getItem("pb_cached_users");
+            if (rawCachedUsers) {
+                const cachedList = JSON.parse(rawCachedUsers);
+                if (Array.isArray(cachedList)) {
+                    cachedList.forEach(registerUserProfile);
+                }
+            }
+        } catch (e) {}
+
+        function registerUsersFromComments(post) {
+            if (!post || !Array.isArray(post.commentList)) return;
+            post.commentList.forEach(c => {
+                if (!c) return;
+                const name = (c.user || "").trim();
+                const username = (c.userId || "").trim();
+                const avatar = c.avatar;
+                if (name && username) {
+                    const existing = userProfileCache[username] || userProfileCache[name] || {};
+                    const profile = {
+                        ...existing,
+                        username: username,
+                        name: name,
+                        displayName: name,
+                        avatarUrl: isValidAvatarUrl(avatar) ? avatar : (existing.avatarUrl || "")
+                    };
+                    userProfileCache[username] = profile;
+                    userProfileCache[name] = profile;
+                }
+                if (isValidAvatarUrl(avatar)) {
+                    if (name) userAvatarCache[name] = avatar;
+                    if (username) userAvatarCache[username] = avatar;
+                }
+            });
+        }
+
+        let isFetchingAllUsers = false;
+        async function fetchAllUserProfiles() {
+            if (isFetchingAllUsers) return;
+            isFetchingAllUsers = true;
+            try {
+                const res = await fetch("https://pb.joyfamkr.synology.me/api/collections/users/records?perPage=200");
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.items && Array.isArray(data.items)) {
+                        data.items.forEach(registerUserProfile);
+                        try {
+                            localStorage.setItem("pb_cached_users", JSON.stringify(data.items.map(u => ({
+                                id: u.id,
+                                username: u.username,
+                                name: u.name,
+                                avatarUrl: u.avatarUrl,
+                                blogDesc: u.blogDesc,
+                                blogTitle: u.blogTitle
+                            }))));
+                        } catch (e) {}
+                    }
+                }
+            } catch (err) {
+                console.warn("fetchAllUserProfiles error:", err);
+            } finally {
+                isFetchingAllUsers = false;
+            }
+        }
+
         function getUserAvatarUrl(username) {
             if (!username) return "default-avatar.svg";
-            if (userAvatarCache[username]) return userAvatarCache[username];
+            if (userAvatarCache[username] && userAvatarCache[username] !== "default-avatar.svg") return userAvatarCache[username];
+
+            // Check profile cache
+            if (userProfileCache[username] && isValidAvatarUrl(userProfileCache[username].avatarUrl)) {
+                userAvatarCache[username] = userProfileCache[username].avatarUrl;
+                return userProfileCache[username].avatarUrl;
+            }
 
             // Check localStorage for this user's avatar
             const localAvatar = localStorage.getItem(`naverBlogAvatar_${username}`);
@@ -732,7 +843,8 @@
 
             // Check if user is currently logged in user
             const currentUser = localStorage.getItem("naverLoggedInUser");
-            if (currentUser && currentUser === username) {
+            const currentUsername = localStorage.getItem("naverLoggedInUsername");
+            if ((currentUser && currentUser === username) || (currentUsername && currentUsername === username)) {
                 const myAvatar = localStorage.getItem("naverBlogAvatar") || localStorage.getItem("naverLoggedInAvatar");
                 if (isValidAvatarUrl(myAvatar)) {
                     userAvatarCache[username] = myAvatar;
@@ -753,14 +865,17 @@
                 const res = await fetch(`https://pb.joyfamkr.synology.me/api/collections/users/records?filter=(name='${queryUser}'||username='${queryUser}')`);
                 if (res.ok) {
                     const data = await res.json();
-                    if (data.items && data.items.length > 0 && isValidAvatarUrl(data.items[0].avatarUrl)) {
+                    if (data.items && data.items.length > 0) {
+                        registerUserProfile(data.items[0]);
                         const avatar = data.items[0].avatarUrl;
-                        userAvatarCache[username] = avatar;
-                        localStorage.setItem(`naverBlogAvatar_${username}`, avatar);
-                        document.querySelectorAll(`img.comment-avatar-img[data-user="${username}"]`).forEach(img => {
-                            img.src = avatar;
-                        });
-                        return avatar;
+                        if (isValidAvatarUrl(avatar)) {
+                            userAvatarCache[username] = avatar;
+                            localStorage.setItem(`naverBlogAvatar_${username}`, avatar);
+                            document.querySelectorAll(`img.comment-avatar-img[data-user="${username}"]`).forEach(img => {
+                                img.src = avatar;
+                            });
+                            return avatar;
+                        }
                     }
                 }
             } catch (err) {
@@ -1087,28 +1202,74 @@
                    "조이";
         }
 
-        function getBloggerInfo(userKey) {
+        function getBloggerInfo(userKey, post) {
             const currentId = getLoggedInUserId();
             const currentNick = getLoggedInUserNickname();
             const currentUserId = localStorage.getItem("naverLoggedInUserId") || "";
 
-            let displayName = userKey;
-            let avatar = "default-avatar.svg";
-            let desc = "";
-
+            // 1. Current logged-in user check
             if (userKey === currentId || userKey === currentNick || userKey === currentUserId || (currentUserId && userKey === currentUserId)) {
-                displayName = currentNick;
-                avatar = currentAvatarUrl || "default-avatar.svg";
-                desc = document.getElementById("myblog-desc")?.textContent || `${currentNick}님의 블로그`;
-            } else {
-                displayName = userKey;
-                avatar = "default-avatar.svg";
-                desc = `${displayName}님의 블로그`;
+                const myName = currentNick || currentId || "조이";
+                let myAvatar = getUserAvatarUrl(currentNick);
+                if (myAvatar === "default-avatar.svg" && currentId) {
+                    myAvatar = getUserAvatarUrl(currentId);
+                }
+                if (myAvatar === "default-avatar.svg") {
+                    myAvatar = (userProfileCache[currentNick] && userProfileCache[currentNick].avatarUrl) ||
+                               (userProfileCache[currentId] && userProfileCache[currentId].avatarUrl) ||
+                               localStorage.getItem("naverBlogAvatar") || 
+                               localStorage.getItem("naverLoggedInAvatar") || 
+                               "default-avatar.svg";
+                }
+                if (!isValidAvatarUrl(myAvatar)) myAvatar = "default-avatar.svg";
+                const myDesc = (userProfileCache[currentNick] && userProfileCache[currentNick].blogDesc) ||
+                               (userProfileCache[currentId] && userProfileCache[currentId].blogDesc) ||
+                               `${myName}님의 블로그`;
+                return {
+                    key: userKey,
+                    displayName: myName,
+                    uniqueId: currentId || userKey,
+                    avatar: myAvatar,
+                    desc: myDesc
+                };
+            }
+
+            // 2. Check profile cache (by userKey: username, name, or id)
+            const cached = userProfileCache[userKey];
+            let displayName = (cached && cached.name) ? cached.name : userKey;
+            let avatar = (cached && isValidAvatarUrl(cached.avatarUrl)) ? cached.avatarUrl : (userAvatarCache[userKey] || "default-avatar.svg");
+
+            // 3. Check post comments if name or avatar is still unresolved
+            if (post && Array.isArray(post.commentList)) {
+                const commentMatch = post.commentList.find(c => c && (c.userId === userKey || c.user === userKey));
+                if (commentMatch) {
+                    if (commentMatch.user && displayName === userKey) {
+                        displayName = commentMatch.user;
+                    }
+                    if (isValidAvatarUrl(commentMatch.avatar) && avatar === "default-avatar.svg") {
+                        avatar = commentMatch.avatar;
+                    }
+                }
+            }
+
+            // 4. Check userAvatarCache using resolved displayName as well
+            if (avatar === "default-avatar.svg" && userAvatarCache[displayName] && userAvatarCache[displayName] !== "default-avatar.svg") {
+                avatar = userAvatarCache[displayName];
+            }
+
+            // 5. Check localStorage fallbacks
+            if (avatar === "default-avatar.svg") {
+                const localAv = localStorage.getItem(`naverBlogAvatar_${userKey}`) || localStorage.getItem(`naverBlogAvatar_${displayName}`);
+                if (isValidAvatarUrl(localAv)) {
+                    avatar = localAv;
+                }
             }
 
             if (!isValidAvatarUrl(avatar)) {
                 avatar = "default-avatar.svg";
             }
+
+            const desc = `${displayName}님의 블로그`;
 
             return {
                 key: userKey,
@@ -1232,32 +1393,48 @@
             const listEl = document.getElementById("liked-bloggers-list");
             if (!listEl) return;
 
-            const likedUsers = Array.isArray(post.likedUsers) ? post.likedUsers : [];
+            const likedUsers = Array.isArray(post?.likedUsers) ? post.likedUsers : [];
             if (likedUsers.length === 0) {
                 listEl.innerHTML = `<div style="text-align: center; color: #999; font-size: 13px; padding: 20px 0; grid-column: 1 / -1;">아직 공감한 블로거가 없습니다. 첫 공감을 남겨보세요!</div>`;
                 return;
             }
 
-            // Build blogger items by resolving IDs to blogger info
-            const bloggers = likedUsers.map(userKey => getBloggerInfo(userKey));
+            // Register any comment authors into user profile cache
+            registerUsersFromComments(post);
 
-            listEl.innerHTML = "";
-            bloggers.forEach(b => {
-                const item = document.createElement("div");
-                item.className = "liked-blogger-item";
-                item.setAttribute("data-username", b.key);
-                item.onclick = () => {
-                    location.href = `my-blog.html?author=${encodeURIComponent(b.displayName || b.key)}`;
-                };
-                item.innerHTML = `
-                    <img src="${b.avatar}" class="blogger-avatar-img" alt="${b.displayName}" onerror="this.src='default-avatar.svg'">
-                    <div class="blogger-text-col">
-                        <span class="blogger-name">${b.displayName}</span>
-                        <span class="blogger-desc">${b.desc}</span>
-                    </div>
-                `;
-                listEl.appendChild(item);
+            const renderItems = () => {
+                const bloggers = likedUsers.map(userKey => getBloggerInfo(userKey, post));
+                listEl.innerHTML = "";
+                bloggers.forEach(b => {
+                    const item = document.createElement("div");
+                    item.className = "liked-blogger-item";
+                    item.setAttribute("data-username", b.key);
+                    item.onclick = () => {
+                        location.href = `my-blog.html?author=${encodeURIComponent(b.displayName || b.key)}`;
+                    };
+                    item.innerHTML = `
+                        <img src="${b.avatar}" class="blogger-avatar-img" data-user-key="${b.key}" alt="${b.displayName}" onerror="this.onerror=null; this.src='default-avatar.svg';">
+                        <div class="blogger-text-col">
+                            <span class="blogger-name" data-user-key="${b.key}">${b.displayName}</span>
+                            <span class="blogger-desc" data-user-key="${b.key}">${b.desc}</span>
+                        </div>
+                    `;
+                    listEl.appendChild(item);
+                });
+            };
+
+            renderItems();
+
+            // Check if any user in likedUsers is missing resolved name or avatar
+            const needFetch = likedUsers.some(k => {
+                const info = getBloggerInfo(k, post);
+                return info.displayName === k || info.avatar === "default-avatar.svg";
             });
+
+            if (needFetch) {
+                await fetchAllUserProfiles();
+                renderItems();
+            }
         }
 
         function toggleBloggerNeighbor(targetUser, btnEl) {
@@ -1397,6 +1574,9 @@
 
             commentsContainer.innerHTML = comments.map(c => {
                 let commentAvatar = getUserAvatarUrl(c.user);
+                if (commentAvatar === "default-avatar.svg" && c.userId) {
+                    commentAvatar = getUserAvatarUrl(c.userId);
+                }
                 
                 // If c.avatar was stored, only use it if it's not the corrupted post author avatar
                 if (commentAvatar === "default-avatar.svg" && isValidAvatarUrl(c.avatar)) {
