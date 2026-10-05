@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
     <!-- FontAwesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=20260905_profile">
+    <link rel="stylesheet" href="style.css?v=20261006_newsfix">
     <style>
         /* Embedded In-Place Search Results Styles */
         .search-results-section {
@@ -681,6 +681,214 @@
             color: #03c75a !important;
         }
 
+        /* Naver-Style News Section Card Styles */
+        .search-news-section-card {
+            background: #ffffff !important;
+            border-radius: 10px !important;
+            border: 1px solid #e3e7ed !important;
+            padding: 22px 24px !important;
+            margin-bottom: 20px !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;
+        }
+
+        .search-news-section-header {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            padding-bottom: 14px !important;
+            border-bottom: 1px solid #f1f3f6 !important;
+            margin-bottom: 16px !important;
+        }
+
+        .search-news-main-title {
+            font-size: 19px !important;
+            font-weight: 800 !important;
+            color: #111111 !important;
+            letter-spacing: -0.3px !important;
+            margin: 0 !important;
+        }
+
+        .search-news-sort-group {
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important;
+            font-size: 12.5px !important;
+        }
+
+        .search-news-sort-group .sort-active {
+            color: #111111 !important;
+            font-weight: 700 !important;
+            cursor: pointer !important;
+        }
+
+        .search-news-sort-group .sort-inactive {
+            color: #888888 !important;
+            cursor: pointer !important;
+        }
+
+        .search-news-item {
+            padding: 16px 0 !important;
+            border-bottom: 1px solid #f4f6f9 !important;
+        }
+
+        .search-news-item:first-of-type {
+            padding-top: 0 !important;
+        }
+
+        .search-news-item:last-of-type {
+            border-bottom: none !important;
+            padding-bottom: 4px !important;
+        }
+
+        .search-news-meta {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            font-size: 12px !important;
+            color: #767676 !important;
+            margin-bottom: 8px !important;
+        }
+
+        .news-press-icon {
+            width: 18px !important;
+            height: 18px !important;
+            border-radius: 50% !important;
+            background: #03c75a !important;
+            color: #ffffff !important;
+            font-size: 10px !important;
+            font-weight: 800 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            flex-shrink: 0 !important;
+        }
+
+        .news-press-name {
+            font-weight: 700 !important;
+            color: #222222 !important;
+        }
+
+        .news-pick-badge {
+            background: #f1f3f5 !important;
+            color: #555555 !important;
+            font-size: 10px !important;
+            font-weight: 700 !important;
+            padding: 1px 5px !important;
+            border-radius: 3px !important;
+            letter-spacing: 0.2px !important;
+        }
+
+        .news-dot {
+            color: #bbb !important;
+        }
+
+        .news-portal {
+            color: #767676 !important;
+        }
+
+        .search-news-content-row {
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            gap: 18px !important;
+        }
+
+        .search-news-text {
+            flex: 1 !important;
+            min-width: 0 !important;
+        }
+
+        .search-news-headline {
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            line-height: 1.4 !important;
+            margin: 0 0 6px 0 !important;
+        }
+
+        .search-news-headline a {
+            color: #003680 !important;
+            text-decoration: none !important;
+            transition: color 0.15s !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+        }
+
+        .search-news-headline a:hover {
+            text-decoration: underline !important;
+            color: #022352 !important;
+        }
+
+        .search-news-headline mark, .search-news-snippet mark {
+            background: transparent !important;
+            font-weight: 800 !important;
+            color: #003680 !important;
+            text-decoration: underline !important;
+            text-decoration-color: #03c75a !important;
+        }
+
+        .search-news-snippet {
+            font-size: 13.5px !important;
+            color: #444444 !important;
+            line-height: 1.55 !important;
+            display: -webkit-box !important;
+            -webkit-line-clamp: 2 !important;
+            -webkit-box-orient: vertical !important;
+            overflow: hidden !important;
+            margin: 0 !important;
+        }
+
+        .search-news-thumb-wrap {
+            width: 96px !important;
+            height: 96px !important;
+            min-width: 96px !important;
+            max-width: 96px !important;
+            border-radius: 8px !important;
+            overflow: hidden !important;
+            flex-shrink: 0 !important;
+            border: 1px solid #eaedf0 !important;
+            display: block !important;
+            background: #f8f9fa !important;
+        }
+
+        .search-news-thumb-img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            display: block !important;
+            transition: transform 0.2s ease !important;
+        }
+
+        .search-news-thumb-wrap:hover .search-news-thumb-img {
+            transform: scale(1.05) !important;
+        }
+
+        .search-news-footer {
+            padding-top: 14px !important;
+            border-top: 1px solid #f1f3f6 !important;
+            margin-top: 12px !important;
+            display: flex !important;
+            justify-content: flex-end !important;
+        }
+
+        .btn-news-all-more {
+            background: none !important;
+            border: none !important;
+            color: #004b99 !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 4px !important;
+            padding: 4px 6px !important;
+        }
+
+        .btn-news-all-more:hover {
+            text-decoration: underline !important;
+        }
+
         @media (max-width: 860px) {
             .search-results-body {
                 grid-template-columns: 1fr !important;
@@ -1152,6 +1360,7 @@
             <a href="#"><strong>개인정보처리방침</strong></a>
             <a href="#">청소년보호정책</a>
             <a href="#">고객센터</a>
+            <a href="webmaster.html" class="footer-webmaster-link" title="에듀버 웹마스터 도구 (사이트 검색 등록)">웹마스터</a>
         </div>
         <p class="copyright">Copyright © EDUVER Corp. All Rights Reserved.</p>
     </footer>

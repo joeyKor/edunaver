@@ -123,10 +123,13 @@ async function getNewsArticles() {
                         isHeadline: Boolean(item.isHeadline)
                     };
                 });
-                // Merge without duplicating
+                // Merge without duplicating (check by ID and title)
                 const merged = [...pbArticles];
+                const seenTitleSet = new Set(pbArticles.map(p => (p.title || "").replace(/\s+/g, "").toLowerCase()));
                 articles.forEach(localArt => {
-                    if (!merged.find(m => m.id === localArt.id)) {
+                    const normTitle = (localArt.title || "").replace(/\s+/g, "").toLowerCase();
+                    if (!merged.find(m => m.id === localArt.id) && !seenTitleSet.has(normTitle)) {
+                        seenTitleSet.add(normTitle);
                         merged.push(localArt);
                     }
                 });

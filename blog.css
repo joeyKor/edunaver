@@ -344,6 +344,10 @@ button {
     margin: 20px auto 60px;
 }
 
+.blog-container.article-reading-mode .blog-sidebar {
+    display: none !important;
+}
+
 /* Left Main Area */
 .blog-main-content {
     min-width: 0;

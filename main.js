@@ -352,6 +352,97 @@ document.addEventListener("DOMContentLoaded", () => {
 
         renderSearchResultsFeed();
     }
+    window.performMainSearch = performMainSearch;
+
+    // ----------------------------------------------------
+    // Webmaster Site Registration System (웹마스터 검색 사이트 등록 시스템)
+    // ----------------------------------------------------
+    const EDUVER_CUSTOM_SITES_KEY = "eduver_custom_registered_sites";
+
+    const DEFAULT_INITIAL_SITES = [
+        {
+            id: "site_dokdo_seonhye_default",
+            name: "순천선혜학교 독도교육주간",
+            domain: "joeykor.github.io/dokdo",
+            title: "순천선혜학교 독도교육주간 | '독도는 우리땅' 타자 대회",
+            url: "https://joeykor.github.io/dokdo/index.html",
+            desc: "전라남도 순천선혜학교 독도교육주간 - '독도는 우리땅' 타자 대회, 독도 퍼즐 및 우리 영토 독도 바로 알기 온라인 교육 포털",
+            icon: "fa-solid fa-flag",
+            iconBg: "#0070f3",
+            sublinks: [
+                { title: "타자 대회", url: "https://joeykor.github.io/dokdo/typing.html" },
+                { title: "퍼즐 대회", url: "https://joeykor.github.io/dokdo/puzzle.html" }
+            ],
+            tags: [
+                { title: "순천선혜학교", url: "http://seonhye.sc.jne.kr/" },
+                { title: "독도는 우리땅", url: "https://joeykor.github.io/dokdo/index.html" }
+            ],
+            keywords: ["독도", "독도교육", "독도교육주간", "순천선혜학교", "선혜학교", "선혜학교독도", "선혜독도", "독도는우리땅", "독도타자", "독도퍼즐"],
+            createdAt: "2026-10-06"
+        }
+    ];
+
+    function getEduverCustomSites() {
+        try {
+            const stored = localStorage.getItem(EDUVER_CUSTOM_SITES_KEY);
+            if (!stored) {
+                localStorage.setItem(EDUVER_CUSTOM_SITES_KEY, JSON.stringify(DEFAULT_INITIAL_SITES));
+                return DEFAULT_INITIAL_SITES;
+            }
+            const parsed = JSON.parse(stored);
+            if (!Array.isArray(parsed) || parsed.length === 0) {
+                localStorage.setItem(EDUVER_CUSTOM_SITES_KEY, JSON.stringify(DEFAULT_INITIAL_SITES));
+                return DEFAULT_INITIAL_SITES;
+            }
+            return parsed;
+        } catch(e) {
+            return DEFAULT_INITIAL_SITES;
+        }
+    }
+
+    function saveEduverCustomSites(sites) {
+        try {
+            localStorage.setItem(EDUVER_CUSTOM_SITES_KEY, JSON.stringify(sites));
+        } catch(e) {
+            console.error("Failed to save custom sites:", e);
+        }
+    }
+
+    // Auto-sync webmaster sites from PocketBase server in background
+    async function syncWebmasterSitesFromPocketBase() {
+        try {
+            const res = await fetch("https://pb.joyfamkr.synology.me/api/collections/posts/records?filter=(category='웹마스터사이트')&sort=-created");
+            if (res.ok) {
+                const data = await res.json();
+                if (data.items && data.items.length > 0) {
+                    const synced = data.items.map(item => {
+                        let meta = {};
+                        try { meta = JSON.parse(item.fullContent || "{}"); } catch(e) {}
+                        return {
+                            id: item.id,
+                            name: item.title,
+                            domain: meta.domain || "",
+                            title: meta.siteTitle || item.title,
+                            url: meta.url || "#",
+                            desc: item.summary || "",
+                            icon: meta.icon || "fa-solid fa-flag",
+                            iconBg: meta.iconBg || "#0070f3",
+                            keywords: meta.keywords || [item.title],
+                            sublinks: meta.sublinks || [],
+                            tags: meta.tags || [{ title: item.title, url: meta.url || "#" }]
+                        };
+                    });
+                    localStorage.setItem(EDUVER_CUSTOM_SITES_KEY, JSON.stringify(synced));
+                }
+            }
+        } catch(err) {
+            console.warn("Background webmaster sync skipped:", err);
+        }
+    }
+    syncWebmasterSitesFromPocketBase();
+
+
+
 
     function closeSearchResults() {
         if (searchResultsSection) searchResultsSection.style.display = "none";
@@ -417,8 +508,9 @@ document.addEventListener("DOMContentLoaded", () => {
             </div>
         `;
 
-        // Concurrently fetch Wikipedia & sync PocketBase
-        const wikiPromise = fetchWikipediaKnowledge(activeQuery);
+        try {
+            // Concurrently fetch Wikipedia & sync PocketBase
+            const wikiPromise = fetchWikipediaKnowledge(activeQuery);
 
         // Try syncing latest posts from PocketBase
         try {
@@ -426,7 +518,31 @@ document.addEventListener("DOMContentLoaded", () => {
             if (pbRes.ok) {
                 const pbData = await pbRes.json();
                 if (pbData.items && pbData.items.length > 0) {
-                    const filteredItems = pbData.items.filter(item => item.title !== "Test Post" && item.summary !== "This is a test post.");
+                    // Extract webmaster sites to sync custom search database
+                    const webmasterItems = pbData.items.filter(item => item.category === "웹마스터사이트");
+                    if (webmasterItems.length > 0) {
+                        const parsedSites = webmasterItems.map(item => {
+                            let meta = {};
+                            try { meta = JSON.parse(item.fullContent || "{}"); } catch(e) {}
+                            return {
+                                id: item.id,
+                                name: item.title,
+                                domain: meta.domain || "",
+                                title: meta.siteTitle || item.title,
+                                url: meta.url || "#",
+                                desc: item.summary || "",
+                                icon: meta.icon || "fa-solid fa-flag",
+                                iconBg: meta.iconBg || "#0070f3",
+                                keywords: meta.keywords || [item.title],
+                                sublinks: meta.sublinks || [],
+                                tags: meta.tags || [{ title: item.title, url: meta.url || "#" }]
+                            };
+                        });
+                        localStorage.setItem(EDUVER_CUSTOM_SITES_KEY, JSON.stringify(parsedSites));
+                    }
+
+                    // Only keep normal user blog posts (exclude webmaster site markers)
+                    const filteredItems = pbData.items.filter(item => item.title !== "Test Post" && item.summary !== "This is a test post." && item.category !== "웹마스터사이트");
                     const pbPosts = filteredItems.map(item => ({
                         id: item.id,
                         author: item.author || "블로거",
@@ -449,7 +565,27 @@ document.addEventListener("DOMContentLoaded", () => {
                             }
                         }
                     });
-                    localStorage.setItem("naverBlogPosts", JSON.stringify(merged));
+                    try {
+                        localStorage.setItem("naverBlogPosts", JSON.stringify(merged));
+                    } catch (quotaErr) {
+                        try {
+                            const slimPosts = merged.map((p, i) => {
+                                if (i > 1 && p.fullContent && p.fullContent.length > 300) {
+                                    return { ...p, fullContent: p.summary || p.fullContent.substring(0, 200) };
+                                }
+                                return p;
+                            });
+                            localStorage.setItem("naverBlogPosts", JSON.stringify(slimPosts));
+                        } catch (quotaErr2) {
+                            try {
+                                const compactPosts = merged.slice(0, 30).map(p => ({
+                                    ...p,
+                                    fullContent: p.summary || ""
+                                }));
+                                localStorage.setItem("naverBlogPosts", JSON.stringify(compactPosts));
+                            } catch (quotaErr3) {}
+                        }
+                    }
                 }
             }
         } catch(e) {
@@ -489,7 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Fetch stored blog posts
         const dummyIds = ["post_1", "post_2", "post_3", "post_4", "post_fold", "post_tech"];
-        let allPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]").filter(p => !dummyIds.includes(p.id));
+        let allPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]").filter(p => !dummyIds.includes(p.id) && p.category !== "웹마스터사이트");
 
         // Fetch stored cafe posts
         let allCafePosts = [];
@@ -836,21 +972,23 @@ document.addEventListener("DOMContentLoaded", () => {
         const q = activeQuery.toLowerCase().trim();
         const rawCleanQuery = q.replace(/\s+/g, "");
 
-        // 1. Match Official Site (공식 사이트 매칭)
-        let matchedOfficialSite = null;
+        // 1. Match Official Site & Webmaster Registered Sites (공식 사이트 및 웹마스터 등록 사이트 매칭)
+        let matchedOfficialSites = [];
         if (currentSearchTab === "all") {
-            matchedOfficialSite = officialSites.find(site => {
-                const siteNameClean = site.name.toLowerCase().replace(/\s+/g, "");
-                const domainClean = site.domain.toLowerCase().replace(/\s+/g, "");
+            const allSites = [...getEduverCustomSites(), ...officialSites];
+            matchedOfficialSites = allSites.filter(site => {
+                const siteNameClean = (site.name || "").toLowerCase().replace(/\s+/g, "");
+                const domainClean = (site.domain || "").toLowerCase().replace(/\s+/g, "");
                 if (siteNameClean.includes(rawCleanQuery) || rawCleanQuery.includes(siteNameClean) || domainClean.includes(rawCleanQuery)) {
                     return true;
                 }
-                return site.keywords.some(kw => {
+                return (site.keywords || []).some(kw => {
                     const kwClean = kw.toLowerCase().replace(/\s+/g, "");
                     return kwClean.includes(rawCleanQuery) || rawCleanQuery.includes(kwClean);
                 });
             });
         }
+        const matchedOfficialSite = matchedOfficialSites[0] || null;
 
         // 2. Match Blog Posts (에듀버 블로그 글 매칭)
         let matchedPosts = allPosts.filter(p => {
@@ -871,6 +1009,76 @@ document.addEventListener("DOMContentLoaded", () => {
             const cafeMatch = cp.cafeName && cp.cafeName.toLowerCase().includes(q);
             const boardMatch = cp.boardName && cp.boardName.toLowerCase().includes(q);
             return titleMatch || contentMatch || summaryMatch || authorMatch || cafeMatch || boardMatch;
+        });
+
+        // 4. Match News Articles (에듀버 뉴스 기사 매칭 - 사용자 요청: 오직 기사 제목만 부분 일치 여부 확인)
+        const defaultSeedNews = [
+            {
+                id: "news_1",
+                title: "특수교육 대상 학생 맞춤형 'AI 디지털 교과서' 현장 실증 연구 착수",
+                subtitle: "개별화 학습 속도에 맞춘 시각·청각 지원 인터페이스로 수업 몰입도 대폭 향상",
+                category: "특수교육",
+                author: "조이 기자",
+                press: "에듀버 교육보도국",
+                date: "2026. 9. 10.",
+                summary: "교육부와 전국 특수교육 연구진이 협력하여 특수학급 학생들을 위한 차세대 AI 디지털 교과서 시범 사업에 본격 돌입했습니다. 학생 개개인의 인지 수준과 의사소통 특성에 맞춘 동적 피드백이 제공됩니다.",
+                thumbnail: "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: "news_2",
+                title: "보완대체의사소통(AAC) 그림 상징 표준화 협의회 발족... \"교실과 일상의 단절 줄인다\"",
+                subtitle: "학교-가정-지역사회 어디서나 통하는 통합 상징 체계 마련 목표",
+                category: "에듀테크",
+                author: "정보쌤 기자",
+                press: "에듀버 특수교육센터",
+                date: "2026. 9. 9.",
+                summary: "학교마다 제각각이던 그림 상징과 의사소통 도구의 혼선을 줄이기 위한 전국 표준 상징 체계 구축 협의회가 공식 출범했습니다.",
+                thumbnail: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: "news_3",
+                title: "특수교사 힐링 연수 및 교과 나눔의 날 성황리 종료",
+                subtitle: "지친 마음 보듬고 서로의 우수 수업 지도안 공유하는 연대의 장",
+                category: "사람과 이야기",
+                author: "현장취재팀",
+                press: "에듀버 뉴스",
+                date: "2026. 9. 8.",
+                summary: "전국 각지에서 모인 특수교사들이 함께 모여 현장의 고충을 나누고, 직접 개발한 개별화 교구와 수업 활동지를 공유하는 따뜻한 연수의 밤이 열렸습니다.",
+                thumbnail: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=600&auto=format&fit=crop&q=80"
+            },
+            {
+                id: "news_4",
+                title: "2026 하반기 통합교육 지원단 확대 운영... 일반학급 협력 강사 추가 배치",
+                subtitle: "일반교사와 특수교사의 원활한 협력 수업 지원 체계 대폭 강화",
+                category: "교육정책",
+                author: "조이 기자",
+                press: "에듀버 교육보도국",
+                date: "2026. 9. 7.",
+                summary: "일반학급에 배치된 특수교육 대상 학생의 학교생활 적응을 돕고 통합교육 내실화를 지원하기 위해 협력 강사가 추가 배치됩니다.",
+                thumbnail: "https://images.unsplash.com/photo-1577896851231-70ef18881754?w=600&auto=format&fit=crop&q=80"
+            }
+        ];
+        const storedNews = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
+        const allNewsList = (storedNews && storedNews.length > 0) ? storedNews : defaultSeedNews;
+
+        // 사용자 요청: 제목만 부분 일치 여부 확인
+        const rawMatchedNews = allNewsList.filter(art => {
+            if (!art.title) return false;
+            const t = art.title.toLowerCase();
+            const cleanT = t.replace(/\s+/g, "");
+            return t.includes(q) || cleanT.includes(rawCleanQuery);
+        });
+
+        // 기사 중복 제거 (동일 제목 기사는 ID가 다르더라도 반드시 1건만 노출)
+        const newsTitleSet = new Set();
+        const matchedNews = [];
+        rawMatchedNews.forEach(art => {
+            if (!art || !art.title) return;
+            const normalizedTitle = art.title.replace(/\s+/g, "").toLowerCase();
+            if (!newsTitleSet.has(normalizedTitle)) {
+                newsTitleSet.add(normalizedTitle);
+                matchedNews.push(art);
+            }
         });
 
         // Tab filtering simulation
@@ -926,12 +1134,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const siteCard = document.createElement("div");
             siteCard.className = "official-site-card";
             
-            const sublinksHtml = site.sublinks.map((sub, idx) => `
+            const sublinksHtml = (site.sublinks || []).map((sub, idx) => `
                 ${idx > 0 ? '<span class="sublink-dot">·</span>' : ''}
                 <a href="${sub.url}" target="_blank" rel="noopener noreferrer">${sub.title}</a>
             `).join("");
 
-            const tagsHtml = site.tags.map(tag => `
+            const tagsHtml = (site.tags || []).map(tag => `
                 <a href="${tag.url}" class="official-site-pill" target="_blank" rel="noopener noreferrer">
                     <span>${tag.title}</span>
                 </a>
@@ -940,26 +1148,22 @@ document.addEventListener("DOMContentLoaded", () => {
             siteCard.innerHTML = `
                 <div class="official-site-header">
                     <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="official-site-source">
-                        <div class="official-site-favicon" style="background-color: ${site.iconBg};">
-                            <i class="${site.icon}"></i>
+                        <div class="official-site-favicon" style="background-color: ${site.iconBg || '#03c75a'};">
+                            <i class="${site.icon || 'fa-solid fa-globe'}"></i>
                         </div>
                         <span class="official-site-name">${site.name}</span>
-                        <span class="official-site-domain">· ${site.domain}</span>
+                        <span class="official-site-domain">· ${site.domain || ''}</span>
                     </a>
                     <button class="official-site-more-btn" title="더보기">
                         <i class="fa-solid fa-ellipsis-vertical"></i>
                     </button>
                 </div>
                 <h3 class="official-site-title">
-                    <a href="${site.url}" target="_blank" rel="noopener noreferrer">${site.title}</a>
+                    <a href="${site.url}" target="_blank" rel="noopener noreferrer">${site.title || site.name}</a>
                 </h3>
-                <div class="official-site-sublinks">
-                    ${sublinksHtml}
-                </div>
-                <p class="official-site-desc">${site.desc}</p>
-                <div class="official-site-tags-row">
-                    ${tagsHtml}
-                </div>
+                ${sublinksHtml ? `<div class="official-site-sublinks">${sublinksHtml}</div>` : ''}
+                <p class="official-site-desc">${site.desc || ''}</p>
+                ${tagsHtml ? `<div class="official-site-tags-row">${tagsHtml}</div>` : ''}
             `;
             return siteCard;
         };
@@ -1056,15 +1260,108 @@ document.addEventListener("DOMContentLoaded", () => {
             return card;
         };
 
+        // Helper: Naver-Style News Section Card (네이버 뉴스 섹션 카드)
+        const createNewsSectionCard = (newsList, query, isNewsTab = false) => {
+            const card = document.createElement("div");
+            card.className = "search-news-section-card";
+            card.style.cssText = "background: #ffffff !important; border-radius: 10px !important; border: 1px solid #e3e7ed !important; padding: 22px 24px !important; margin-bottom: 20px !important; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03) !important;";
+
+            // 이중 방어: 제목 기준 중복 기사 확실히 제거
+            const seenTitles = new Set();
+            const uniqueNews = [];
+            (newsList || []).forEach(item => {
+                if (!item || !item.title) return;
+                const norm = item.title.replace(/\s+/g, "").toLowerCase();
+                if (!seenTitles.has(norm)) {
+                    seenTitles.add(norm);
+                    uniqueNews.push(item);
+                }
+            });
+
+            const displayList = isNewsTab ? uniqueNews : uniqueNews.slice(0, 3);
+            const itemsHtml = displayList.map((art, idx) => {
+                const highlightedTitle = highlightKeyword(art.title || "", query);
+                const summaryText = art.summary || (art.content ? art.content.replace(/<[^>]+>/g, '').slice(0, 140) : "");
+                const highlightedSnippet = highlightKeyword(summaryText, query);
+                const pressName = art.press || "에듀버 교육보도국";
+                const dateText = art.date || "최근";
+                const isLast = idx === displayList.length - 1;
+
+                return `
+                    <div class="search-news-item" style="padding: 16px 0 !important; ${isLast ? 'border-bottom: none !important; padding-bottom: 4px !important;' : 'border-bottom: 1px solid #f1f3f6 !important;'}">
+                        <div class="search-news-meta" style="display: flex !important; align-items: center !important; justify-content: space-between !important; margin-bottom: 8px !important;">
+                            <div style="display: flex !important; align-items: center !important; gap: 6px !important; font-size: 12px !important; color: #767676 !important;">
+                                <span class="news-press-icon" style="width: 18px !important; height: 18px !important; border-radius: 50% !important; background: #03c75a !important; color: #fff !important; font-size: 10px !important; font-weight: 800 !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; flex-shrink: 0 !important;">N</span>
+                                <span class="news-press-name" style="font-weight: 700 !important; color: #222 !important;">${pressName}</span>
+                                <span class="news-pick-badge" style="background: #f1f3f5 !important; color: #555 !important; font-size: 10px !important; font-weight: 700 !important; padding: 1px 5px !important; border-radius: 3px !important; letter-spacing: 0.2px !important;">PiCK</span>
+                                <span class="news-dot" style="color: #bbb !important;">•</span>
+                                <span class="news-date" style="color: #767676 !important;">${dateText}</span>
+                                <span class="news-dot" style="color: #bbb !important;">•</span>
+                                <span class="news-portal" style="color: #767676 !important;">에듀버뉴스</span>
+                            </div>
+                            <button type="button" style="background: none !important; border: none !important; color: #aaa !important; cursor: pointer !important; padding: 2px 4px !important; font-size: 13px !important;" title="더보기">
+                                <i class="fa-solid fa-ellipsis-vertical"></i>
+                            </button>
+                        </div>
+                        <div class="search-news-content-row" style="display: flex !important; justify-content: space-between !important; align-items: flex-start !important; gap: 16px !important;">
+                            <div class="search-news-text" style="flex: 1 !important; min-width: 0 !important;">
+                                <h4 class="search-news-headline" style="font-size: 16px !important; font-weight: 700 !important; line-height: 1.4 !important; margin: 0 0 6px 0 !important;">
+                                    <a href="news.html?id=${encodeURIComponent(art.id)}" style="color: #003680 !important; text-decoration: none !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;">${highlightedTitle}</a>
+                                </h4>
+                                <p class="search-news-snippet" style="font-size: 13.5px !important; color: #444 !important; line-height: 1.55 !important; display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important; margin: 0 !important;">${highlightedSnippet}</p>
+                            </div>
+                            ${art.thumbnail ? `
+                                <a href="news.html?id=${encodeURIComponent(art.id)}" class="search-news-thumb-wrap" style="width: 96px !important; height: 96px !important; min-width: 96px !important; max-width: 96px !important; aspect-ratio: 1/1 !important; border-radius: 8px !important; overflow: hidden !important; flex-shrink: 0 !important; border: 1px solid #eaedf0 !important; display: block !important; background: #f8f9fa !important;">
+                                    <img src="${art.thumbnail}" alt="${art.title}" class="search-news-thumb-img" style="width: 96px !important; height: 96px !important; min-width: 96px !important; max-width: 96px !important; object-fit: cover !important; display: block !important;">
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            }).join("");
+
+            const footerHtml = (!isNewsTab && newsList.length > 0) ? `
+                <div class="search-news-footer" style="padding-top: 14px !important; border-top: 1px solid #f1f3f6 !important; margin-top: 12px !important; display: flex !important; justify-content: flex-end !important;">
+                    <button class="btn-news-all-more" onclick="window.switchToNewsSearchTab()" style="background: none !important; border: none !important; color: #004b99 !important; font-size: 13px !important; font-weight: 600 !important; cursor: pointer !important; display: inline-flex !important; align-items: center !important; gap: 4px !important; padding: 4px 6px !important;">
+                        관련뉴스 전체보기 (${newsList.length}건) <i class="fa-solid fa-chevron-right" style="font-size: 10px !important;"></i>
+                    </button>
+                </div>
+            ` : '';
+
+            card.innerHTML = `
+                <div class="search-news-section-header" style="display: flex !important; justify-content: space-between !important; align-items: center !important; padding-bottom: 14px !important; border-bottom: 1px solid #f1f3f6 !important; margin-bottom: 16px !important;">
+                    <h3 class="search-news-main-title" style="font-size: 19px !important; font-weight: 800 !important; color: #111111 !important; letter-spacing: -0.3px !important; margin: 0 !important;">뉴스</h3>
+                    <div class="search-news-sort-group" style="display: flex !important; align-items: center !important; gap: 10px !important; font-size: 12.5px !important;">
+                        <span class="sort-active" style="color: #111111 !important; font-weight: 700 !important; cursor: pointer !important;">• 관련도순</span>
+                        <span class="sort-inactive" style="color: #888888 !important; cursor: pointer !important;">• 최신순</span>
+                    </div>
+                </div>
+                ${itemsHtml}
+                ${footerHtml}
+            `;
+            return card;
+        };
+
+        // Window helper for tab switching
+        window.switchToNewsSearchTab = function() {
+            const newsTabBtn = document.querySelector(`.search-tab-btn[data-tab="news"]`);
+            if (newsTabBtn) {
+                newsTabBtn.click();
+            } else {
+                currentSearchTab = "news";
+                renderSearchResultsFeed();
+            }
+        };
+
         const hasWiki = wikiPages && wikiPages.length > 0;
-        const totalResultsCount = (matchedOfficialSite ? 1 : 0) + matchedPosts.length + matchedCafePosts.length + (hasWiki ? wikiPages.length : 0);
+        const totalResultsCount = matchedOfficialSites.length + matchedNews.length + matchedPosts.length + matchedCafePosts.length + (hasWiki ? wikiPages.length : 0);
 
         if (searchTotalCount) {
             searchTotalCount.textContent = `총 ${totalResultsCount}건`;
         }
 
         // Empty state check
-        if (!matchedOfficialSite && !hasWiki && matchedPosts.length === 0 && matchedCafePosts.length === 0) {
+        if (matchedOfficialSites.length === 0 && matchedNews.length === 0 && !hasWiki && matchedPosts.length === 0 && matchedCafePosts.length === 0) {
             searchItemsFeed.innerHTML = `
                 <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 50px 20px; text-align: center; color: #888;">
                     <i class="fa-solid fa-circle-exclamation" style="font-size: 38px; color: #ced4da; margin-bottom: 14px;"></i>
@@ -1082,9 +1379,16 @@ document.addEventListener("DOMContentLoaded", () => {
         // Render TAB: ALL (통합검색 - 사이트 자료 우선, 위키백과 최후)
         // ----------------------------------------------------
         if (currentSearchTab === "all") {
-            // [1순위] 공식 사이트 / 바로가기 (Official Brand Site)
-            if (matchedOfficialSite) {
-                searchItemsFeed.appendChild(createOfficialSiteCard(matchedOfficialSite));
+            // [1순위] 공식 사이트 및 웹마스터 등록 사이트 카드 표시
+            if (matchedOfficialSites && matchedOfficialSites.length > 0) {
+                matchedOfficialSites.slice(0, 3).forEach(site => {
+                    searchItemsFeed.appendChild(createOfficialSiteCard(site));
+                });
+            }
+
+            // [1.5순위] 에듀버 뉴스 검색 결과 (제목 부분 일치 시 스크린샷과 동일한 네이버 뉴스 섹션 카드 표시)
+            if (matchedNews && matchedNews.length > 0) {
+                searchItemsFeed.appendChild(createNewsSectionCard(matchedNews, activeQuery, false));
             }
 
             // [2순위] 에듀버 블로그 검색 결과 먼저 표시!
@@ -1209,49 +1513,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // ----------------------------------------------------
         // Render TAB: NEWS (뉴스 탭)
         // ----------------------------------------------------
-        else if (activeTab === "news") {
-            const allNews = JSON.parse(localStorage.getItem("naverNewsArticles") || "[]");
-            const matchedNews = allNews.filter(a => 
-                (a.title && a.title.toLowerCase().includes(activeQuery.toLowerCase())) ||
-                (a.summary && a.summary.toLowerCase().includes(activeQuery.toLowerCase())) ||
-                (a.content && a.content.toLowerCase().includes(activeQuery.toLowerCase())) ||
-                (a.category && a.category.toLowerCase().includes(activeQuery.toLowerCase())) ||
-                (a.author && a.author.toLowerCase().includes(activeQuery.toLowerCase()))
-            );
-
+        else if (currentSearchTab === "news") {
             if (matchedNews.length > 0) {
-                matchedNews.forEach(art => {
-                    const card = document.createElement("article");
-                    card.className = "search-result-card";
-                    const highlightedTitle = highlightKeyword(art.title, activeQuery);
-                    const highlightedSnippet = highlightKeyword(art.summary, activeQuery);
-
-                    card.innerHTML = `
-                        <div class="result-source-row">
-                            <div class="result-source-info">
-                                <span class="result-source-name" style="font-weight: 700; color: #03c75a;">${art.press}</span>
-                                <span class="result-source-time">· ${art.date} (${art.author})</span>
-                            </div>
-                            <span class="result-type-badge">${art.category}</span>
-                        </div>
-                        <div class="result-main-group">
-                            <div class="result-text-content">
-                                <h4 class="result-title" onclick="location.href='news.html?id=${encodeURIComponent(art.id)}'">${highlightedTitle}</h4>
-                                <p class="result-snippet">${highlightedSnippet}</p>
-                            </div>
-                            ${art.thumbnail ? `
-                                <div class="result-thumb-wrapper" onclick="location.href='news.html?id=${encodeURIComponent(art.id)}'">
-                                    <img src="${art.thumbnail}" class="result-thumb-img" alt="Thumbnail">
-                                </div>
-                            ` : ''}
-                        </div>
-                    `;
-                    searchItemsFeed.appendChild(card);
-                });
+                searchItemsFeed.appendChild(createNewsSectionCard(matchedNews, activeQuery, true));
             } else {
                 searchItemsFeed.innerHTML = `
                     <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
-                        <p>'${activeQuery}' 관련 등록된 뉴스가 없습니다.</p>
+                        <p>'${activeQuery}'에 대한 뉴스 기사가 없습니다.</p>
                         <a href="news.html" style="color: #03c75a; font-weight: 700; text-decoration: none; font-size: 13px; margin-top: 8px; display: inline-block;">에듀버 뉴스 홈 바로가기 →</a>
                     </div>
                 `;
@@ -1275,6 +1543,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 `;
             }
             searchItemsFeed.appendChild(createExternalSearchCard());
+        }
+        } catch (feedErr) {
+            console.error("Search rendering error caught:", feedErr);
+            if (searchItemsFeed) {
+                searchItemsFeed.innerHTML = `
+                    <div style="background: #fff; border-radius: 8px; border: 1px solid #e3e7ed; padding: 40px 20px; text-align: center; color: #888;">
+                        <h4 style="font-size: 16px; color: #333; margin-bottom: 6px;">'${activeQuery}' 검색 결과를 정리하는 중입니다.</h4>
+                        <p style="font-size: 13px; margin-bottom: 16px;">아래 외부 검색엔진에서 즉시 찾아보실 수 있습니다.</p>
+                    </div>
+                `;
+                searchItemsFeed.appendChild(createExternalSearchCard());
+            }
         }
     }
 

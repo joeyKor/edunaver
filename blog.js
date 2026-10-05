@@ -34,20 +34,56 @@ const initialPosts = [
 
 const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
 
+// Global in-memory posts cache for real-time reactivity without localStorage quota blockages
+let cachedBlogPosts = null;
+
+// Safe helper to persist posts into localStorage with quota protection
+function safeSaveBlogPosts(postsArray) {
+    if (!postsArray || !Array.isArray(postsArray)) return;
+    try {
+        localStorage.setItem("naverBlogPosts", JSON.stringify(postsArray));
+    } catch (e) {
+        console.warn("Storage quota exceeded on blog posts! Trimming full content for cache...", e);
+        try {
+            // Level 1: Trim fullContent of older posts (> 2) to preserve space while keeping titles/summaries/thumbnails
+            const slimPosts = postsArray.map((p, i) => {
+                if (i > 1 && p.fullContent && p.fullContent.length > 300) {
+                    return { ...p, fullContent: p.summary || p.fullContent.substring(0, 200) };
+                }
+                return p;
+            });
+            localStorage.setItem("naverBlogPosts", JSON.stringify(slimPosts));
+        } catch (e2) {
+            try {
+                // Level 2: Trim all fullContent to summary and keep latest 30 posts
+                const compactPosts = postsArray.slice(0, 30).map(p => ({
+                    ...p,
+                    fullContent: p.summary || (p.fullContent ? p.fullContent.substring(0, 150) : "")
+                }));
+                localStorage.setItem("naverBlogPosts", JSON.stringify(compactPosts));
+            } catch (e3) {
+                console.error("Unable to save blog posts to localStorage:", e3);
+            }
+        }
+    }
+}
+
 // Initialize Storage & Sync with PocketBase
 async function initializeBlogStorage() {
     let localPosts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
     
-    // Purge automated test post, legacy author names, and strip redundant authorAvatar
-    localPosts = localPosts.filter(p => p.title !== "Test Post" && p.summary !== "This is a test post.");
+    // Purge automated test post, webmaster sites, legacy author names, and strip redundant authorAvatar
+    localPosts = localPosts.filter(p => p.title !== "Test Post" && p.summary !== "This is a test post." && p.category !== "웹마스터사이트");
     localPosts.forEach(p => {
         if (p.author === "조이네") { p.author = "조이"; }
         if (p.authorAvatar) { delete p.authorAvatar; }
     });
-    localStorage.setItem("naverBlogPosts", JSON.stringify(localPosts));
+    safeSaveBlogPosts(localPosts);
+    cachedBlogPosts = localPosts;
 
     if (!localStorage.getItem("naverBlogPosts") || localPosts.length === 0) {
-        localStorage.setItem("naverBlogPosts", JSON.stringify(initialPosts));
+        safeSaveBlogPosts(initialPosts);
+        cachedBlogPosts = [...initialPosts];
     }
     if (!localStorage.getItem("naverBlogActivities")) {
         localStorage.setItem("naverBlogActivities", JSON.stringify([]));
@@ -60,9 +96,9 @@ async function initializeBlogStorage() {
 async function syncPostsFromPocketBase() {
     try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 seconds timeout for large payloads
 
-        const response = await fetch(`${POCKETBASE_URL}/api/collections/posts/records?sort=-created`, {
+        const response = await fetch(`${POCKETBASE_URL}/api/collections/posts/records?sort=-created&perPage=50`, {
             signal: controller.signal
         });
         clearTimeout(timeoutId);
@@ -70,7 +106,7 @@ async function syncPostsFromPocketBase() {
         if (response.ok) {
             const data = await response.json();
             if (data.items && Array.isArray(data.items) && data.items.length > 0) {
-                const filteredItems = data.items.filter(item => item.title !== "Test Post" && item.summary !== "This is a test post.");
+                const filteredItems = data.items.filter(item => item.title !== "Test Post" && item.summary !== "This is a test post." && item.category !== "웹마스터사이트");
                 const pbPosts = filteredItems.map(item => {
                     let parsedComments = [];
                     if (Array.isArray(item.comments)) {
@@ -148,7 +184,13 @@ async function syncPostsFromPocketBase() {
                     }
                 });
 
-                localStorage.setItem("naverBlogPosts", JSON.stringify(merged));
+                // Immediately update in-memory cache so UI updates without being blocked by localStorage quota
+                cachedBlogPosts = merged;
+
+                // Safely persist to localStorage with quota overflow handling
+                safeSaveBlogPosts(merged);
+
+                // Always re-render feed posts with newly synced posts
                 renderFeedPosts();
             }
         }
@@ -159,15 +201,20 @@ async function syncPostsFromPocketBase() {
 
 // Get Data Helpers
 function getBlogPosts() {
+    if (cachedBlogPosts && cachedBlogPosts.length > 0) {
+        return cachedBlogPosts.filter(p => p.category !== "웹마스터사이트");
+    }
     const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
     if (posts.length === 0) {
         return initialPosts;
     }
-    return posts;
+    cachedBlogPosts = posts.filter(p => p.category !== "웹마스터사이트");
+    return cachedBlogPosts;
 }
 
 function saveBlogPosts(posts) {
-    localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+    cachedBlogPosts = posts;
+    safeSaveBlogPosts(posts);
 }
 
 function getCurrentUserKey() {
@@ -811,7 +858,8 @@ async function openFullArticleView(postId) {
     let posts = getBlogPosts();
     let post = posts.find(p => p.id === postId);
 
-    if (!post) {
+    // If post not found or fullContent is missing/truncated, fetch complete post from PocketBase
+    if (!post || !post.fullContent || (post.fullContent.length <= (post.summary || "").length && !post.fullContent.includes("<"))) {
         try {
             const res = await fetch(`${POCKETBASE_URL}/api/collections/posts/records/${postId}`);
             if (res.ok) {
@@ -826,7 +874,7 @@ async function openFullArticleView(postId) {
                 else if (typeof item.likedUsers === "string" && item.likedUsers.trim()) {
                     try { parsedLikedUsers = JSON.parse(item.likedUsers); } catch(e) { parsedLikedUsers = [item.likedUsers]; }
                 }
-                post = {
+                const fullItem = {
                     id: item.id,
                     author: item.author || "블로거",
                     time: item.created ? new Date(item.created).toLocaleDateString() : "방금 전",
@@ -841,7 +889,12 @@ async function openFullArticleView(postId) {
                     comments: parsedComments.length,
                     isNeighbor: false
                 };
-                posts.unshift(post);
+                if (post) {
+                    Object.assign(post, fullItem);
+                } else {
+                    post = fullItem;
+                    posts.unshift(post);
+                }
                 saveBlogPosts(posts);
             }
         } catch(e) {}
@@ -899,15 +952,17 @@ async function openFullArticleView(postId) {
         }
     }
 
-    // Show fullview section and hide feed & hottopic
+    // Show fullview section and hide feed & hottopic & sidebar
     const fullViewEl = document.getElementById("blog-article-fullview");
     const hottopicEl = document.getElementById("hottopic-section");
     const feedEl = document.getElementById("feed-section");
+    const sidebarEl = document.querySelector(".blog-sidebar");
     const containerEl = document.querySelector(".blog-container");
 
     if (fullViewEl) fullViewEl.style.display = "block";
     if (hottopicEl) hottopicEl.style.display = "none";
     if (feedEl) feedEl.style.display = "none";
+    if (sidebarEl) sidebarEl.style.display = "none";
     if (containerEl) containerEl.classList.add("article-reading-mode");
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1047,7 +1102,7 @@ function toggleFullViewLike() {
     }
 
     if (!currentViewingFullPostId) return;
-    const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+    const posts = getBlogPosts();
     const post = posts.find(p => p.id === currentViewingFullPostId);
     if (!post) return;
 
@@ -1070,7 +1125,7 @@ function toggleFullViewLike() {
     }
     // Count dynamically from likedUsers length
     post.likes = post.likedUsers.length;
-    localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+    saveBlogPosts(posts);
 
     renderFullViewLikeState(post);
 
@@ -1157,7 +1212,7 @@ async function addFullViewComment() {
     const currentUserId = getUniqueUserId();
     const currentUserName = localStorage.getItem("naverLoggedInUser") || currentUserId || "조이";
 
-    const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+    const posts = getBlogPosts();
     const post = posts.find(p => p.id === currentViewingFullPostId);
     if (!post) return;
 
@@ -1173,7 +1228,7 @@ async function addFullViewComment() {
 
     post.commentList.push(newComment);
     post.comments = post.commentList.length;
-    localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+    saveBlogPosts(posts);
     input.value = "";
 
     renderFullViewComments(post);
@@ -1197,12 +1252,12 @@ async function deleteFullViewComment(commentId) {
     if (!currentViewingFullPostId) return;
     if (!confirm("댓글을 삭제하시겠습니까?")) return;
 
-    const posts = JSON.parse(localStorage.getItem("naverBlogPosts") || "[]");
+    const posts = getBlogPosts();
     const post = posts.find(p => p.id === currentViewingFullPostId);
     if (post && post.commentList) {
         post.commentList = post.commentList.filter(c => c.id !== commentId);
         post.comments = post.commentList.length;
-        localStorage.setItem("naverBlogPosts", JSON.stringify(posts));
+        saveBlogPosts(posts);
 
         renderFullViewComments(post);
 

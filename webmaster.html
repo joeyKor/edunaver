@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>에듀버 웹마스터 도구 (Search Advisor) - 검색 사이트 등록 관리</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary: #03c75a;
+            --primary-hover: #02a84c;
+            --primary-light: #e8f9ef;
+            --text-dark: #191f28;
+            --text-gray: #4e5968;
+            --text-muted: #8b95a1;
+            --bg-page: #f5f6f8;
+            --bg-card: #ffffff;
+            --border-light: #e5e8eb;
+            --border-focus: #03c75a;
+            --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Navigation */
+        .wm-nav {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border-light);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .wm-nav-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            height: 64px;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .wm-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .wm-logo-text {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+        }
+
+        .wm-logo-badge {
+            background: #edf2f7;
+            color: #4a5568;
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .wm-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-to-portal {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            color: var(--text-gray);
+            font-size: 13.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .btn-to-portal:hover {
+            border-color: var(--text-muted);
+            color: var(--text-dark);
+            background: #f8fafc;
+        }
+
+        /* Hero Banner */
+        .wm-hero {
+            background: linear-gradient(135deg, #073b22 0%, #03c75a 100%);
+            color: #ffffff;
+            padding: 40px 24px 44px;
+        }
+
+        .wm-hero-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .wm-hero-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.18);
+            backdrop-filter: blur(8px);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .wm-hero-title {
+            font-size: 26px;
+            font-weight: 800;
+            line-height: 1.35;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .wm-hero-desc {
+            font-size: 14.5px;
+            opacity: 0.9;
+            line-height: 1.5;
+            max-width: 720px;
+        }
+
+        /* Main Container */
+        .wm-container {
+            max-width: 1200px;
+            margin: -24px auto 60px;
+            padding: 0 24px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 1.15fr 0.85fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 960px) {
+            .wm-container {
+                grid-template-columns: 1fr;
+                margin-top: 20px;
+            }
+        }
+
+        /* Card Styles */
+        .wm-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-card);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wm-card-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #ffffff;
+        }
+
+        .wm-card-title {
+            font-size: 16.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--text-dark);
+        }
+
+        .wm-card-title i {
+            color: var(--primary);
+        }
+
+        .wm-badge-count {
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+
+        .wm-card-body {
+            padding: 24px;
+        }
+
+        /* Form Controls */
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 7px;
+        }
+
+        .form-group label .req {
+            color: #e53e3e;
+            margin-left: 2px;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-light);
+            border-radius: 8px;
+            font-size: 14px;
+            color: var(--text-dark);
+            background: #ffffff;
+            outline: none;
+            transition: all 0.15s ease;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(3, 199, 90, 0.15);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-help {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 5px;
+            line-height: 1.4;
+        }
+
+        /* Action Button */
+        .btn-submit {
+            width: 100%;
+            padding: 13px 20px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(3, 199, 90, 0.25);
+            margin-top: 8px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(3, 199, 90, 0.35);
+        }
+
+        /* Live Preview Section */
+        .preview-box {
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .preview-box-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Official Site Card Preview (Eduver Exact Replica) */
+        .preview-card {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e3e7ed;
+            padding: 18px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .preview-card-header {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            margin-bottom: 8px;
+        }
+
+        .preview-favicon {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 11px;
+            background: #0070f3;
+        }
+
+        .preview-site-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .preview-domain {
+            font-size: 12.5px;
+            color: #888888;
+        }
+
+        .preview-card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #004b99;
+            margin-bottom: 6px;
+            line-height: 1.35;
+        }
+
+        .preview-card-desc {
+            font-size: 13.5px;
+            color: #495057;
+            line-height: 1.5;
+            margin-bottom: 10px;
+        }
+
+        .preview-tags-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .preview-pill {
+            background: #f1f3f5;
+            color: #495057;
+            font-size: 12px;
+            font-weight: 500;
+            padding: 3px 10px;
+            border-radius: 14px;
+            border: 1px solid #dee2e6;
+        }
+
+        /* Right Panel: Registered Sites List */
+        .registered-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            max-height: 680px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .registered-item {
+            background: #ffffff;
+            border: 1px solid var(--border-light);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            transition: all 0.15s ease;
+        }
+
+        .registered-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+        }
+
+        .registered-item-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .registered-item-info {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .registered-item-name {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-decoration: none;
+        }
+
+        .registered-item-name:hover {
+            color: var(--primary);
+            text-decoration: underline;
+        }
+
+        .registered-item-domain {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-delete {
+            background: #fff0f0;
+            color: #e53e3e;
+            border: 1px solid #fed7d7;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-delete:hover {
+            background: #e53e3e;
+            color: #ffffff;
+        }
+
+        .registered-item-desc {
+            font-size: 12.5px;
+            color: var(--text-gray);
+            line-height: 1.45;
+        }
+
+        .registered-item-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .kw-badge {
+            background: #edf2f7;
+            color: #4a5568;
+            font-size: 11.5px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 16px;
+            color: var(--text-muted);
+        }
+
+        .empty-state i {
+            font-size: 36px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 9999;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="wm-nav">
+        <div class="wm-nav-inner">
+            <a href="index.html" class="wm-brand">
+                <span class="wm-logo-text">EDUVER</span>
+                <span class="wm-logo-badge"><i class="fa-solid fa-shield-halved"></i> Search Advisor</span>
+            </a>
+            <div class="wm-nav-actions">
+                <a href="index.html" class="btn-to-portal">
+                    <i class="fa-solid fa-arrow-left"></i> 에듀버 메인 포털로 가기
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="wm-hero">
+        <div class="wm-hero-inner">
+            <div class="wm-hero-tag">
+                <i class="fa-solid fa-sparkles"></i> 에듀버 스마트 검색 사이트 등록 관리자
+            </div>
+            <h1 class="wm-hero-title">웹사이트 검색 즉시 등록 센터</h1>
+            <p class="wm-hero-desc">
+                학교 행사, 교육 콘텐츠, 독도 체험 등 에듀버 통합검색에서 검색어로 최우선 노출될 사이트를 직접 등록하세요.<br>
+                여기서 등록하면 코드를 고치거나 서버에 다시 올리지 않아도 <strong>에듀버 검색창에 실시간으로 즉시 반영</strong>됩니다.
+            </p>
+        </div>
+    </section>
+
+    <!-- Main Container Layout -->
+    <main class="wm-container">
+        
+        <!-- Left: Registration Form & Live Preview -->
+        <section class="wm-card">
+            <div class="wm-card-header">
+                <div class="wm-card-title">
+                    <i class="fa-solid fa-plus-circle"></i> 새 웹사이트 검색 등록
+                </div>
+                <span style="font-size: 12px; color: var(--text-muted);"><span style="color:#e53e3e;">*</span> 필수 항목</span>
+            </div>
+            <div class="wm-card-body">
+                <form id="site-register-form" onsubmit="handleRegisterSite(event)">
+                    
+                    <div class="form-group">
+                        <label for="input-site-name">사이트 명칭 <span class="req">*</span></label>
+                        <input type="text" id="input-site-name" class="form-input" placeholder="사이트 이름을 입력하세요" required oninput="updateLivePreview()">
+                        <div class="form-help">검색 결과 상단 대표 이름으로 표시됩니다.</div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="input-site-url">웹사이트 링크 (URL) <span class="req">*</span></label>
+                            <input type="url" id="input-site-url" class="form-input" placeholder="https://..." required oninput="handleUrlInput(this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label for="input-site-domain">표시 도메인</label>
+                            <input type="text" id="input-site-domain" class="form-input" placeholder="선택 사항 (자동 추출)" oninput="updateLivePreview()">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-site-title">검색 제목 (타이틀)</label>
+                        <input type="text" id="input-site-title" class="form-input" placeholder="검색 결과 제목 (미입력 시 사이트 명칭과 동일)" oninput="updateLivePreview()">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-site-desc">사이트 소개 설명문 <span class="req">*</span></label>
+                        <textarea id="input-site-desc" class="form-textarea" rows="2" placeholder="검색 결과 카드에 노출될 간단한 사이트 소개글을 입력하세요" required oninput="updateLivePreview()"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="input-site-keywords">검색 키워드 (쉼표 구분) <span class="req">*</span></label>
+                        <input type="text" id="input-site-keywords" class="form-input" placeholder="검색어 입력 (쉼표로 구분, 예: 교육, 학교, 과학)" required oninput="updateLivePreview()">
+                        <div class="form-help">에듀버 검색창에 사용자가 이 단어를 입력하면 등록된 공식 사이트 카드가 바로 나타납니다.</div>
+                    </div>
+
+                    <div class="form-row-2">
+                        <div class="form-group">
+                            <label for="input-site-icon">대표 아이콘</label>
+                            <select id="input-site-icon" class="form-select" onchange="updateLivePreview()">
+                                <option value="fa-solid fa-flag">🚩 깃발 (행사/기념/주간)</option>
+                                <option value="fa-solid fa-school">🏫 학교 / 교육기관</option>
+                                <option value="fa-solid fa-graduation-cap">🎓 학술 / 학생</option>
+                                <option value="fa-solid fa-book-open">📖 도서 / 학습자료</option>
+                                <option value="fa-solid fa-globe">🌐 글로벌 / 웹사이트</option>
+                                <option value="fa-solid fa-laptop-code">💻 소프트웨어 / 코딩</option>
+                                <option value="fa-solid fa-star">⭐ 추천 사이트</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="input-site-color">테마 배지 색상</label>
+                            <select id="input-site-color" class="form-select" onchange="updateLivePreview()">
+                                <option value="#0070f3">🔵 블루 (#0070f3)</option>
+                                <option value="#03c75a">🟢 에듀버 그린 (#03c75a)</option>
+                                <option value="#e63946">🔴 레드 (#e63946)</option>
+                                <option value="#8a2be2">🟣 퍼플 (#8a2be2)</option>
+                                <option value="#f59e0b">🟠 오렌지 (#f59e0b)</option>
+                                <option value="#343a40">⚫ 다크 (#343a40)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Live Preview in Search -->
+                    <div class="preview-box">
+                        <div class="preview-box-title">
+                            <i class="fa-solid fa-eye"></i> 에듀버 검색 결과 실시간 미리보기
+                        </div>
+                        <div class="preview-card" id="preview-card-container">
+                            <div class="preview-card-header">
+                                <div class="preview-favicon" id="prev-favicon">
+                                    <i class="fa-solid fa-flag" id="prev-icon"></i>
+                                </div>
+                                <span class="preview-site-name" id="prev-name">순천선혜학교 독도교육주간</span>
+                                <span class="preview-domain" id="prev-domain">· joeykor.github.io/dokdo</span>
+                            </div>
+                            <h3 class="preview-card-title" id="prev-title">순천선혜학교 독도교육주간 | '독도는 우리땅' 타자 대회</h3>
+                            <p class="preview-card-desc" id="prev-desc">전라남도 순천선혜학교 독도교육주간 - '독도는 우리땅' 타자 대회 및 우리 영토 독도 바로 알기 온라인 교육 포털</p>
+                            <div class="preview-tags-row" id="prev-tags">
+                                <span class="preview-pill">#독도</span>
+                                <span class="preview-pill">#독도교육주간</span>
+                                <span class="preview-pill">#순천선혜학교</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid fa-check"></i> 이 사이트를 에듀버 검색에 즉시 등록
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Right: Registered Sites List & Quick Management -->
+        <section class="wm-card">
+            <div class="wm-card-header">
+                <div class="wm-card-title">
+                    <i class="fa-solid fa-list-check"></i> 등록된 사이트 목록
+                    <span class="wm-badge-count" id="total-sites-count">0</span>
+                </div>
+            </div>
+            <div class="wm-card-body">
+                <div class="registered-list" id="registered-sites-list">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">
+        <i class="fa-solid fa-circle-check" style="color: #03c75a;"></i>
+        <span id="toast-msg">사이트가 성공적으로 등록되었습니다.</span>
+    </div>
+
+    <script>
+        const POCKETBASE_URL = "https://pb.joyfamkr.synology.me";
+        const STORAGE_KEY = "eduver_custom_registered_sites";
+
+        // Initial default fallback
+        const DEFAULT_SITES = [
+            {
+                id: "site_dokdo_seonhye_default",
+                name: "순천선혜학교 독도교육주간",
+                domain: "joeykor.github.io/dokdo",
+                title: "순천선혜학교 독도교육주간 | '독도는 우리땅' 타자 대회",
+                url: "https://joeykor.github.io/dokdo/index.html",
+                desc: "전라남도 순천선혜학교 독도교육주간 - '독도는 우리땅' 타자 대회, 독도 퍼즐 및 우리 영토 독도 바로 알기 온라인 교육 포털",
+                icon: "fa-solid fa-flag",
+                iconBg: "#0070f3",
+                sublinks: [
+                    { title: "타자 대회", url: "https://joeykor.github.io/dokdo/typing.html" },
+                    { title: "퍼즐 대회", url: "https://joeykor.github.io/dokdo/puzzle.html" }
+                ],
+                tags: [
+                    { title: "순천선혜학교", url: "http://seonhye.sc.jne.kr/" },
+                    { title: "독도는 우리땅", url: "https://joeykor.github.io/dokdo/index.html" }
+                ],
+                keywords: ["독도", "독도교육", "독도교육주간", "순천선혜학교", "선혜학교", "선혜학교독도", "선혜독도", "독도는우리땅", "독도타자", "독도퍼즐"],
+                createdAt: "2026-10-06"
+            }
+        ];
+
+        function getRegisteredSitesLocal() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (!raw) return DEFAULT_SITES;
+                const parsed = JSON.parse(raw);
+                return (Array.isArray(parsed) && parsed.length > 0) ? parsed : DEFAULT_SITES;
+            } catch (e) {
+                return DEFAULT_SITES;
+            }
+        }
+
+        async function fetchSitesFromPocketBase() {
+            try {
+                const res = await fetch(`${POCKETBASE_URL}/api/collections/posts/records?filter=(category='웹마스터사이트')&sort=-created`);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.items && data.items.length > 0) {
+                        const pbSites = data.items.map(item => {
+                            let meta = {};
+                            try {
+                                meta = JSON.parse(item.fullContent || "{}");
+                            } catch(e) {}
+                            return {
+                                id: item.id,
+                                pbRecordId: item.id,
+                                name: item.title,
+                                domain: meta.domain || "",
+                                title: meta.siteTitle || item.title,
+                                url: meta.url || "#",
+                                desc: item.summary || "",
+                                icon: meta.icon || "fa-solid fa-flag",
+                                iconBg: meta.iconBg || "#0070f3",
+                                keywords: meta.keywords || [item.title],
+                                sublinks: meta.sublinks || [],
+                                tags: meta.tags || [{ title: item.title, url: meta.url || "#" }],
+                                createdAt: item.created ? new Date(item.created).toLocaleDateString('ko-KR') : "등록됨"
+                            };
+                        });
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(pbSites));
+                        return pbSites;
+                    }
+                }
+            } catch (err) {
+                console.warn("PocketBase sync fallback to local cache:", err);
+            }
+            return getRegisteredSitesLocal();
+        }
+
+        function handleUrlInput(url) {
+            if (!url) return;
+            try {
+                const domainEl = document.getElementById("input-site-domain");
+                if (domainEl && !domainEl.value) {
+                    const parsed = new URL(url);
+                    domainEl.value = parsed.hostname + (parsed.pathname !== '/' && parsed.pathname.length > 1 ? parsed.pathname.replace(/\/index\.html?$/i, '') : '');
+                }
+            } catch(e) {}
+            updateLivePreview();
+        }
+
+        function updateLivePreview() {
+            const nameInput = document.getElementById("input-site-name").value.trim();
+            const domainInput = document.getElementById("input-site-domain").value.trim();
+            const titleInput = document.getElementById("input-site-title").value.trim();
+            const descInput = document.getElementById("input-site-desc").value.trim();
+            const rawKw = document.getElementById("input-site-keywords").value.trim();
+            const icon = document.getElementById("input-site-icon").value;
+            const color = document.getElementById("input-site-color").value;
+
+            const name = nameInput || "사이트 명칭";
+            const domain = domainInput;
+            const title = titleInput || nameInput || "웹사이트 제목";
+            const desc = descInput || "위 입력란에 내용을 작성하면 검색 결과 카드가 여기에 실시간으로 표시됩니다.";
+
+            document.getElementById("prev-name").textContent = name;
+            document.getElementById("prev-domain").textContent = domain ? `· ${domain}` : '';
+            document.getElementById("prev-title").textContent = title;
+            document.getElementById("prev-desc").textContent = desc;
+
+            const iconEl = document.getElementById("prev-icon");
+            iconEl.className = icon;
+            document.getElementById("prev-favicon").style.backgroundColor = color;
+
+            const tagsContainer = document.getElementById("prev-tags");
+            if (rawKw) {
+                const kwList = rawKw.split(/[,，\s]+/).filter(k => k.length > 0);
+                tagsContainer.innerHTML = kwList.slice(0, 4).map(k => `<span class="preview-pill">#${k}</span>`).join('');
+            } else {
+                tagsContainer.innerHTML = '<span class="preview-pill" style="opacity: 0.5;">#키워드예시</span>';
+            }
+        }
+
+        async function renderSitesList() {
+            const listEl = document.getElementById("registered-sites-list");
+            const countEl = document.getElementById("total-sites-count");
+            
+            // Show immediate cached sites first
+            let sites = getRegisteredSitesLocal();
+            if (countEl) countEl.textContent = sites.length;
+            renderSitesDOM(sites, listEl);
+
+            // Fetch live synced sites from PocketBase
+            sites = await fetchSitesFromPocketBase();
+            if (countEl) countEl.textContent = sites.length;
+            renderSitesDOM(sites, listEl);
+        }
+
+        function renderSitesDOM(sites, listEl) {
+            if (!listEl) return;
+            if (sites.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fa-solid fa-folder-open"></i>
+                        <p>등록된 사이트가 없습니다.<br>왼쪽 폼에서 사이트를 등록해 보세요!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = sites.map(site => `
+                <div class="registered-item" id="site-card-${site.id}">
+                    <div class="registered-item-header">
+                        <div class="registered-item-info">
+                            <div class="preview-favicon" style="background-color: ${site.iconBg || '#03c75a'}; width: 26px; height: 26px;">
+                                <i class="${site.icon || 'fa-solid fa-globe'}"></i>
+                            </div>
+                            <div>
+                                <a href="${site.url}" target="_blank" rel="noopener noreferrer" class="registered-item-name">${site.name}</a>
+                                <div class="registered-item-domain">${site.domain || site.url}</div>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-delete" onclick="handleDeleteSite('${site.id}')">
+                            <i class="fa-regular fa-trash-can"></i> 삭제
+                        </button>
+                    </div>
+                    <div class="registered-item-desc">${site.desc}</div>
+                    <div class="registered-item-keywords">
+                        ${(site.keywords || []).map(kw => `<span class="kw-badge">#${kw}</span>`).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function handleRegisterSite(e) {
+            e.preventDefault();
+            const submitBtn = e.target.querySelector(".btn-submit");
+            const name = document.getElementById("input-site-name").value.trim();
+            const url = document.getElementById("input-site-url").value.trim();
+            let domain = document.getElementById("input-site-domain").value.trim();
+            let title = document.getElementById("input-site-title").value.trim();
+            const desc = document.getElementById("input-site-desc").value.trim();
+            const rawKw = document.getElementById("input-site-keywords").value.trim();
+            const icon = document.getElementById("input-site-icon").value;
+            const iconBg = document.getElementById("input-site-color").value;
+
+            if (!name || !url || !desc || !rawKw) {
+                alert("필수 입력 항목을 모두 작성해 주세요.");
+                return;
+            }
+
+            if (!domain) {
+                try {
+                    const u = new URL(url);
+                    domain = u.hostname;
+                } catch(err) {
+                    domain = url.replace(/https?:\/\//i, '').split('/')[0];
+                }
+            }
+
+            if (!title) title = name;
+
+            const keywords = rawKw.split(/[,，\s]+/).filter(k => k.length > 0);
+            keywords.push(name.toLowerCase().replace(/\s+/g, ''));
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> 서버에 동기화 저장 중...';
+            }
+
+            // 1. Sync to PocketBase Server
+            const payload = {
+                title: name,
+                category: "웹마스터사이트",
+                author: "에듀버 웹마스터",
+                summary: desc,
+                fullContent: JSON.stringify({
+                    url,
+                    domain,
+                    siteTitle: title,
+                    icon,
+                    iconBg,
+                    keywords,
+                    sublinks: [],
+                    tags: [{ title: name, url }]
+                }),
+                thumbnail: ""
+            };
+
+            let pbRecordId = null;
+            try {
+                const pbRes = await fetch(`${POCKETBASE_URL}/api/collections/posts/records`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (pbRes.ok) {
+                    const createdRec = await pbRes.json();
+                    pbRecordId = createdRec.id;
+                }
+            } catch (err) {
+                console.warn("PocketBase post error:", err);
+            }
+
+            // 2. Cache in LocalStorage
+            const newSite = {
+                id: pbRecordId || ("site_custom_" + Date.now()),
+                pbRecordId,
+                name,
+                domain,
+                title,
+                url,
+                desc,
+                icon,
+                iconBg,
+                sublinks: [],
+                tags: [{ title: name, url: url }],
+                keywords,
+                createdAt: new Date().toLocaleDateString('ko-KR')
+            };
+
+            const sites = getRegisteredSitesLocal();
+            sites.unshift(newSite);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(sites));
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> 이 사이트를 에듀버 검색에 즉시 등록';
+            }
+
+            showToast(`'${name}' 사이트가 서버에 안전하게 등록되어 모든 사용자에게 검색됩니다!`);
+            document.getElementById("site-register-form").reset();
+            updateLivePreview();
+            renderSitesList();
+        }
+
+        async function handleDeleteSite(id) {
+            if (!confirm("정말 이 사이트 등록을 삭제하시겠습니까?\n삭제 시 서버와 모든 에듀버 검색 결과에서 노출되지 않습니다.")) {
+                return;
+            }
+
+            // PocketBase delete
+            try {
+                await fetch(`${POCKETBASE_URL}/api/collections/posts/records/${id}`, {
+                    method: 'DELETE'
+                });
+            } catch (err) {
+                console.warn("PocketBase delete error:", err);
+            }
+
+            let sites = getRegisteredSitesLocal();
+            sites = sites.filter(s => s.id !== id);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(sites));
+            renderSitesList();
+            showToast("사이트 등록이 서버에서 삭제되었습니다.");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById("toast");
+            const toastMsg = document.getElementById("toast-msg");
+            if (!toast || !toastMsg) return;
+            toastMsg.textContent = msg;
+            toast.classList.add("show");
+            setTimeout(() => {
+                toast.classList.remove("show");
+            }, 3000);
+        }
+
+        // Initialize on load
+        window.addEventListener("DOMContentLoaded", () => {
+            renderSitesList();
+            updateLivePreview();
+        });
+    </script>
+</body>
+</html>
