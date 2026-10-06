@@ -320,10 +320,11 @@
 
                 // Render content
                 let fullHtml = "";
-                if (currentArticle.thumbnail) {
+                const contentStr = currentArticle.content || "";
+                if (currentArticle.thumbnail && !contentStr.includes(currentArticle.thumbnail)) {
                     fullHtml += `<img src="${currentArticle.thumbnail}" alt="Thumbnail" style="width:100%; border-radius:8px; margin-bottom:24px;">`;
                 }
-                fullHtml += currentArticle.content || `<p>${currentArticle.summary}</p>`;
+                fullHtml += contentStr || `<p>${currentArticle.summary}</p>`;
                 document.getElementById("article-content").innerHTML = fullHtml;
             }
         });

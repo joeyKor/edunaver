@@ -202,10 +202,34 @@
             background: #f1f3f5;
         }
 
+        .thumb-preview-placeholder {
+            width: 140px;
+            height: 90px;
+            border-radius: 6px;
+            border: 1.5px dashed #ced4da;
+            background: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #868e96;
+            font-size: 11.5px;
+            gap: 4px;
+        }
+
         .btn-upload-thumb {
-            padding: 8px 16px;
+            padding: 8px 14px;
             background: #f1f3f5;
             border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: 0.15s;
+        }
             border-radius: 6px;
             font-size: 13px;
             font-weight: 600;
@@ -294,14 +318,23 @@
 
         <!-- Thumbnail Image -->
         <div class="form-row">
-            <label>대표 이미지 (썸네일)</label>
+            <label>대표 이미지 (썸네일) <span style="font-size:12px; font-weight:normal; color:#888;">(선택 사항 - 미등록 시 본문 첫 사진으로 자동 지정되거나 생략됩니다)</span></label>
             <div class="thumbnail-preview-box">
-                <img id="thumb-preview" src="https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80" alt="Preview" class="thumb-preview-img">
+                <div id="thumb-preview-placeholder" class="thumb-preview-placeholder">
+                    <i class="fa-regular fa-image" style="font-size: 24px; color: #adb5bd;"></i>
+                    <span>사진 없음</span>
+                </div>
+                <img id="thumb-preview" src="" alt="Preview" class="thumb-preview-img" style="display: none;">
                 <div>
                     <input type="file" id="thumb-file-input" accept="image/*" style="display: none;" onchange="handleThumbFile(event)">
-                    <button type="button" class="btn-upload-thumb" onclick="document.getElementById('thumb-file-input').click()">
-                        <i class="fa-solid fa-camera"></i> 사진 선택
-                    </button>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="btn-upload-thumb" onclick="document.getElementById('thumb-file-input').click()">
+                            <i class="fa-solid fa-camera"></i> 사진 선택
+                        </button>
+                        <button type="button" id="btn-remove-thumb" class="btn-upload-thumb" style="display: none; color: #e03131;" onclick="removeThumbnail()">
+                            <i class="fa-solid fa-trash-can"></i> 삭제
+                        </button>
+                    </div>
                     <div style="font-size: 11px; color: #888; margin-top: 6px;">기사와 어울리는 사진을 첨부하세요 (자동 최적화 압축)</div>
                 </div>
             </div>
@@ -325,7 +358,7 @@
 
     <script src="news.js"></script>
     <script>
-        let currentThumbUrl = "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80";
+        let currentThumbUrl = "";
 
         // Auto fill author from logged-in user
         document.addEventListener("DOMContentLoaded", () => {
@@ -401,14 +434,39 @@
             });
         }
 
+        // Set thumbnail URL and toggle preview elements
+        function setThumbnailUrl(url) {
+            currentThumbUrl = url || "";
+            const img = document.getElementById("thumb-preview");
+            const placeholder = document.getElementById("thumb-preview-placeholder");
+            const removeBtn = document.getElementById("btn-remove-thumb");
+            if (currentThumbUrl) {
+                img.src = currentThumbUrl;
+                img.style.display = "block";
+                if (placeholder) placeholder.style.display = "none";
+                if (removeBtn) removeBtn.style.display = "inline-flex";
+            } else {
+                img.src = "";
+                img.style.display = "none";
+                if (placeholder) placeholder.style.display = "flex";
+                if (removeBtn) removeBtn.style.display = "none";
+            }
+        }
+
+        // Remove thumbnail
+        function removeThumbnail() {
+            setThumbnailUrl("");
+            const fileInput = document.getElementById("thumb-file-input");
+            if (fileInput) fileInput.value = "";
+        }
+
         // Handle thumbnail file upload with canvas compression
         function handleThumbFile(e) {
             const file = e.target.files[0];
             if (!file) return;
 
             compressImageFile(file, 800, 0.75).then(compressedUrl => {
-                currentThumbUrl = compressedUrl;
-                document.getElementById("thumb-preview").src = currentThumbUrl;
+                setThumbnailUrl(compressedUrl);
             }).catch(err => {
                 console.error("썸네일 압축 실패:", err);
             });
@@ -514,6 +572,15 @@
                 const now = new Date();
                 const loggedInUsername = localStorage.getItem("naverLoggedInUsername") || localStorage.getItem("naverLoggedInUserId") || "";
 
+                // Determine thumbnail: use selected thumbnail or fallback to first image in editor
+                let finalThumbnail = currentThumbUrl;
+                if (!finalThumbnail) {
+                    const firstImg = editorEl.querySelector("img");
+                    if (firstImg && firstImg.src) {
+                        finalThumbnail = firstImg.src;
+                    }
+                }
+
                 const newArticle = {
                     id: newId,
                     title: title,
@@ -526,7 +593,7 @@
                     time: now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                     summary: summaryText,
                     content: contentHtml,
-                    thumbnail: currentThumbUrl,
+                    thumbnail: finalThumbnail || "",
                     views: 1,
                     likedUsers: [],
                     likes: 0,
@@ -576,7 +643,7 @@
                             press: press,
                             summary: summaryText,
                             content: contentHtml,
-                            thumbnail: currentThumbUrl,
+                            thumbnail: finalThumbnail || "",
                             views: 1,
                             likedUsers: [],
                             isHeadline: isHeadline

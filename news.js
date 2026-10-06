@@ -116,7 +116,7 @@ async function getNewsArticles() {
                         time: item.created ? new Date(item.created).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "",
                         summary: item.summary || "",
                         content: item.content || item.summary || "",
-                        thumbnail: item.thumbnail || "https://images.unsplash.com/photo-1509062522246-3755977927d7?w=600&auto=format&fit=crop&q=80",
+                        thumbnail: item.thumbnail || "",
                         views: item.views || 0,
                         likedUsers: likedArr,
                         likes: likedArr.length || item.likes || 0,
@@ -167,7 +167,9 @@ async function renderNewsHome() {
             <div class="headline-hero-card" onclick="openNewsDetail('${headline.id}')">
                 <div class="headline-hero-img-wrap">
                     <span class="headline-badge">헤드라인</span>
-                    <img src="${headline.thumbnail}" alt="Thumbnail" class="headline-hero-img">
+                    ${headline.thumbnail 
+                        ? `<img src="${headline.thumbnail}" alt="Thumbnail" class="headline-hero-img">`
+                        : `<div class="headline-hero-img placeholder-hero-img" style="display:flex;align-items:center;justify-content:center;background:#1e293b;color:#94a3b8;font-size:42px;"><i class="fa-solid fa-newspaper"></i></div>`}
                 </div>
                 <div class="headline-hero-content">
                     <div>
