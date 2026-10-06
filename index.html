@@ -26,7 +26,7 @@
             display: flex !important;
             align-items: center !important;
             justify-content: space-between !important;
-            padding: 0 40px !important;
+            padding: 0 4px !important;
             position: sticky !important;
             top: 0 !important;
             z-index: 50 !important;
@@ -90,16 +90,32 @@
         }
 
         .search-results-container {
-            max-width: 1130px !important;
+            max-width: 1060px !important;
             margin: 0 auto !important;
-            padding: 0 16px !important;
+            padding: 0 20px !important;
+            box-sizing: border-box !important;
         }
 
         .search-results-body {
             display: grid !important;
-            grid-template-columns: 1fr 320px !important;
-            gap: 24px !important;
+            grid-template-columns: minmax(0, 680px) 320px !important;
+            justify-content: center !important;
+            gap: 28px !important;
             padding: 24px 0 !important;
+            box-sizing: border-box !important;
+        }
+
+        .search-results-left {
+            min-width: 0 !important;
+            max-width: 680px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+
+        .search-results-right {
+            min-width: 0 !important;
+            width: 320px !important;
+            box-sizing: border-box !important;
         }
 
         .search-query-summary {
@@ -133,6 +149,10 @@
             border: 1px solid #e3e7ed !important;
             padding: 20px 24px !important;
             box-shadow: 0 1px 3px rgba(0,0,0,0.03) !important;
+            box-sizing: border-box !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
         }
 
         .result-source-row {
@@ -140,12 +160,14 @@
             align-items: center !important;
             justify-content: space-between !important;
             margin-bottom: 10px !important;
+            min-width: 0 !important;
         }
 
         .result-source-info {
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
+            min-width: 0 !important;
         }
 
         .result-author-avatar {
@@ -154,17 +176,20 @@
             border-radius: 50% !important;
             object-fit: cover !important;
             display: block !important;
+            flex-shrink: 0 !important;
         }
 
         .result-source-name {
             font-size: 13px !important;
             font-weight: 700 !important;
             color: #333 !important;
+            white-space: nowrap !important;
         }
 
         .result-source-time {
             font-size: 12px !important;
             color: #888 !important;
+            flex-shrink: 0 !important;
         }
 
         .result-type-badge {
@@ -174,6 +199,7 @@
             background: #ebfbee !important;
             padding: 2px 6px !important;
             border-radius: 3px !important;
+            flex-shrink: 0 !important;
         }
 
         .result-type-badge.cafe-badge {
@@ -184,10 +210,13 @@
         .result-main-group {
             display: flex !important;
             gap: 18px !important;
+            min-width: 0 !important;
+            width: 100% !important;
         }
 
         .result-text-content {
             flex: 1 !important;
+            min-width: 0 !important;
         }
 
         .result-title {
@@ -197,6 +226,7 @@
             line-height: 1.4 !important;
             margin: 0 0 8px 0 !important;
             cursor: pointer !important;
+            word-break: break-all !important;
         }
 
         .result-title:hover {
@@ -216,6 +246,8 @@
             color: #4b525d !important;
             line-height: 1.6 !important;
             margin: 0 0 12px 0 !important;
+            word-break: break-all !important;
+            overflow-wrap: break-word !important;
         }
 
         .result-thumb-wrapper {
@@ -316,6 +348,10 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
             margin-bottom: 20px !important;
             position: relative !important;
+            box-sizing: border-box !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
         }
 
         .official-site-header {
@@ -452,6 +488,10 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
             margin-bottom: 20px !important;
             transition: box-shadow 0.2s ease !important;
+            box-sizing: border-box !important;
+            max-width: 100% !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
         }
 
         .wiki-knowledge-card:hover {
@@ -463,12 +503,14 @@
             align-items: center !important;
             justify-content: space-between !important;
             margin-bottom: 12px !important;
+            min-width: 0 !important;
         }
 
         .wiki-badge-group {
             display: flex !important;
             align-items: center !important;
             gap: 8px !important;
+            min-width: 0 !important;
         }
 
         .wiki-badge {
@@ -482,22 +524,28 @@
             padding: 3px 8px !important;
             border-radius: 4px !important;
             letter-spacing: -0.3px !important;
+            flex-shrink: 0 !important;
         }
 
         .wiki-source-sub {
             font-size: 13px !important;
             color: #666 !important;
             font-weight: 500 !important;
+            white-space: nowrap !important;
         }
 
         .wiki-main-content {
             display: flex !important;
             gap: 18px !important;
             align-items: flex-start !important;
+            min-width: 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
 
         .wiki-text-col {
             flex: 1 !important;
+            min-width: 0 !important;
         }
 
         .wiki-title {
@@ -506,6 +554,7 @@
             color: #111 !important;
             margin: 0 0 8px 0 !important;
             line-height: 1.35 !important;
+            word-break: break-all !important;
         }
 
         .wiki-title a {
@@ -522,6 +571,8 @@
             color: #3b4048 !important;
             line-height: 1.6 !important;
             margin: 0 0 12px 0 !important;
+            word-break: break-all !important;
+            overflow-wrap: break-word !important;
         }
 
         .wiki-thumb-col {
@@ -547,13 +598,19 @@
             display: flex !important;
             flex-direction: column !important;
             gap: 8px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
         }
 
         .wiki-sub-item {
             display: flex !important;
-            align-items: baseline !important;
+            align-items: center !important;
             gap: 8px !important;
             font-size: 13px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
         }
 
         .wiki-sub-label {
@@ -571,6 +628,7 @@
             font-weight: 600 !important;
             text-decoration: none !important;
             flex-shrink: 0 !important;
+            white-space: nowrap !important;
         }
 
         .wiki-sub-link:hover {
@@ -578,6 +636,8 @@
         }
 
         .wiki-sub-desc {
+            flex: 1 !important;
+            min-width: 0 !important;
             color: #666 !important;
             font-size: 12.5px !important;
             white-space: nowrap !important;
@@ -889,15 +949,16 @@
             text-decoration: underline !important;
         }
 
-        @media (max-width: 860px) {
+        @media (max-width: 1060px) {
             .search-results-body {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: minmax(0, 680px) !important;
+                justify-content: center !important;
             }
             .search-results-right {
                 display: none !important;
             }
             .search-tabs-bar {
-                padding: 0 16px !important;
+                padding: 0 8px !important;
             }
         }
     </style>
